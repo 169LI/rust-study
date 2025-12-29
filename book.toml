@@ -1,7 +1,7 @@
 [book]
 title = "Rust study"
 authors = ["QuanLi"]
-language = "en"
+language = "zh-CN"
 # description = "The example book covers examples."
 # text-direction = "ltr"
 
@@ -18,7 +18,7 @@ admonitions = true
 mathjax-support = false
 # additional-css = ["custom.css", "custom2.css"]
 # additional-js = ["custom.js"]
-no-section-label = true
+no-section-label = false
 # git-repository-url = "https://github.com/rust-lang/mdBook"
 # git-repository-icon = "fab-github"
 # edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
