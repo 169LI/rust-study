@@ -6,7 +6,7 @@ language = "zh-CN"
 # text-direction = "ltr"
 
 [rust]
-edition = "2021" # 代码块的默认版本
+edition = "2024" # 代码块的默认版本
 
 [output.html]
 default-theme = "light"
@@ -15,12 +15,12 @@ smart-punctuation = true
 definition-lists = true
 admonitions = true
 mathjax-support = false
-# additional-css = ["custom.css", "custom2.css"]
+additional-css = ["custom.css"]
 # additional-js = ["custom.js"]
 no-section-label = false
 git-repository-url = "https://github.com/169li/rust-study"
 # git-repository-icon = "fab-github"
-edit-url-template = "https://github.com/169li/rust-study/edit/master/guide/{path}"
+edit-url-template = "https://github.com/169li/rust-study/edit/master/{path}"
 # site-url = "/example-book/"
 # cname = "myproject.rs"
 # input-404 = "not-found.md"
@@ -31,11 +31,11 @@ enable = true     # 包含打印输出支持
 page-break = true # 每章后插入分页符
 
 [output.html.fold]
-enable = false # 是否启用章节折叠
-level = 2      # 开始折叠的深度
+enable = true # 是否启用章节折叠
+level = 1      # 开始折叠的深度
 
 [output.html.playground]
-editable = true      # 允许编辑源代码
+editable = true     # 允许编辑源代码
 copyable = true      # 包含用于复制代码片段的复制按钮
 copy-js = true       # 包含代码编辑器的 JavaScript
 line-numbers = false # 显示可编辑代码的行号

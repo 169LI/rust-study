@@ -1,0 +1,28 @@
+/* 全局代码字体设置 (包括行内代码和代码块) */
+code {
+    /* 优先使用现代编程字体，回退到系统等宽字体 */
+    font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", Consolas, "Courier New", monospace !important;
+}
+
+/* 代码块 (Code Blocks) 样式 */
+pre code {
+    /* 增加行高，提升代码可读性 (推荐 1.5 - 1.7) */
+    line-height: 1.6 !important;
+    
+    /* 调整字体大小 (根据需要微调，默认通常是 1em 或 0.9em) */
+    font-size: 1em !important;
+}
+
+/* 代码块容器 */
+pre {
+    /* 代码块内部的留白 */
+    padding: 1rem !important;
+}
+
+/* 行内代码 (Inline Code) 微调 */
+:not(pre) > code {
+    /* 行内代码可以稍微小一点或保持默认 */
+    font-size: 0.9em;
+    /* 稍微增加一点左右间距 */
+    padding: 0.1em 0.3em;
+}
