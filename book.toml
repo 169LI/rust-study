@@ -2,12 +2,11 @@
 title = "Rust study"
 authors = ["QuanLi"]
 language = "zh-CN"
-# description = "The example book covers examples."
+# description = "示例书籍涵盖示例。"
 # text-direction = "ltr"
 
 [rust]
-edition = "2024" # the default edition for code blocks
-
+edition = "2021" # 代码块的默认版本
 
 [output.html]
 default-theme = "light"
@@ -19,44 +18,42 @@ mathjax-support = false
 # additional-css = ["custom.css", "custom2.css"]
 # additional-js = ["custom.js"]
 no-section-label = false
-# git-repository-url = "https://github.com/rust-lang/mdBook"
+git-repository-url = "https://github.com/169li/rust-study"
 # git-repository-icon = "fab-github"
-# edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
+edit-url-template = "https://github.com/169li/rust-study/edit/master/guide/{path}"
 # site-url = "/example-book/"
 # cname = "myproject.rs"
 # input-404 = "not-found.md"
-sidebar-header-nav = true
+sidebar-header-nav = false
 
 [output.html.print]
-enable = true     # include support for printable output
-page-break = true # insert page-break after each chapter
-
+enable = true     # 包含打印输出支持
+page-break = true # 每章后插入分页符
 
 [output.html.fold]
-enable = false # whether or not to enable section folding
-level = 0      # the depth to start folding
+enable = false # 是否启用章节折叠
+level = 2      # 开始折叠的深度
 
 [output.html.playground]
-editable = false     # allows editing the source code
-copyable = true      # include the copy button for copying code snippets
-copy-js = true       # includes the JavaScript for the code editor
-line-numbers = false # displays line numbers for editable code
-runnable = true      # displays a run button for rust code
+editable = true      # 允许编辑源代码
+copyable = true      # 包含用于复制代码片段的复制按钮
+copy-js = true       # 包含代码编辑器的 JavaScript
+line-numbers = false # 显示可编辑代码的行号
+runnable = true      # 显示 Rust 代码的运行按钮
 
 [output.html.code]
-# A prefix string per language (one or more chars).
-# Any line starting with whitespace+prefix is hidden.
+# 每种语言的前缀字符串（一个或多个字符）。
+# 任何以空白+前缀开头的行都将被隐藏。
 hidelines = { python = "~" }
 
-
 [output.html.search]
-enable = true           # enables the search feature
-limit-results = 30      # maximum number of search results
-teaser-word-count = 30  # number of words used for a search result teaser
-use-boolean-and = true  # multiple search terms must all match
-boost-title = 2         # ranking boost factor for matches in headers
-boost-hierarchy = 1     # ranking boost factor for matches in page names
-boost-paragraph = 1     # ranking boost factor for matches in text
-expand = true           # partial words will match longer terms
-heading-split-level = 3 # link results to heading levels
-copy-js = true          # include Javascript code for search
+enable = true           # 启用搜索功能
+limit-results = 30      # 最大搜索结果数
+teaser-word-count = 30  # 搜索结果摘要中使用的单词数
+use-boolean-and = true  # 多个搜索词必须全部匹配
+boost-title = 2         # 标题匹配的排名提升因子
+boost-hierarchy = 1     # 页面名称匹配的排名提升因子
+boost-paragraph = 1     # 文本匹配的排名提升因子
+expand = true           # 部分单词将匹配更长的术语
+heading-split-level = 3 # 将结果链接到标题级别
+copy-js = true          # 包含用于搜索的 Javascript 代码
