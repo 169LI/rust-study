@@ -28,6 +28,7 @@
         <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../custom-faaa6e76.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -35,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4d12b3d1.js";
+            window.path_to_searchindex_js = "../../searchindex-bbece05d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-f5727c51.js"></script>
+        <script src="../../toc-ed81faac.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -146,7 +147,7 @@
                         <a href="https://github.com/169li/rust-study" title="Git repository" aria-label="Git repository">
                             <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
-                        <a href="https://github.com/169li/rust-study/edit/master/guide/src/Rust学习/基础语法/条件语句.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/基础语法/条件语句.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
                             <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
                         </a>
 
@@ -181,16 +182,241 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="条件语句"><a class="header" href="#条件语句">条件语句</a></h1>
+<p>在 Rust 中，控制流和模式匹配不仅仅是逻辑的分叉口，它们更是安全性的守护者。Rust 编译器通过严格的类型检查和“穷尽性检查”，确保你在处理各种逻辑情况时不会留下漏洞。</p>
+<p>以下是整理的 Rust 控制流、循环流与 <code>match</code> 表达式的详细指南。</p>
+<hr>
+<h2 id="一控制流conditional-control-flow"><a class="header" href="#一控制流conditional-control-flow">一、控制流（Conditional Control Flow）</a></h2>
+<p>控制流是程序根据特定条件执行不同代码的能力。Rust 的 <code>if</code> 分支结构非常严谨。</p>
+<h3 id="1-if--else-if--else"><a class="header" href="#1-if--else-if--else">1. <code>if / else if / else</code></a></h3>
+<p>Rust 要求条件表达式必须是严格的 <code>bool</code> 类型。这意味着你不能像在 C 或 JavaScript 中那样使用数字（如 <code>if (1)</code>）来代表逻辑真。这种设计避免了因隐式类型转换导致的逻辑错误。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let x = 10;
+
+    if x &gt; 0 {
+        println!("positive");
+    } else if x == 0 {
+        println!("zero");
+    } else {
+        println!("negative");
+    }
+}</code></pre>
+<h3 id="2-if-是表达式可以返回值"><a class="header" href="#2-if-是表达式可以返回值">2. <code>if</code> 是表达式：可以返回值</a></h3>
+<p>在 Rust 中，if 是一个表达式而不是语句。这意味着它可以产生一个值，并将其直接赋值给变量。</p>
+<p><strong>注意：所有分支返回的数据类型必须完全一致，且分支末尾不要写分号，否则该分支会返回单元类型 ()。</strong></p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let x = 7;
+    // if 表达式赋值
+    let y = if x % 2 == 0 { 100 } else { 200 };
+    // let y = if x % 2 == 0 { 100 } else { 200; };
+    println!("y 的值是: {y}"); // 输出 200
+}</code></pre>
+<h3 id="3-if-let只关心某一种模式"><a class="header" href="#3-if-let只关心某一种模式">3. <code>if let</code>：只关心某一种模式</a></h3>
+<p>当你只想处理某一种特定的模式（例如 <code>Option</code> 中的 <code>Some</code>），而对其他情况（如 <code>None</code>）不感兴趣时，<code>if let</code> 是比 <code>match</code> 更简洁的选择。它减少了样板代码的编写。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v: Option&lt;i32&gt; = Some(10);
+
+    // 只解构 Some，忽略 None
+    if let Some(n) = v {
+        println!("解构成功，n = {n}");
+    } else {
+        println!("这里是 None 的情况");
+    }
+}</code></pre>
+<h3 id="4-let-else模式不匹配就提前退出"><a class="header" href="#4-let-else模式不匹配就提前退出">4. <code>let else</code>：模式不匹配就提前退出</a></h3>
+<p>这是 Rust 1.65 引入的新语法，非常适合编写“守护语句（Guard Statement）”。如果在解构时失败，必须在 <code>else</code> 块中通过 <code>return</code>、<code>break</code> 或 <code>panic!</code> 强制退出当前作用域。这使得后续代码可以放心地使用解构出来的变量。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn parse_first(v: Vec&lt;i32&gt;) -&gt; Option&lt;i32&gt; {
+    // 如果无法获取第一个元素，直接返回 None
+    let Some(first) = v.get(0) else {
+        return None; 
+    };
+    // 此时 first 已经成功绑定，且作用域在外面
+    Some(*first)
+}
+
+fn main() {
+    let numbers = vec![1, 2, 3];
+    if let Some(val) = parse_first(numbers) {
+        println!("第一个值是: {val}");
+    }
+}</code></pre>
+<hr>
+<h2 id="二循环流looping-control-flow"><a class="header" href="#二循环流looping-control-flow">二、循环流（Looping Control Flow）</a></h2>
+<p>Rust 提供了三种循环原语，它们在底层性能上是一致的，但在语义表达上各有侧重。</p>
+<h3 id="1-loop无限循环--break-返回值"><a class="header" href="#1-loop无限循环--break-返回值">1. <code>loop</code>：无限循环 + <code>break</code> 返回值</a></h3>
+<p><code>loop</code> 常用于需要反复执行直到满足某个条件（如轮询任务或重试逻辑）的场景。由于 <code>loop</code> 保证一定会运行（直到被 break），它也可以作为表达式返回一个值。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut n = 0;
+
+    let result = loop {
+        n += 1;
+        if n == 5 {
+            break n * 2; // 带值跳出循环
+        }
+    };
+
+    println!("结果是: {result}"); // 10
+}</code></pre>
+<h3 id="2-while条件循环"><a class="header" href="#2-while条件循环">2. <code>while</code>：条件循环</a></h3>
+<p>这是最传统的循环方式，每次迭代开始前都会检查条件。适合处理那些依赖外部状态变化的逻辑。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut n = 3;
+    while n &gt; 0 {
+        println!("{n}...");
+        n -= 1;
+    }
+    println!("发射！");
+}</code></pre>
+<h3 id="3-for遍历迭代器最常用"><a class="header" href="#3-for遍历迭代器最常用">3. <code>for</code>：遍历迭代器（最常用）</a></h3>
+<p><code>for</code> 循环通过迭代器工作，是 Rust 中最安全的选择，因为它不会出现索引越界（Out of Bounds）的问题。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>使用方法</th><th>等价使用方式</th><th>所有权</th></tr>
+</thead>
+<tbody>
+<tr><td><code>for item in collection</code></td><td><code>for item in IntoIterator::into_iter(collection)</code></td><td>转移所有权</td></tr>
+<tr><td><code>for item in &amp;collection</code></td><td><code>for item in collection.iter()</code></td><td>不可变借用</td></tr>
+<tr><td><code>for item in &amp;mut collection</code></td><td><code>for item in collection.iter_mut()</code></td><td>可变借用</td></tr>
+</tbody>
+</table>
+</div>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    // 1. 范围遍历
+    for i in 0..3 { println!("范围 A: {i}"); }    // 0, 1, 2
+    for i in 0..=3 { println!("范围 B: {i}"); }   // 0, 1, 2, 3
+
+    // 2. 遍历集合（借用与移动）
+    let v = vec![10, 20, 30];
+    for x in &amp;v { println!("借用元素: {x}"); }    // v 依然可用
+
+    // 3. 可变借用遍历
+    let mut nums = vec![1, 2, 3];
+    for x in &amp;mut nums {
+        *x *= 10; // 修改原始数据
+    }
+
+    // 4. 带索引遍历
+    for (i, val) in nums.iter().enumerate() {
+        println!("索引 {i} 的值是 {val}");
+    }
+}</code></pre>
+<h3 id="4-循环控制与标签"><a class="header" href="#4-循环控制与标签">4. 循环控制与标签</a></h3>
+<ul>
+<li><code>continue</code>：结束当前迭代，立即开始下一次。</li>
+<li><code>break</code>：立即退出当前循环。</li>
+<li><strong>循环标签</strong> ：在处理多层嵌套循环时，你可以给循环起名字（以单引号开头），以便在内层直接退出外层, <strong>影响可读性</strong>。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    'outer: for i in 0..10 {
+        'inner: for j in 0..10 {
+            if i + j == 5 {
+                println!("找到目标：i={}, j={}", i, j);
+                break 'outer; // 跳出最外层循环
+            }
+        }
+    }
+}</code></pre>
+<hr>
+<h2 id="三match-表达式pattern-matching"><a class="header" href="#三match-表达式pattern-matching">三、<code>match</code> 表达式（Pattern Matching）</a></h2>
+<p><code>match</code> 是 Rust 的“核心杀手锏”，它非常类似于多分支的 <code>switch</code>，但功能要强大得多。它强制要求 <strong>穷尽性检查</strong> ，即你必须处理所有可能的情况。</p>
+<h3 id="1-基本用法与模式"><a class="header" href="#1-基本用法与模式">1. 基本用法与模式</a></h3>
+<p><code>match</code> 的每个分支被称为一个“臂（Arm）”。<code>_</code> 是通配符，用于捕获所有未明确列出的情况。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let n = 3;
+    match n {
+        1 =&gt; println!("一"),
+        2 =&gt; println!("二"),
+        3 =&gt; println!("三"),
+        _ =&gt; println!("其他数字"), // 必须有这一行，除非 n 的所有可能已被覆盖
+    }
+}</code></pre>
+<h3 id="2-范围与多重匹配"><a class="header" href="#2-范围与多重匹配">2. 范围与多重匹配</a></h3>
+<p>你可以使用 <code>|</code> 匹配多个值，或使用 <code>..=</code> 匹配一个闭区间。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let score = 85;
+    match score {
+        0..=59 =&gt; println!("不及格"),
+        60..=80 =&gt; println!("合格"),
+        81..=100 =&gt; println!("优秀"),
+        _ =&gt; println!("无效分数"),
+    }
+
+    let day = 6;
+    match day {
+        1 | 2 | 3 | 4 | 5 =&gt; println!("工作日"),
+        6 | 7 =&gt; println!("周末"),
+        _ =&gt; println!("火星日?"),
+    }
+}</code></pre>
+<h3 id="3-解构复合类型元组结构体枚举"><a class="header" href="#3-解构复合类型元组结构体枚举">3. 解构复合类型（元组/结构体/枚举）</a></h3>
+<p><code>match</code> 最强大的地方在于它可以“拆解”数据结构。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct Point { x: i32, y: i32 }
+enum Message { Quit, Write(String) }
+
+fn main() {
+    // 1. 解构元组
+    let pair = (0, -2);
+    match pair {
+        (0, y) =&gt; println!("在 Y 轴上: {y}"),
+        (x, 0) =&gt; println!("在 X 轴上: {x}"),
+        _ =&gt; println!("在象限内"),
+    }
+
+    // 2. 解构结构体
+    let p = Point { x: 10, y: 0 };
+    match p {
+        Point { x, y: 0 } =&gt; println!("X 轴上的点，x = {x}"),
+        Point { x, y } =&gt; println!("普通点 ({x}, {y})"),
+    }
+
+    // 3. 解构枚举
+    let msg = Message::Write(String::from("Hello"));
+    match msg {
+        Message::Quit =&gt; println!("退出"),
+        Message::Write(s) =&gt; println!("消息内容: {s}"),
+    }
+}</code></pre>
+<h3 id="4-进阶匹配守卫与--绑定"><a class="header" href="#4-进阶匹配守卫与--绑定">4. 进阶：匹配守卫与 <code>@</code> 绑定</a></h3>
+<ul>
+<li><strong>匹配守卫 (Match Guard)</strong> ：在模式匹配的基础上增加 <code>if</code> 条件，用于更细粒度的过滤。</li>
+<li><strong><code>@</code> 绑定</strong> ：允许你在匹配一个值的同时，将其绑定到一个变量上，方便后续使用。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    // 匹配守卫
+    let num = Some(10);
+    match num {
+        Some(x) if x &gt; 5 =&gt; println!("大于 5 的数字: {x}"),
+        Some(x) =&gt; println!("普通数字: {x}"),
+        None =&gt; (),
+    }
+
+    // @ 绑定
+    let age = 7;
+    match age {
+        v @ 1..=12 =&gt; println!("小孩，年龄是: {v}"),
+        v @ 13..=19 =&gt; println!("青少年，年龄是: {v}"),
+        _ =&gt; println!("成年人"),
+    }
+}</code></pre>
+<h3 id="5-核心应用option-和-result"><a class="header" href="#5-核心应用option-和-result">5. 核心应用：<code>Option</code> 和 <code>Result</code></a></h3>
+<p>这是 <code>match</code> 在 Rust 中最高频的出现场景，用于安全地处理可能为空或可能出错的值。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let res: Result&lt;i32, &amp;str&gt; = Ok(200);
+    match res {
+        Ok(code) =&gt; println!("请求成功，状态码: {code}"),
+        Err(msg) =&gt; println!("请求失败: {msg}"),
+    }
+}</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Rust学习/基础语法/变量.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Rust学习/基础语法/语句与表达式.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../LeetCode.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Rust学习/基础语法/结构体.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -200,11 +426,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Rust学习/基础语法/变量.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Rust学习/基础语法/语句与表达式.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../LeetCode.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Rust学习/基础语法/结构体.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
