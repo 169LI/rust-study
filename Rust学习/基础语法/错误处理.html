@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>serde - Rust study</title>
+        <title>错误处理 - Rust study</title>
 
 
         <!-- Custom HTML head -->
@@ -147,7 +147,7 @@
                         <a href="https://github.com/169li/rust-study" title="Git repository" aria-label="Git repository">
                             <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
-                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/三方库/serde.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/基础语法/错误处理.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
                             <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
                         </a>
 
@@ -181,17 +181,214 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="serde"><a class="header" href="#serde">serde</a></h1>
+                        <h1 id="错误处理"><a class="header" href="#错误处理">错误处理</a></h1>
+<p>Rust 的错误处理体系以其<strong>严谨性</strong>著称。它不使用传统的 <code>try-catch</code> 异常机制，而是通过类型系统将错误显式化，强制开发者在编译期就面对可能的失败。</p>
+<hr>
+<h2 id="一-不可恢复错误panic"><a class="header" href="#一-不可恢复错误panic">一、 不可恢复错误：<code>panic!</code></a></h2>
+<p>当程序遇到无法恢复的错误时（如数组越界或断言失败），Rust 使用 panic! 宏来终止执行。这会 unwind 栈（清理资源）或直接 abort（不清理，适合嵌入式系统）。</p>
+<h3 id="1-发生什么"><a class="header" href="#1-发生什么">1. 发生什么？</a></h3>
+<ol>
+<li>程序打印错误信息。</li>
+<li><strong>展开（Unwinding）</strong> ：Rust 沿着栈往回走，清理每个函数的数据（释放所有权）。</li>
+<li>程序退出。</li>
+</ol>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    // 主动触发 panic
+    // panic!("这里发生了不可预见的灾难！");
+
+    let v = vec![1, 2, 3];
+    v[99]; // ❌ 被动触发 panic：索引越界
+}</code></pre>
+<p>当你取到了一个不属于你的值，这在很多时候会导致程序上的逻辑 BUG！ 有编程经验的人都知道这种逻辑上的 BUG 是多么难被发现和修复！因此程序直接崩溃，然后告诉我们问题发生的位置，最后我们对此进行修复，这才是最合理的软件开发流程，而不是把问题藏着掖着：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>thread 'main' (12) panicked at src/main.rs:6:6:
+index out of bounds: the len is 3 but the index is 99
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+<span class="boring">}</span></code></pre>
+<p>好的，现在成功知道问题发生的位置，但是如果我们想知道该问题之前经过了哪些调用环节，该怎么办？那就按照提示使用 <code>RUST_BACKTRACE=1 cargo run</code> 或 <code>$env:RUST_BACKTRACE=1 ; cargo run</code> 来再一次运行程序</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>thread 'main' panicked at 'index out of bounds: the len is 3 but the index is 99', src/main.rs:6:6
+stack backtrace:
+   0: rust_begin_unwind
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/std/src/panicking.rs:517:5
+   1: core::panicking::panic_fmt
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/core/src/panicking.rs:101:14
+   2: core::panicking::panic_bounds_check
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/core/src/panicking.rs:77:5
+   3: &lt;usize as core::slice::index::SliceIndex&lt;[T]&gt;&gt;::index
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/core/src/slice/index.rs:184:10
+   4: core::slice::index::&lt;impl core::ops::index::Index&lt;I&gt; for [T]&gt;::index
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/core/src/slice/index.rs:15:9
+   5: &lt;alloc::vec::Vec&lt;T,A&gt; as core::ops::index::Index&lt;I&gt;&gt;::index
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/alloc/src/vec/mod.rs:2465:9
+   6: world_hello::main
+             at ./src/main.rs:4:5
+   7: core::ops::function::FnOnce::call_once
+             at /rustc/59eed8a2aac0230a8b53e89d4e99d55912ba6b35/library/core/src/ops/function.rs:227:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+<span class="boring">}</span></code></pre>
+<p>上面的代码就是一次栈展开（也称栈回溯），它包含了函数调用的顺序，当然按照逆序排列：最近调用的函数排在列表的最上方。因为咱们的 main 函数基本是最先调用的函数了，所以排在了倒数第二位，还有一个关注点，排在最顶部最后一个调用的函数是 rust_begin_unwind，该函数的目的就是进行栈展开，呈现这些列表信息给我们。</p>
+<p>要获取到栈回溯信息，你还需要开启 debug 标志，该标志在使用 cargo run 或者 cargo build 时自动开启（这两个操作默认是 Debug 运行方式）。同时，栈展开信息在不同操作系统或者 Rust 版本上也有所不同。</p>
+<h3 id="2-何时使用"><a class="header" href="#2-何时使用">2. 何时使用？</a></h3>
+<ul>
+<li><strong>示例代码或原型</strong> ：快速展示逻辑。</li>
+<li><strong>测试代码</strong> ：断言失败。</li>
+<li><strong>逻辑不可达</strong> ：你确信这段代码永远不会运行到，除非有严重的 Bug。</li>
+</ul>
+<hr>
+<h2 id="二-可恢复错误option-与-result"><a class="header" href="#二-可恢复错误option-与-result">二、 可恢复错误：<code>Option</code> 与 <code>Result</code></a></h2>
+<p>这是 Rust 错误处理的核心，通过两个枚举来包裹“可能不存在的值”或“可能失败的操作”。Rust 不使用异常，而是返回枚举类型：</p>
+<ul>
+<li><strong>Option</strong>：表示可能为空的值。<strong>Some(T) 或 None</strong>。</li>
+<li><strong>Result&lt;T, E&gt;</strong>：表示成功或失败。<strong>Ok(T) 或 Err(E)</strong>。</li>
+</ul>
+<h3 id="1-optiont值可能不存在"><a class="header" href="#1-optiont值可能不存在">1. <code>Option&lt;T&gt;</code>：值可能不存在</a></h3>
+<p>用于表示一个值要么有（<code>Some(T)</code>），要么没有（<code>None</code>）。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn find_index(target: i32, list: Vec&lt;i32&gt;) -&gt; Option&lt;usize&gt; {
+    for (i, &amp;item) in list.iter().enumerate() {
+        if item == target { return Some(i); }
+    }
+    None
+}
+
+fn main() {
+    let list = vec![10, 20, 30];
+    match find_index(20, list) {
+        Some(index) =&gt; println!("找到索引: {index}"),
+        None =&gt; println!("未找到"),
+    }
+}</code></pre>
+<h3 id="2-resultt-e操作可能失败"><a class="header" href="#2-resultt-e操作可能失败">2. <code>Result&lt;T, E&gt;</code>：操作可能失败</a></h3>
+<p>用于表示一个操作要么成功（<code>Ok(T)</code>），要么失败（<code>Err(E)</code>）。</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::fs::File;
+
+fn main() {
+    let greeting_file_result = File::open("hello.txt");
+
+    let _file = match greeting_file_result {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; panic!("打开文件失败: {:?}", error),
+    };
+}</code></pre>
+<h3 id="模式匹配和-unwrap"><a class="header" href="#模式匹配和-unwrap">模式匹配和 unwrap</a></h3>
+<ul>
+<li><strong>match</strong>：最安全的方式。</li>
+<li><strong>unwrap()</strong>：如果 Ok 返回值，否则 panic!（不推荐生产环境）。</li>
+<li><strong>expect(“消息”)</strong>：类似 unwrap，但自定义 panic 消息。</li>
+<li><strong>unwrap_or(default)</strong>：为 Option/Result 提供默认值。</li>
+<li><strong>unwrap_or_else(closure)</strong>：懒惰计算默认值。</li>
+</ul>
+<hr>
+<h2 id="三-常用组合器-combinators"><a class="header" href="#三-常用组合器-combinators">三、 常用组合器 (Combinators)</a></h2>
+<p>组合器允许你以<strong>函数式</strong>的风格链式处理 <code>Option</code> 和 <code>Result</code>，避免层层嵌套的 <code>match</code>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>组合器</strong></th><th><strong>作用描述</strong></th><th><strong>示例逻辑</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong><code>.map()</code></strong></td><td>仅对成功（<code>Some</code>/<code>Ok</code>）的值进行转换</td><td><code>Ok(2).map()</code></td></tr>
+<tr><td><strong><code>.and_then()</code></strong></td><td>类似 <code>map</code>，但闭包也返回一个 <code>Result/Option</code>(平铺嵌套)</td><td>避免出现 <code>Some(Some(x))</code></td></tr>
+<tr><td><strong><code>.unwrap_or()</code></strong></td><td>如果是失败/缺失，则返回一个默认值</td><td><code>None.unwrap_or(0)</code>-&gt;<code>0</code></td></tr>
+<tr><td><strong><code>.unwrap_or_else()</code></strong></td><td>类似 <code>unwrap_or</code>，但默认值通过闭包计算（延迟求值）</td><td>适合计算默认值开销大的场景</td></tr>
+<tr><td><strong><code>.map_err()</code></strong></td><td>仅对 <code>Err</code>进行转换（通常用于转换错误类型）</td><td>`Err(e).map_err(</td></tr>
+</tbody>
+</table>
+</div>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    // --- 1. .map(): 只转换成功的值，忽略失败 ---
+    let s = Some("5");
+    let n = s.map(|val| val.parse::&lt;i32&gt;().unwrap_or(0)); 
+    // n 现在是 Some(5)
+
+    // --- 2. .and_then(): 展平嵌套（类似 flat_map） ---
+    // 如果转换函数也返回 Option/Result，用 and_then 防止出现 Option&lt;Option&lt;T&gt;&gt;
+    let get_val = |i: i32| if i &gt; 0 { Some(i * 2) } else { None };
+    let result = Some(10).and_then(get_val); 
+    // result 是 Some(20)，而不是 Some(Some(20))
+
+    // --- 3. .unwrap_or() 与 .unwrap_or_else(): 兜底默认值 ---
+    let x: Option&lt;i32&gt; = None;
+    let val = x.unwrap_or(0); // 如果是 None，则返回 0
+  
+    // or_else 接受闭包，适合计算默认值开销较大的场景（延迟求值）
+    let val_lazy = x.unwrap_or_else(|| {
+        // 执行复杂的计算过程...
+        100 
+    });
+
+    // --- 4. .map_err(): 只处理错误，不改动成功值 ---
+    let res: Result&lt;i32, i32&gt; = Err(404);
+    let updated_res = res.map_err(|e| format!("Error code: {}", e));
+    // updated_res 是 Err("Error code: 404")
+
+    println!("组合器处理结果: {:?}, {}, {:?}", n, val, updated_res);
+}</code></pre>
+<hr>
+<h2 id="四--操作符错误传播的捷径"><a class="header" href="#四--操作符错误传播的捷径">四、 <code>?</code> 操作符：错误传播的捷径</a></h2>
+<p><code>?</code> 操作符是 Rust 错误传播的语法糖。它可以极大地简化代码，让逻辑保持清晰。程序几乎不太可能只有 A-&gt;B 形式的函数调用，一个设计良好的程序，一个功能涉及十几层的函数调用都有可能。而错误处理也往往不是哪里调用出错，就在哪里处理，实际应用中，大概率会把错误层层上传然后交给调用链的上游函数进行处理，错误传播将极为常见</p>
+<h3 id="1-工作原理"><a class="header" href="#1-工作原理">1. 工作原理</a></h3>
+<p>当你在一个返回 <code>Result</code> 的表达式后面加 <code>?</code> 时：</p>
+<ol>
+<li>如果结果是 <code>Ok</code>，它会<strong>自动解包</strong>出里面的值，程序继续执行。</li>
+<li>如果结果是 <code>Err</code>，它会立即 <strong>提前返回</strong> （Return）整个函数，并将错误传递给调用者。</li>
+</ol>
+<pre class="playground"><code class="language-rust editable edition2024">use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username() -&gt; Result&lt;String, io::Error&gt; {
+    // 如果 open 失败，直接返回 Err；如果成功，f 绑定为 File 对象
+    let mut f = File::open("name.txt")?; 
+    let mut s = String::new();
+    f.read_to_string(&amp;mut s)?; // 如果读取失败，直接返回 Err
+    Ok(s)
+}
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let username = read_username()?;
+    println!("用户名: {}", username);
+    Ok(())
+}</code></pre>
+<ul>
+<li>解释：? 等价于</li>
+</ul>
+<pre><code class="language-txt">let mut file = match File::open(filename) {
+    Ok(f) =&gt; f,
+    Err(e) =&gt; return Err(e),
+};
+</code></pre>
+<ul>
+<li>要求：函数必须返回 <code>Result/Option</code>。</li>
+<li>链式使用：支持多个 ?，错误会向上传播。</li>
+<li><code>From trait</code>：如果错误类型不同，? 会自动转换（如果实现了 From）。</li>
+</ul>
+<h3 id="2-使用限制"><a class="header" href="#2-使用限制">2. 使用限制</a></h3>
+<ul>
+<li><code>?</code> 只能在返回类型与 <code>?</code> 处理的类型<strong>相兼容</strong>的函数中使用（例如在返回 <code>Result</code> 的函数中处理 <code>Result</code>）。</li>
+<li>在 <code>main</code> 函数中使用 <code>?</code> 需要将 <code>main</code> 的返回类型改为 <code>Result&lt;(), Box&lt;dyn Error&gt;&gt;</code>。</li>
+</ul>
+<hr>
+<h2 id="五自定义错误类型"><a class="header" href="#五自定义错误类型">五、自定义错误类型</a></h2>
+<p>对于复杂应用，定义自己的错误枚举，结合 <code>thiserror</code> 或 <code>anyhow</code> crate 更加方便。</p>
+<h2 id="总结概括"><a class="header" href="#总结概括">总结概括</a></h2>
+<ol>
+<li><strong><code>panic!</code></strong> ：用于 <strong>程序 Bug</strong> 。当你无法预见错误或错误会导致程序状态不可靠时使用。</li>
+<li><strong><code>Option</code></strong> ：用于 <strong>可能缺失</strong> 。不代表失败，只是“没有”。</li>
+<li><strong><code>Result</code></strong> ：用于 <strong>可能失败</strong> 。明确区分成功数据和错误信息。</li>
+<li><strong><code>?</code></strong> ：用于 <strong>传播错误</strong> 。让错误处理像写直线代码一样简单。</li>
+<li><strong>组合器</strong> ：用于 <strong>优雅转换</strong> 。让数据在各种状态间流动而不需要嵌套判断。</li>
+</ol>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Rust学习/三方库.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Rust学习/基础语法/闭包.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../LeetCode.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Rust学习/基础语法/结构体.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -201,11 +398,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Rust学习/三方库.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Rust学习/基础语法/闭包.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../LeetCode.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Rust学习/基础语法/结构体.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
