@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-e072f944.js";
+            window.path_to_searchindex_js = "../../searchindex-0ceb304c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-d8ebfcf5.js"></script>
@@ -182,6 +182,126 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="枚举"><a class="header" href="#枚举">枚举</a></h1>
+<p>如果说结构体（Struct）是将多个相关数据“打包”在一起，那么**枚举（Enums）**则是让一个变量在“多种可能”中选择其一。</p>
+<p>在 Rust 中，枚举不仅是其他语言中常见的整数常量列表，它还是功能极其强大的 <strong>代数数据类型（Algebraic Data Types）</strong> 。</p>
+<hr>
+<h2 id="一-基础枚举简单的分类"><a class="header" href="#一-基础枚举简单的分类">一、 基础枚举：简单的分类</a></h2>
+<p>这是枚举最基础的用法，用于定义一组离散的选项。</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn main() {
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+
+    // 枚举可以作为函数参数
+    route(four);
+    route(six);
+}
+
+fn route(ip_kind: IpAddrKind) {}</code></pre>
+<p><strong>关键点：</strong></p>
+<ul>
+<li>枚举变体（如 V4、V6）是枚举类型的成员。</li>
+<li>枚举可以作为参数传递给函数，也可以在函数中返回。</li>
+<li>你可以在 <code>match</code> 表达式中匹配枚举的每个变体，处理不同的情况。</li>
+</ul>
+<hr>
+<h2 id="二-枚举的真威力携带数据"><a class="header" href="#二-枚举的真威力携带数据">二、 枚举的真威力：携带数据</a></h2>
+<p>在 Rust 中，每个枚举变体（Variant）都可以关联不同类型、不同数量的数据。这让你可以用一个类型表达多种结构完全不同的信息。</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum Message {
+    Quit,                       // 无数据
+    Move { x: i32, y: i32 },    // 匿名结构体
+    Write(String),              // 单个 String
+    ChangeColor(i32, i32, i32), // 元组
+}
+
+impl Message {
+    fn call(&amp;self) {
+        // 你也可以为枚举定义方法！
+    }
+}
+
+fn main() {
+    let m = Message::Write(String::from("hello"));
+    m.call();
+}</code></pre>
+<p>为什么这比结构体好用？</p>
+<p>如果你用结构体来实现上面的功能，你可能需要定义 4 个不同的结构体(Rust 是一种强静态类型语言，函数在编译时必须明确知道它接收的参数是什么类型，以及该类型占用的空间大小。)。而使用枚举，它们都属于 Message 类型，方便在函数间统一传递。</p>
+<hr>
+<h2 id="三-核心中的核心option-枚举"><a class="header" href="#三-核心中的核心option-枚举">三、 核心中的核心：<code>Option</code> 枚举</a></h2>
+<p>Rust  <strong>没有空值（Null）</strong> 。为了表达“一个值可能不存在”，Rust 使用了标准库中定义的 <code>Option&lt;T&gt;</code> 枚举：</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}</code></pre>
+<ul>
+<li><strong><code>Some(T)</code></strong> ：代表有值，值为 <code>T</code> 类型。</li>
+<li><strong><code>None</code></strong> ：代表没有值。</li>
+</ul>
+<p>意义何在？</p>
+<p>在有 Null 的语言中，你随时可能忘记检查空指针而导致崩溃。在 Rust 中，如果你有一个 Option <code>&lt;i32&gt;</code>，你必须处理 None 的情况，否则代码编译不通过。这从根本上杜绝了空指针异常。</p>
+<hr>
+<h2 id="四-模式匹配枚举的完美搭档"><a class="header" href="#四-模式匹配枚举的完美搭档">四、 模式匹配：枚举的完美搭档</a></h2>
+<p>要获取枚举内部的数据，最常用的工具就是 <code>match</code> 表达式。</p>
+<h3 id="1-match穷尽式检查"><a class="header" href="#1-match穷尽式检查">1. <code>match</code>：穷尽式检查</a></h3>
+<p><code>match</code> 强制你处理枚举的每一个变体。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; 1,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter(state) =&gt; {
+            println!("来自 {:?} 州的 25 美分", state);
+            25
+        },
+    }
+}
+fn main() {
+    let coin = Coin::Quarter(UsState::Alaska);
+    let cents = value_in_cents(coin);
+    println!("{} 美分", cents);
+}</code></pre>
+<h3 id="2-if-let更简洁的匹配"><a class="header" href="#2-if-let更简洁的匹配">2. <code>if let</code>：更简洁的匹配</a></h3>
+<p>如果你只关心其中的一种情况，<code>if let</code> 是比 <code>match</code> 更优雅的选择。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let some_u8_value = Some(3u8);
+
+    // 仅在值为 Some 时处理
+    if let Some(value) = some_u8_value {
+        println!("找到了{}！", value);
+    }else{
+        println!("没有找到值！");
+    }
+}</code></pre>
+<hr>
+<h2 id="五-枚举的内存布局进阶"><a class="header" href="#五-枚举的内存布局进阶">五、 枚举的内存布局（进阶）</a></h2>
+<p>枚举在内存中是如何存储的？</p>
+<p>Rust 会为枚举分配足够的空间来容纳最大的那个变体，此外还需要一个小的<strong>标签Tag</strong>来记录当前存的是哪一个变体。</p>
+<p>对于一个枚举 $E$，其占用内存大小大致为：</p>
+<p>$$
+Size(E) = Size(Tag) + \max(Size(Variant_1), Size(Variant_2), \dots)
+$$</p>
+<blockquote>
+<p>小技巧：</p>
+<p>对于 Option&lt;&amp;T&gt;，因为引用（指针）永远不会为 0，Rust 会非常聪明地用 0 来表示 None。这意味着 Option&lt;&amp;T&gt; 和 &amp;T 占用的空间是一样大的！</p>
+</blockquote>
+<hr>
+<h2 id="总结结构体-vs-枚举"><a class="header" href="#总结结构体-vs-枚举">总结：结构体 vs 枚举</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>特性</strong></th><th><strong>结构体 (Struct)</strong></th><th><strong>枚举 (Enum)</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>逻辑关系</strong></td><td><strong>“和” (And)</strong> ：包含 A 且包含 B</td><td><strong>“或” (Or)</strong> ：要么是 A 要么是 B</td></tr>
+<tr><td><strong>数据访问</strong></td><td>通过 <code>.</code>直接访问字段</td><td>必须通过 <code>match</code>或 <code>if let</code>解构</td></tr>
+<tr><td><strong>主要用途</strong></td><td>定义具体的数据实体</td><td>定义状态机、分类、错误处理</td></tr>
+</tbody>
+</table>
+</div>
 
                     </main>
 

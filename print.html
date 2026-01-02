@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-e072f944.js";
+            window.path_to_searchindex_js = "searchindex-0ceb304c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-d8ebfcf5.js"></script>
@@ -1507,10 +1507,427 @@ fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="结构体"><a class="header" href="#结构体">结构体</a></h1>
+<p>在 Rust 中，<strong>结构体Structs</strong>是构建复杂程序的基石。它允许你将相关联的数据组合在一起，创建出更有意义的自定义类型。相比于元组，结构体为每个数据片段命名，因此更加灵活且意图清晰。</p>
+<hr>
+<h2 id="一-结构体的三种类型"><a class="header" href="#一-结构体的三种类型">一、 结构体的三种类型</a></h2>
+<p>Rust 支持三种不同风格的结构体，分别适用于不同的场景。</p>
+<h3 id="1-具名结构体-classic-structs"><a class="header" href="#1-具名结构体-classic-structs">1. 具名结构体 (Classic Structs)</a></h3>
+<p>最常用的类型，类似于其他语言中的类或对象，每个字段都有明确的名字。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+
+fn main() {
+    // 实例化结构体
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someuser123"),
+        active: true,
+        sign_in_count: 1,
+    };
+
+    println!("用户 {} 的邮箱是 {}", user1.username, user1.email);
+}</code></pre>
+<p><strong>关键点：</strong></p>
+<ul>
+<li>结构体通常拥有其数据，使用如 String 的拥有类型，以确保数据在结构体存在期间有效。</li>
+<li>如果使用引用（如 &amp;str），需要指定生命周期（lifetime），以避免悬垂引用（dangling references）。</li>
+<li>字段不能单独标记为可变，整个结构体实例必须是可变的才能修改字段。</li>
+</ul>
+<h3 id="2-元组结构体-tuple-structs"><a class="header" href="#2-元组结构体-tuple-structs">2. 元组结构体 (Tuple Structs)</a></h3>
+<p>当你想给整个元组起个名字，但不需要为内部每个字段命名时使用。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+  
+    // 注意：虽然内部类型一样，但 Color 和 Point 是不同的类型！
+    println!("第一个颜色分量: {}", black.0);
+}</code></pre>
+<h3 id="3-单元结构体-unit-like-structs"><a class="header" href="#3-单元结构体-unit-like-structs">3. 单元结构体 (Unit-like Structs)</a></h3>
+<p>没有任何字段。常用于需要在某个类型上实现 <code>Trait</code>但不需要存储数据的情况。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct AlwaysEqual;
+
+fn main() {
+    let _subject = AlwaysEqual;
+}</code></pre>
+<hr>
+<h2 id="二-实例化"><a class="header" href="#二-实例化">二、 实例化</a></h2>
+<h3 id="1-字段初始化简写-field-init-shorthand"><a class="header" href="#1-字段初始化简写-field-init-shorthand">1. 字段初始化简写 (Field Init Shorthand)</a></h3>
+<p>当变量名与字段名完全相同时，可以简写。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+fn build_user(email: String, username: String) -&gt; User {
+    User {
+        active: true,
+        username, // 等同于 username: username
+        email,    // 等同于 email: email
+        sign_in_count: 1,
+    }
+}
+
+fn main() {
+    let user1 = build_user(String::from("a@b.com"), String::from("user1"));
+    println!("用户 {} 的邮箱是 {}", user1.username, user1.email);
+}</code></pre>
+<h3 id="2-结构体更新语法-struct-update-syntax"><a class="header" href="#2-结构体更新语法-struct-update-syntax">2. 结构体更新语法 (Struct Update Syntax)</a></h3>
+<p>当你想要创建一个新实例，但大部分数据与旧实例相同时，使用 <code>..</code> 语法。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+fn main() {
+    let user1 = User {
+        email: String::from("a@b.com"),
+        username: String::from("user1"),
+        active: true,
+        sign_in_count: 1,
+    };
+
+    // 使用 user1 的部分数据创建 user2
+    let user2 = User {
+        email: String::from("c@d.com"),
+        ..user1 // 剩余字段直接拷贝/移动自 user1
+    };
+    println!("用户 {} 的邮箱是 {}", user2.username, user2.email);
+    // println!("用户 {} 的邮箱是 {}", user1.username, user1.email);
+    // 注意：由于 String 发生了所有权转移，user1.username 此时已失效！除非那些字段实现了 Copy trait
+}</code></pre>
+<h3 id="3-访问和更新字段"><a class="header" href="#3-访问和更新字段">3. 访问和更新字段</a></h3>
+<p>使用点号 . 访问字段。要更新，需要可变实例（mut）。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+fn main() {
+    let mut user1 = User {
+        email: String::from("a@b.com"),
+        username: String::from("user1"),
+        active: true,
+        sign_in_count: 1,
+    };
+    user1.email = String::from("newemail@example.com");
+    println!("用户 {} 的邮箱是 {}", user1.username, user1.email);
+}</code></pre>
+<hr>
+<h2 id="三-结构体方法impl-块"><a class="header" href="#三-结构体方法impl-块">三、 结构体方法：<code>impl</code> 块</a></h2>
+<p>在 Rust 中，数据定义（<code>struct</code>）和行为定义（<code>impl</code>）是分开的。</p>
+<ul>
+<li><strong>方法 (Methods)</strong> ：第一个参数是 <code>self</code>，通过实例调用。</li>
+<li><strong>关联函数 (Associated Functions)</strong> ：没有 <code>self</code> 参数，通过 <code>类型名::</code> 调用（类似静态方法）。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">#[derive(Debug)] // 允许通过 {:?} 打印结构体
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // 关联函数：通常用于构造函数
+    fn square(size: u32) -&gt; Self {
+        Self { width: size, height: size }
+    }
+
+    // 方法：计算面积
+    // 使用 &amp;self 借用实例，而不是获取所有权
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+
+    // 方法：判断当前矩形是否能容纳另一个矩形
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+    let rect2 = Rectangle::square(10); // 调用关联函数
+
+    println!("矩形面积: {}", rect1.area());
+    println!("rect1 能容纳 rect2 吗？ {}", rect1.can_hold(&amp;rect2));
+    println!("打印结构体详情: {:?}", rect1);
+}</code></pre>
+<h3 id="关键差异与-oop"><a class="header" href="#关键差异与-oop">关键差异与 OOP</a></h3>
+<ul>
+<li>Rust 无自动 getter/setter，需要手动定义。</li>
+<li>方法名可与字段名相同（基于语法区分）。</li>
+<li>强调借用规则，与 OOP 的封装不同。</li>
+<li>Rust 自动处理引用/解引用，无需 -&gt; 操作符。</li>
+</ul>
+<hr>
+<h2 id="四-结构体与所有权"><a class="header" href="#四-结构体与所有权">四、 结构体与所有权</a></h2>
+<p>这是新手最容易困惑的地方：</p>
+<ol>
+<li><strong>字段的所有权</strong> ：如果结构体拥有其字段的所有权（如 <code>String</code>），那么当结构体被销毁时，字段也会被销毁。结构体字段若为拥有类型（如 String），实例移动时会转移所有权。</li>
+<li><strong>在结构体中存储引用</strong> ：如果你希望结构体存储一个指向外部数据的引用（如 <code>&amp;str</code>），你需要使用 <strong>生命周期（Lifetimes）</strong> 标注。</li>
+</ol>
+<blockquote>
+<p><em>目前建议先使用拥有所有权的类型（如 <code>String</code> 而不是 <code>&amp;str</code>），直到学习到生命周期章节。</em>
+<em>优先使用借用（&amp;）以避免不必要的移动</em></p>
+</blockquote>
+<hr>
+<h2 id="总结"><a class="header" href="#总结">总结</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>特性</strong></th><th><strong>具名结构体</strong></th><th><strong>元组结构体</strong></th><th><strong>单元结构体</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>访问方式</strong></td><td><code>s.field_name</code></td><td><code>s.0</code>,<code>s.1</code></td><td>不可访问</td></tr>
+<tr><td><strong>语义</strong></td><td>明确的数据对象</td><td>强类型化的元组</td><td>标签或特征实现</td></tr>
+<tr><td><strong>典型案例</strong></td><td>用户信息、配置项</td><td>坐标 (x, y)、颜色 (r, g, b)</td><td>状态标记、Trait 对象</td></tr>
+</tbody>
+</table>
+</div>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="枚举"><a class="header" href="#枚举">枚举</a></h1>
+<p>如果说结构体（Struct）是将多个相关数据“打包”在一起，那么**枚举（Enums）**则是让一个变量在“多种可能”中选择其一。</p>
+<p>在 Rust 中，枚举不仅是其他语言中常见的整数常量列表，它还是功能极其强大的 <strong>代数数据类型（Algebraic Data Types）</strong> 。</p>
+<hr>
+<h2 id="一-基础枚举简单的分类"><a class="header" href="#一-基础枚举简单的分类">一、 基础枚举：简单的分类</a></h2>
+<p>这是枚举最基础的用法，用于定义一组离散的选项。</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum IpAddrKind {
+    V4,
+    V6,
+}
+
+fn main() {
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+
+    // 枚举可以作为函数参数
+    route(four);
+    route(six);
+}
+
+fn route(ip_kind: IpAddrKind) {}</code></pre>
+<p><strong>关键点：</strong></p>
+<ul>
+<li>枚举变体（如 V4、V6）是枚举类型的成员。</li>
+<li>枚举可以作为参数传递给函数，也可以在函数中返回。</li>
+<li>你可以在 <code>match</code> 表达式中匹配枚举的每个变体，处理不同的情况。</li>
+</ul>
+<hr>
+<h2 id="二-枚举的真威力携带数据"><a class="header" href="#二-枚举的真威力携带数据">二、 枚举的真威力：携带数据</a></h2>
+<p>在 Rust 中，每个枚举变体（Variant）都可以关联不同类型、不同数量的数据。这让你可以用一个类型表达多种结构完全不同的信息。</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum Message {
+    Quit,                       // 无数据
+    Move { x: i32, y: i32 },    // 匿名结构体
+    Write(String),              // 单个 String
+    ChangeColor(i32, i32, i32), // 元组
+}
+
+impl Message {
+    fn call(&amp;self) {
+        // 你也可以为枚举定义方法！
+    }
+}
+
+fn main() {
+    let m = Message::Write(String::from("hello"));
+    m.call();
+}</code></pre>
+<p>为什么这比结构体好用？</p>
+<p>如果你用结构体来实现上面的功能，你可能需要定义 4 个不同的结构体(Rust 是一种强静态类型语言，函数在编译时必须明确知道它接收的参数是什么类型，以及该类型占用的空间大小。)。而使用枚举，它们都属于 Message 类型，方便在函数间统一传递。</p>
+<hr>
+<h2 id="三-核心中的核心option-枚举"><a class="header" href="#三-核心中的核心option-枚举">三、 核心中的核心：<code>Option</code> 枚举</a></h2>
+<p>Rust  <strong>没有空值（Null）</strong> 。为了表达“一个值可能不存在”，Rust 使用了标准库中定义的 <code>Option&lt;T&gt;</code> 枚举：</p>
+<pre class="playground"><code class="language-rust editable edition2024">enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}</code></pre>
+<ul>
+<li><strong><code>Some(T)</code></strong> ：代表有值，值为 <code>T</code> 类型。</li>
+<li><strong><code>None</code></strong> ：代表没有值。</li>
+</ul>
+<p>意义何在？</p>
+<p>在有 Null 的语言中，你随时可能忘记检查空指针而导致崩溃。在 Rust 中，如果你有一个 Option <code>&lt;i32&gt;</code>，你必须处理 None 的情况，否则代码编译不通过。这从根本上杜绝了空指针异常。</p>
+<hr>
+<h2 id="四-模式匹配枚举的完美搭档"><a class="header" href="#四-模式匹配枚举的完美搭档">四、 模式匹配：枚举的完美搭档</a></h2>
+<p>要获取枚举内部的数据，最常用的工具就是 <code>match</code> 表达式。</p>
+<h3 id="1-match穷尽式检查"><a class="header" href="#1-match穷尽式检查">1. <code>match</code>：穷尽式检查</a></h3>
+<p><code>match</code> 强制你处理枚举的每一个变体。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; 1,
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter(state) =&gt; {
+            println!("来自 {:?} 州的 25 美分", state);
+            25
+        },
+    }
+}
+fn main() {
+    let coin = Coin::Quarter(UsState::Alaska);
+    let cents = value_in_cents(coin);
+    println!("{} 美分", cents);
+}</code></pre>
+<h3 id="2-if-let更简洁的匹配"><a class="header" href="#2-if-let更简洁的匹配">2. <code>if let</code>：更简洁的匹配</a></h3>
+<p>如果你只关心其中的一种情况，<code>if let</code> 是比 <code>match</code> 更优雅的选择。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let some_u8_value = Some(3u8);
+
+    // 仅在值为 Some 时处理
+    if let Some(value) = some_u8_value {
+        println!("找到了{}！", value);
+    }else{
+        println!("没有找到值！");
+    }
+}</code></pre>
+<hr>
+<h2 id="五-枚举的内存布局进阶"><a class="header" href="#五-枚举的内存布局进阶">五、 枚举的内存布局（进阶）</a></h2>
+<p>枚举在内存中是如何存储的？</p>
+<p>Rust 会为枚举分配足够的空间来容纳最大的那个变体，此外还需要一个小的<strong>标签Tag</strong>来记录当前存的是哪一个变体。</p>
+<p>对于一个枚举 $E$，其占用内存大小大致为：</p>
+<p>$$
+Size(E) = Size(Tag) + \max(Size(Variant_1), Size(Variant_2), \dots)
+$$</p>
+<blockquote>
+<p>小技巧：</p>
+<p>对于 Option&lt;&amp;T&gt;，因为引用（指针）永远不会为 0，Rust 会非常聪明地用 0 来表示 None。这意味着 Option&lt;&amp;T&gt; 和 &amp;T 占用的空间是一样大的！</p>
+</blockquote>
+<hr>
+<h2 id="总结结构体-vs-枚举"><a class="header" href="#总结结构体-vs-枚举">总结：结构体 vs 枚举</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>特性</strong></th><th><strong>结构体 (Struct)</strong></th><th><strong>枚举 (Enum)</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>逻辑关系</strong></td><td><strong>“和” (And)</strong> ：包含 A 且包含 B</td><td><strong>“或” (Or)</strong> ：要么是 A 要么是 B</td></tr>
+<tr><td><strong>数据访问</strong></td><td>通过 <code>.</code>直接访问字段</td><td>必须通过 <code>match</code>或 <code>if let</code>解构</td></tr>
+<tr><td><strong>主要用途</strong></td><td>定义具体的数据实体</td><td>定义状态机、分类、错误处理</td></tr>
+</tbody>
+</table>
+</div>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="切片"><a class="header" href="#切片">切片</a></h1>
+<p>Rust 中的 slice（切片）是一种引用集合中连续元素的视图，而不拥有这些元素。它类似于数组或向量的子视图，使用 <code>&amp;[T]</code> 表示不可变切片，<code>&amp;mut [T]</code> 表示可变切片。Slice 是借用的一部分，遵守借用规则，确保内存安全。Slice 常用于字符串、数组和向量，帮助避免不必要的拷贝，提高效率。</p>
+<h2 id="1-slice-简介"><a class="header" href="#1-slice-简介">1. Slice 简介</a></h2>
+<ul>
+<li><strong>什么是 slice？</strong> ：Slice 是对数据序列的引用视图，指向连续内存块。不拥有数据，只借用。长度在运行时确定。</li>
+<li><strong>语法</strong> ：<code>&amp;[T]</code>（不可变）、<code>&amp;mut [T]</code>（可变）。T 是元素类型。</li>
+<li><strong>优势</strong> ：零拷贝访问子集；函数参数通用（如接受 &amp;[i32] 而非 Vec 或 [i32; N]）。</li>
+<li><strong>与数组/向量的关系</strong> ：数组是固定大小，向量是动态。Slice 可以从两者创建。</li>
+<li><strong>字符串 slice</strong> ：<code>&amp;str</code> 是 &amp;[u8] 的特殊形式，处理 UTF-8。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let s = String::from("hello world");
+    let hello = &amp;s[0..5];
+    let world = &amp;s[6..11];
+    println!("{}", hello);  // 输出: hello
+    println!("{}", world);  // 输出: world
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：<code>[start..end]</code> 是半开区间（包括 start，不包括 end）。<code>&amp;arr[..]</code> 是全切片。Slice 借用 arr，借用规则适用。</li>
+</ul>
+<p>对于字符串而言，切片就是对 String 类型中某一部分的引用，它看起来像这样：</p>
+<img src="images/切片.jpg" alt="切片" class="center-img" width="50%" />
+<h3 id="胖指针fat-pointer"><a class="header" href="#胖指针fat-pointer">胖指针(Fat Pointer)</a></h3>
+<ul>
+<li>数据结构：对比普通引用（1个字长指针）与切片引用（2个字长）。</li>
+<li>组成部分：
+<ul>
+<li>Pointer：指向数据的起始位置。</li>
+<li>Length：切片包含的元素个数。</li>
+</ul>
+</li>
+<li>内存视图：在栈上存储元数据，在堆/静态区查看数据。</li>
+</ul>
+<h2 id="2-创建-slice"><a class="header" href="#2-创建-slice">2. 创建 Slice</a></h2>
+<p>Slice 通过借用和范围运算符创建。</p>
+<ul>
+<li><strong>范围语法</strong> ：
+<ul>
+<li><code>[start..end]</code>：从 start 到 end-1。</li>
+<li><code>[..end]</code>：从 0 到 end-1。</li>
+<li><code>[start..]</code>：从 start 到结束。</li>
+<li><code>[..]</code> ：整个集合。</li>
+</ul>
+</li>
+<li><strong>从向量/数组</strong> ：直接 &amp;vec[start..end]。</li>
+<li><strong>边界检查</strong> ：运行时检查，如果越界 panic!（安全）。</li>
+</ul>
+<h3 id="示例各种创建方式"><a class="header" href="#示例各种创建方式">示例：各种创建方式</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let vec = vec![10, 20, 30, 40, 50];
+  
+    let full = &amp;vec[..];      // 全切片: [10, 20, 30, 40, 50]
+    let first_three = &amp;vec[0..3];  // [10, 20, 30]
+    let last_two = &amp;vec[3..];     // [40, 50]
+  
+    println!("{:?}", first_three);
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：Vec 和数组都支持。Slice 的 len() 返回元素数，get(i) 返回 Option&lt;&amp;T&gt;（安全访问）。</li>
+</ul>
+<h3 id="可变-slice"><a class="header" href="#可变-slice">可变 slice</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut vec = vec![1, 2, 3];
+    let slice = &amp;mut vec[1..3];  // 可变借用
+  
+    slice[0] = 20;  // 修改 vec[1]
+    println!("{:?}", vec);  // 输出: [1, 20, 3]
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：可变 slice 允许修改元素，但遵守独占借用规则。</li>
+</ul>
+<h2 id="3-字符串-slice-str"><a class="header" href="#3-字符串-slice-str">3. 字符串 Slice (&amp;str)</a></h2>
+<p>字符串 slice 是常见的，处理 String 或 str。</p>
+<h3 id="示例字符串-slice"><a class="header" href="#示例字符串-slice">示例：字符串 slice</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn first_word(s: &amp;str) -&gt; &amp;str {  // 既能接受 String 的切片，也能接受字符串字面量
+    let bytes = s.as_bytes();
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+    &amp;s[..]
+}
+
+fn main() {
+    let s = String::from("hello world");
+    let word = first_word(&amp;s);  // &amp;String 隐式转为 &amp;str
+    
+    println!("{}", word);  // 输出: hello
+    
+    // s.clear();  // 错误！word 借用期间不能修改 s
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：<code>&amp;str</code> 是 UTF-8 安全的。as_bytes() 转为 &amp;[u8]。切片索引必须在字符边界（否则 panic!）。用 chars() 或 bytes() 迭代以避免。</li>
+</ul>
+<h2 id="4-多维-slice"><a class="header" href="#4-多维-slice">4. 多维 Slice</a></h2>
+<p>Slice 可以是多维的，如 <code>&amp;[[T]]</code>。</p>
+<p>示例：矩阵 slice</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let matrix = vec![vec![1, 2], vec![3, 4]];
+    let row = &amp;matrix[0][..];  // &amp;[i32]: [1, 2]
+    
+    println!("{:?}", row);
+}</code></pre>
+<ul>
+<li>解释：嵌套借用。复杂时考虑扁平化或专用 crate。</li>
+</ul>
+<blockquote>
+<p>注意事项：
+索引越界：如果你请求的范围超出了集合边界（如 &amp;s[0..100]），Rust 会在运行时 panic。
+UTF-8 字符：对于字符串切片，索引必须落在字符边界上。如果在多字节字符（如中文）中间切片，程序会崩溃。</p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="泛型"><a class="header" href="#泛型">泛型</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>

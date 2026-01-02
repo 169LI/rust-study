@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-e072f944.js";
+            window.path_to_searchindex_js = "../../searchindex-0ceb304c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-d8ebfcf5.js"></script>
@@ -182,6 +182,117 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="切片"><a class="header" href="#切片">切片</a></h1>
+<p>Rust 中的 slice（切片）是一种引用集合中连续元素的视图，而不拥有这些元素。它类似于数组或向量的子视图，使用 <code>&amp;[T]</code> 表示不可变切片，<code>&amp;mut [T]</code> 表示可变切片。Slice 是借用的一部分，遵守借用规则，确保内存安全。Slice 常用于字符串、数组和向量，帮助避免不必要的拷贝，提高效率。</p>
+<h2 id="1-slice-简介"><a class="header" href="#1-slice-简介">1. Slice 简介</a></h2>
+<ul>
+<li><strong>什么是 slice？</strong> ：Slice 是对数据序列的引用视图，指向连续内存块。不拥有数据，只借用。长度在运行时确定。</li>
+<li><strong>语法</strong> ：<code>&amp;[T]</code>（不可变）、<code>&amp;mut [T]</code>（可变）。T 是元素类型。</li>
+<li><strong>优势</strong> ：零拷贝访问子集；函数参数通用（如接受 &amp;[i32] 而非 Vec 或 [i32; N]）。</li>
+<li><strong>与数组/向量的关系</strong> ：数组是固定大小，向量是动态。Slice 可以从两者创建。</li>
+<li><strong>字符串 slice</strong> ：<code>&amp;str</code> 是 &amp;[u8] 的特殊形式，处理 UTF-8。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let s = String::from("hello world");
+    let hello = &amp;s[0..5];
+    let world = &amp;s[6..11];
+    println!("{}", hello);  // 输出: hello
+    println!("{}", world);  // 输出: world
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：<code>[start..end]</code> 是半开区间（包括 start，不包括 end）。<code>&amp;arr[..]</code> 是全切片。Slice 借用 arr，借用规则适用。</li>
+</ul>
+<p>对于字符串而言，切片就是对 String 类型中某一部分的引用，它看起来像这样：</p>
+<img src="../../images/切片.jpg" alt="切片" class="center-img" width="50%" />
+<h3 id="胖指针fat-pointer"><a class="header" href="#胖指针fat-pointer">胖指针(Fat Pointer)</a></h3>
+<ul>
+<li>数据结构：对比普通引用（1个字长指针）与切片引用（2个字长）。</li>
+<li>组成部分：
+<ul>
+<li>Pointer：指向数据的起始位置。</li>
+<li>Length：切片包含的元素个数。</li>
+</ul>
+</li>
+<li>内存视图：在栈上存储元数据，在堆/静态区查看数据。</li>
+</ul>
+<h2 id="2-创建-slice"><a class="header" href="#2-创建-slice">2. 创建 Slice</a></h2>
+<p>Slice 通过借用和范围运算符创建。</p>
+<ul>
+<li><strong>范围语法</strong> ：
+<ul>
+<li><code>[start..end]</code>：从 start 到 end-1。</li>
+<li><code>[..end]</code>：从 0 到 end-1。</li>
+<li><code>[start..]</code>：从 start 到结束。</li>
+<li><code>[..]</code> ：整个集合。</li>
+</ul>
+</li>
+<li><strong>从向量/数组</strong> ：直接 &amp;vec[start..end]。</li>
+<li><strong>边界检查</strong> ：运行时检查，如果越界 panic!（安全）。</li>
+</ul>
+<h3 id="示例各种创建方式"><a class="header" href="#示例各种创建方式">示例：各种创建方式</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let vec = vec![10, 20, 30, 40, 50];
+  
+    let full = &amp;vec[..];      // 全切片: [10, 20, 30, 40, 50]
+    let first_three = &amp;vec[0..3];  // [10, 20, 30]
+    let last_two = &amp;vec[3..];     // [40, 50]
+  
+    println!("{:?}", first_three);
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：Vec 和数组都支持。Slice 的 len() 返回元素数，get(i) 返回 Option&lt;&amp;T&gt;（安全访问）。</li>
+</ul>
+<h3 id="可变-slice"><a class="header" href="#可变-slice">可变 slice</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut vec = vec![1, 2, 3];
+    let slice = &amp;mut vec[1..3];  // 可变借用
+  
+    slice[0] = 20;  // 修改 vec[1]
+    println!("{:?}", vec);  // 输出: [1, 20, 3]
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：可变 slice 允许修改元素，但遵守独占借用规则。</li>
+</ul>
+<h2 id="3-字符串-slice-str"><a class="header" href="#3-字符串-slice-str">3. 字符串 Slice (&amp;str)</a></h2>
+<p>字符串 slice 是常见的，处理 String 或 str。</p>
+<h3 id="示例字符串-slice"><a class="header" href="#示例字符串-slice">示例：字符串 slice</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn first_word(s: &amp;str) -&gt; &amp;str {  // 既能接受 String 的切片，也能接受字符串字面量
+    let bytes = s.as_bytes();
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+    &amp;s[..]
+}
+
+fn main() {
+    let s = String::from("hello world");
+    let word = first_word(&amp;s);  // &amp;String 隐式转为 &amp;str
+    
+    println!("{}", word);  // 输出: hello
+    
+    // s.clear();  // 错误！word 借用期间不能修改 s
+}</code></pre>
+<ul>
+<li><strong>解释</strong> ：<code>&amp;str</code> 是 UTF-8 安全的。as_bytes() 转为 &amp;[u8]。切片索引必须在字符边界（否则 panic!）。用 chars() 或 bytes() 迭代以避免。</li>
+</ul>
+<h2 id="4-多维-slice"><a class="header" href="#4-多维-slice">4. 多维 Slice</a></h2>
+<p>Slice 可以是多维的，如 <code>&amp;[[T]]</code>。</p>
+<p>示例：矩阵 slice</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let matrix = vec![vec![1, 2], vec![3, 4]];
+    let row = &amp;matrix[0][..];  // &amp;[i32]: [1, 2]
+    
+    println!("{:?}", row);
+}</code></pre>
+<ul>
+<li>解释：嵌套借用。复杂时考虑扁平化或专用 crate。</li>
+</ul>
+<blockquote>
+<p>注意事项：
+索引越界：如果你请求的范围超出了集合边界（如 &amp;s[0..100]），Rust 会在运行时 panic。
+UTF-8 字符：对于字符串切片，索引必须落在字符边界上。如果在多字节字符（如中文）中间切片，程序会崩溃。</p>
+</blockquote>
 
                     </main>
 
