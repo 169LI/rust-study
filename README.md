@@ -1,4 +1,4 @@
-![1767180541975](image/README/1767180541975.png)
+<img src="./src/images/image.png" alt="Rust学习笔记" style="zoom: 50%;" />
 
 ---
 
