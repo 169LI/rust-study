@@ -28,6 +28,7 @@
   - [项目组织及依赖管理](./Rust学习/项目组织及依赖管理.md)
     - [项目结构](./Rust学习/项目组织及依赖管理/项目结构.md)
     - [Cargo.Toml](./Rust学习/项目组织及依赖管理/Cargo.Toml.md)
+    - [文档](./Rust学习/项目组织及依赖管理/文档.md)
   - [Cargo](./Rust学习/Cargo/Cargo.md)
     - [Cargo 命令](./Rust学习/Cargo/Cargo命令.md)
     - [Cargo 工具链](./Rust学习/Cargo/Cargo工具链.md)
