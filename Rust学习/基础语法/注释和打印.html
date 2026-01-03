@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Cargo 命令 - Rust study</title>
+        <title>注释和打印 - Rust study</title>
 
 
         <!-- Custom HTML head -->
@@ -147,7 +147,7 @@
                         <a href="https://github.com/169li/rust-study" title="Git repository" aria-label="Git repository">
                             <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
                         </a>
-                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/Cargo/Cargo命令.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/基础语法/注释和打印.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
                             <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
                         </a>
 
@@ -181,17 +181,252 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="cargo-命令"><a class="header" href="#cargo-命令">Cargo 命令</a></h1>
+                        <h1 id="注释和打印"><a class="header" href="#注释和打印">注释和打印</a></h1>
+<p>在 Rust 中，注释是写给程序员看的“备忘录”，而打印则是程序与外界沟通的最基本方式。理解这两者能极大地提升开发和调试效率。</p>
+<hr>
+<h2 id="一-注释-comments"><a class="header" href="#一-注释-comments">一、 注释 (Comments)</a></h2>
+<p>Rust 支持多种注释风格，除了代码解释外，Rust 的注释还深度集成了文档生成工具 <code>cargo doc</code>。</p>
+<h3 id="1-常规注释"><a class="header" href="#1-常规注释">1. 常规注释</a></h3>
+<ul>
+<li><strong>单行注释</strong> ：使用 <code>//</code>，这是最常用的注释方式。</li>
+<li><strong>块注释 (多行)</strong> ：使用 <code>/* ... */</code>。虽然 Rust 支持，但社区更倾向于在多行也使用单行注释。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    // 这是一个单行注释
+    let x = 5; // 也可以在代码行末尾
+
+    /* 这是一个块注释
+       它可以跨越多行 */
+    let y = 10;
+}</code></pre>
+<h3 id="2-文档注释-doc-comments"><a class="header" href="#2-文档注释-doc-comments">2. 文档注释 (Doc Comments)</a></h3>
+<p>这是 Rust 的特色，用于生成 HTML 格式的 API 文档。</p>
+<ul>
+<li><strong>三斜杠 <code>///</code></strong> ：为紧随其后的 <strong>项目</strong> （如函数、结构体）生成文档。支持 Markdown 语法。</li>
+<li><strong>双斜杠感叹号 <code>//!</code></strong> ：为包含该注释的 <strong>条目</strong> （如整个 crate 或模块）生成文档。</li>
+</ul>
+<pre><code class="language-rust ignore">//! # 核心逻辑模块
+//! 这个模块包含了一些数学运算函数。
+
+/// 将两个数字相加。
+/// 
+/// # Examples
+/// ```
+/// let res = add(1, 2);
+/// ```
+fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}</code></pre>
+<p>在<a href="../项目组织及依赖管理/文档.html">文档</a>章节会详细介绍文档注释的使用方法和注意事项。</p>
+<hr>
+<h2 id="二-打印-printing"><a class="header" href="#二-打印-printing">二、 打印 (Printing)</a></h2>
+<p>Rust 的打印是通过一组<strong>宏 (Macros)</strong> 来实现的。宏的显著特征是名称末尾带有感叹号 <code>!</code>。</p>
+<h3 id="1-核心宏"><a class="header" href="#1-核心宏">1. 核心宏</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>宏名称</strong></th><th><strong>功能描述</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong><code>print!</code></strong></td><td>打印到标准输出，不换行。</td></tr>
+<tr><td><strong><code>println!</code></strong></td><td>打印到标准输出，<strong>自动换行</strong> 。</td></tr>
+<tr><td><strong><code>format!</code></strong></td><td>不打印，而是返回一个格式化后的 <code>String</code>。</td></tr>
+<tr><td><strong><code>eprintln!</code></strong></td><td>打印到<strong>标准错误输出 (stderr)</strong> ，常用于打印错误信息。</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="2-占位符"><a class="header" href="#2-占位符">2. 占位符</a></h3>
+<h4 id="参数位置与命名"><a class="header" href="#参数位置与命名">参数位置与命名</a></h4>
+<p>除了按顺序匹配，你还可以通过索引或名称来复用变量。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let name = "Alice";
+    let age = 30;
+
+    // 按顺序匹配
+    println!("{} is {} years old.", name, age); // Alice is 30 years old.
+
+    // 索引匹配
+    println!("{0} is {1} years old.", name, age); // Alice is 30 years old.
+
+    // 具名匹配
+    println!("{name} is {age} years old."); // Alice is 30 years old.
+}</code></pre>
+<h4 id="格式化占位符核心语法"><a class="header" href="#格式化占位符核心语法">格式化占位符核心语法</a></h4>
+<p>下表总结了占位符 <code>{}</code> 内部可以使用的所有核心语法：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类别</th><th>语法示例</th><th>效果描述</th><th>42或“Hi“为例</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>基础展示</strong></td><td><code>{}</code></td><td>调用 <code>Display</code> 特征，普通人类可读输出。</td><td><code>42</code></td></tr>
+<tr><td></td><td><code>{:?}</code></td><td>调用 <code>Debug</code> 特征，程序员调试用输出。</td><td><code>42</code></td></tr>
+<tr><td></td><td><code>{:#?}</code></td><td><strong>漂亮打印 (Pretty Print)</strong>，多行缩进展示复杂结构。</td><td>(分行显示的结构)</td></tr>
+<tr><td><strong>参数索引</strong></td><td><code>{0}</code></td><td>使用第 1 个位置参数（索引从 0 开始）。</td><td><code>42</code></td></tr>
+<tr><td></td><td><code>{name}</code></td><td>使用具名参数。</td><td><code>Hi</code></td></tr>
+<tr><td><strong>对齐与填充</strong></td><td><code>{:10}</code></td><td>设置宽度为 10，默认左对齐（字符串）或右对齐（数字）。</td><td><code>"Hi        "</code></td></tr>
+<tr><td></td><td><code>{:&lt;10}</code></td><td>强制<strong>左对齐</strong>。</td><td><code>"Hi        "</code></td></tr>
+<tr><td></td><td><code>{:&gt;10}</code></td><td>强制<strong>右对齐</strong>。</td><td><code>"        Hi"</code></td></tr>
+<tr><td></td><td><code>{:^10}</code></td><td>强制<strong>居中对齐</strong>。</td><td><code>"    Hi    "</code></td></tr>
+<tr><td></td><td><code>{:*^10}</code></td><td>使用 <code>*</code> 进行填充（填充字符必须在对齐符号前）。</td><td><code>"****Hi****"</code></td></tr>
+<tr><td><strong>数字进制</strong></td><td><code>{:b}</code></td><td>转换为二进制 (Binary)。</td><td><code>101010</code></td></tr>
+<tr><td></td><td><code>{:o}</code></td><td>转换为八进制 (Octal)。</td><td><code>52</code></td></tr>
+<tr><td></td><td><code>{:x}</code> / <code>{:X}</code></td><td>转换为十六进制 (Hex)，大小写决定字母大小写。</td><td><code>2a</code> / <code>2A</code></td></tr>
+<tr><td></td><td><code>{:#x}</code></td><td>带有进制前缀的十六进制。</td><td><code>0x2a</code></td></tr>
+<tr><td><strong>精度与正负</strong></td><td><code>{:.2}</code></td><td>浮点数保留 2 位小数。</td><td><code>3.14</code></td></tr>
+<tr><td></td><td><code>{:+.2}</code></td><td>强制显示正负号。</td><td><code>+42.00</code></td></tr>
+<tr><td></td><td><code>{:05}</code></td><td>宽度为 5，不足部分用 <strong>0 填充</strong>。</td><td><code>00042</code></td></tr>
+<tr><td><strong>特殊指针</strong></td><td><code>{:p}</code></td><td><strong>打印内存地址</strong>（适用于引用或原生指针）。</td><td><code>0x7ffee1234567</code></td></tr>
+<tr><td><strong>转义</strong></td><td><code>{{</code> / <code>}}</code></td><td>在格式化字符串中显示原始的大括号。</td><td><code>{</code> / <code>}</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>为了更直观地理解如何组合这些选项，请看下面的综合实例：</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::mem::size_of;
+
+#[derive(Debug)]
+struct Point { x: i32, y: i32 }
+
+fn main() {
+    let p = Point { x: 10, y: 20 };
+    let pi = 3.14159;
+    // 1. 组合：宽度、对齐、填充、精度
+    // 效果：居中对齐，宽度10，用'-'填充，保留2位小数
+    println!("数值展示: {:*^10.2}", pi); 
+
+    // 2. 指针地址展示
+    // 使用 :p 查看变量在栈上的地址
+    let r = &amp;p;
+    println!("结构体 p 的地址: {:p}", r); 
+
+    // 3. 进制与前缀
+    let val = 255;
+    println!("十六进制: {:#X}, 二进制: {:b}", val, val);
+
+    // 4. 调试复杂结构
+    // 使用 {:#?} 实现易读的缩进输出
+    println!("漂亮打印结构体: {:#?}", p);
+}</code></pre>
+<h4 id="-核心知识点补充"><a class="header" href="#-核心知识点补充">💡 核心知识点补充</a></h4>
+<ul>
+<li>**<code>Debug</code> vs <code>Display**</code>：几乎所有的 Rust 标准库类型都实现了 <code>Debug</code>（用于调试），但并非都实现了 <code>Display</code>（因为某些类型没有唯一的人类可读展示方式）。</li>
+<li><strong>指针长度</strong>：在 64 位系统上，使用 <code>{:p}</code> 打印出的地址通常对应一个 8 字节（单字长）的内存位置。</li>
+<li><strong>内存效率</strong>：所有的 <code>print!</code> 系列宏在编译时都会被检查。如果占位符数量与参数不匹配，编译器会直接报错，这保证了运行时的类型安全。</li>
+</ul>
+<h4 id="结构化调试打印"><a class="header" href="#结构化调试打印">结构化调试打印</a></h4>
+<ul>
+<li><strong>派生 Debug</strong>： 使用 <code>#[derive(Debug)]</code> 注解结构体或枚举，自动生成 Debug 实现。
+<ul>
+<li><strong><code>{:?}</code></strong> ：以调试模式打印（需要类型实现 <code>std::fmt::Debug</code>）。</li>
+<li><strong><code>{:#?}</code></strong> ： <strong>美化打印</strong> ，会自动分行并添加缩进，适合查看大型结构体。</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect = Rectangle { width: 30, height: 50 };
+    println!("rect 是 {:?}", rect);  // 输出: rect 是 Rectangle { width: 30, height: 50 }
+    println!("rect 是 {:#?}", rect);  // 美化输出，多行缩进
+}</code></pre>
+<ul>
+<li><strong>手动实现 Debug</strong>： 如果需要自定义格式，实现 std::fmt::Debug trait</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::fmt;
+struct Point {
+    x: i32,
+    y: i32,
+}
+impl fmt::Debug for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        f.debug_struct("Point")
+         .field("x", &amp;self.x)
+         .field("y", &amp;self.y)
+         .finish()
+    }
+}
+fn main() {
+    let p = Point { x: 1, y: 2 };
+    println!("{:?}", p);  // 输出: Point { x: 1, y: 2 }
+}</code></pre>
+<ul>
+<li><strong>Debug vs Display</strong>：
+<ul>
+<li>Debug：用于开发者，格式如 { x: 1, y: 2 }，通过 {:?}。</li>
+<li>Display：用于用户友好输出，通过 {}。需手动实现 std::fmt::Display。</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-rust ignore">impl fmt::Display for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+println!("{}", p);  // 输出: (1, 2)</code></pre>
+<hr>
+<h2 id="3-dbg宏"><a class="header" href="#3-dbg宏">3. dbg宏</a></h2>
+<p>dbg! 宏用于调试，它打印表达式的值和源代码位置，然后返回该值。适合插入代码中快速检查，而不中断流程。</p>
+<ul>
+<li><strong>语法</strong>：
+<ul>
+<li><strong>dbg!(表达式);</strong>：打印表达式的文件名、行号、列号和值，返回表达式本身。</li>
+<li>支持借用（&amp;），避免所有权转移。</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">#[derive(Debug)] // 使用 dbg! 要求类型必须实现 Debug 特征
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+fn main() {
+    let rect = Rectangle { width: 30, height: 50 };
+    // 1. println! 的方式：必须单独写一行，且需要手动写描述
+    println!("矩形的数据是: {:?}", rect); 
+    // 2. dbg! 的方式：直接包裹表达式
+    // 它会打印：[src\main.rs:12:5] rect = Rectangle { width: 30, height: 50 }
+    dbg!(&amp;rect); 
+    // 3. 嵌套使用（逻辑不中断）
+    let area = dbg!(rect.width * rect.height); // 打印计算过程并把结果赋给 area
+    println!("面积是: {}", area);
+}</code></pre>
+<ul>
+<li>
+<p><strong>与结构体结合</strong>： dbg! 使用 Debug trait，如果结构体未实现 Debug，会编译错误。</p>
+</li>
+<li>
+<p><strong>注意</strong>：dbg! 只在调试构建中有效，在发布模式下可能被优化掉。输出到 stderr，便于区分正常输出。</p>
+</li>
+</ul>
+<h3 id="dbg-与-println-的详细对比"><a class="header" href="#dbg-与-println-的详细对比"><code>dbg!</code> 与 <code>println!</code> 的详细对比</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th><code>println!</code></th><th><code>dbg!</code></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>输出目标</strong></td><td>标准输出 (stdout)</td><td><strong>标准错误 (stderr)</strong></td></tr>
+<tr><td><strong>占位符要求</strong></td><td>必须手动写 <code>{}</code> 或 <code>{:?}</code></td><td><strong>自动调用 <code>{:?}</code></strong></td></tr>
+<tr><td><strong>信息量</strong></td><td>仅打印你指定的内容</td><td>自动包含<strong>文件名、行号、表达式</strong></td></tr>
+<tr><td><strong>返回值</strong></td><td>返回单元类型 <code>()</code></td><td><strong>返回表达式的值（所有权转移）</strong></td></tr>
+<tr><td><strong>典型用途</strong></td><td>最终程序输出给用户看</td><td><strong>开发过程中快速排查问题</strong></td></tr>
+</tbody>
+</table>
+</div>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../Rust学习/Cargo/Cargo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../Rust学习/基础语法/数据类型.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Rust学习/Cargo/Cargo工具链.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Rust学习/基础语法/所有权和借用.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -201,11 +436,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../Rust学习/Cargo/Cargo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../Rust学习/基础语法/数据类型.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Rust学习/Cargo/Cargo工具链.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Rust学习/基础语法/所有权和借用.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

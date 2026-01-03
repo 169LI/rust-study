@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-0ceb304c.js";
+            window.path_to_searchindex_js = "../../searchindex-b1f3c136.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-d8ebfcf5.js"></script>
+        <script src="../../toc-2a4c8e05.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -414,8 +414,8 @@ fn main() {
     println!("{:?}", u.name);
 }</code></pre>
 <p>2)结构体与所有权的直观规则</p>
-<p>字段类型如果是 String、Vec<t> 等“拥有型”，把结构体赋值给新变量时默认会发生移动（move）。
-想继续使用旧值通常需要借用（&amp;User）或让字段可复制（如 u32）或显式 clone()。</t></p>
+<p>字段类型如果是 String、Vec <code>&lt;T&gt;</code> 等“拥有型”，把结构体赋值给新变量时默认会发生移动（move）。
+想继续使用旧值通常需要借用（&amp;User）或让字段可复制（如 u32）或显式 clone()。</p>
 <pre class="playground"><code class="language-rust editable edition2024">struct User {
     name: String,
     age: u8,
@@ -428,20 +428,117 @@ fn main() {
     println!("{}", u2.age);
 }</code></pre>
 <hr>
-<h3 id="c-指针类型与所有权相关形态"><a class="header" href="#c-指针类型与所有权相关形态">C. 指针类型与所有权相关形态</a></h3>
+<h3 id="c-指针类型pointer-types"><a class="header" href="#c-指针类型pointer-types">C. 指针类型（Pointer Types）</a></h3>
+<p>根据底层的表现形式和抽象程度，可以将 Rust 的指针分为以下四大类：</p>
+<h4 id="1-引用-references--最常用的指针"><a class="header" href="#1-引用-references--最常用的指针">1. 引用 (References) —— 最常用的指针</a></h4>
+<p>引用是 Rust 中最常见的指针形式，它们在底层表现为指向某个内存地址的指针。</p>
 <ul>
-<li>
-<p><strong>引用</strong>：<code>&amp;T</code>（不可变）与 <code>&amp;mut T</code>（可变）</p>
-</li>
-<li>
-<p><strong>智能指针</strong>：</p>
+<li><strong><code>&amp;T</code>（不可变引用）</strong> ：指向类型为 <code>T</code> 的值，允许读取数据但不能修改。</li>
+<li><strong><code>&amp;mut T</code>（可变引用）</strong> ：允许读取并修改指向的数据。</li>
+<li><strong>内存表现</strong> ：
 <ul>
-<li><code>Box&lt;T&gt;</code>：把数据放到堆上</li>
-<li><code>Rc&lt;T&gt;</code>：引用计数（单线程）</li>
-<li><code>Arc&lt;T&gt;</code>：原子引用计数（多线程）</li>
+<li><strong>普通引用</strong> ：对于已知大小的类型（如 <code>i32</code>），它是单字长的指针。</li>
+<li><strong>切片引用（胖指针）</strong> ：对于动态大小类型（如 <code>&amp;str</code> 或 <code>&amp;[T]</code>），它由指针和长度组成，占用两个字长。</li>
 </ul>
 </li>
 </ul>
+<h4 id="2-原生指针-raw-pointers--绕过安全的底层指针"><a class="header" href="#2-原生指针-raw-pointers--绕过安全的底层指针">2. 原生指针 (Raw Pointers) —— 绕过安全的底层指针</a></h4>
+<p>原生指针与 C 语言的指针非常相似。它们在语法上定义为 <code>*const T</code> 和 <code>*mut T</code>。</p>
+<ul>
+<li><strong>特点</strong> ：
+<ul>
+<li>允许忽略借用规则，可以同时拥有多个指向同一位置的可变和不可变指针。</li>
+<li>不保证指向有效的内存，且允许为 <code>null</code>。</li>
+<li><strong>安全性</strong> ：解引用原生指针是不安全的，必须放在 <code>unsafe</code> 块中执行。</li>
+</ul>
+</li>
+<li><strong>用途</strong> ：主要用于与 C 语言交互（FFI）或编写底层高性能驱动。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut num = 5;
+
+    // 1. 从引用创建原生指针
+    // 虽然创建原生指针是安全的，但后续使用是不安全的
+    let r1 = &amp;num as *const i32; // 不可变原生指针
+    let r2 = &amp;mut num as *mut i32; // 可变原生指针
+
+    // 2. 解引用原生指针
+    // 必须放在 unsafe 块中，否则编译器会报错
+    unsafe {
+        println!("r1 指向的值: {}", *r1);
+
+    // 修改原生指针指向的数据
+        *r2 = 10;
+        println!("修改后 r2 指向的值: {}", *r2);
+    }
+
+    // 3. 创建一个指向任意内存地址的指针（慎用！）
+    let address = 0x012345usize;
+    let _r3 = address as *const i32;
+}</code></pre>
+<h4 id="3-函数指针-fn-pointer--代码地址的载体"><a class="header" href="#3-函数指针-fn-pointer--代码地址的载体">3. 函数指针 (fn Pointer) —— 代码地址的载体</a></h4>
+<p>函数指针指向的是代码段中的函数入口地址，而不是堆栈上的数据。</p>
+<ul>
+<li><strong>语法</strong> ：类型写作 <code>fn(参数类型) -&gt; 返回类型</code>。</li>
+<li><strong>区别于闭包</strong> ：
+<ul>
+<li>函数指针不捕获环境变量。</li>
+<li>它的长度始终是一个字长（存储地址）。</li>
+<li>它可以作为参数传递给其他函数，或者存储在数据结构中。</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn add_one(x: i32) -&gt; i32 {
+    x + 1
+}
+
+fn do_twice(f: fn(i32) -&gt; i32, arg: i32) -&gt; i32 {
+    // 像正常函数一样通过指针调用
+    f(arg) + f(arg)
+}
+
+fn main() {
+    // 将函数名 add_one 隐式转换为函数指针类型
+    let f: fn(i32) -&gt; i32 = add_one;
+
+    let answer = do_twice(f, 5);
+
+    println!("计算结果为: {}", answer); // 输出: 12
+
+    // 函数指针的大小验证
+    println!("函数指针的大小: {} 字节", std::mem::size_of_val(&amp;f));
+}</code></pre>
+<h4 id="4-智能指针-smart-pointers--携带元数据的指针"><a class="header" href="#4-智能指针-smart-pointers--携带元数据的指针">4. 智能指针 (Smart Pointers) —— 携带元数据的指针</a></h4>
+<p>智能指针是拥有数据所有权的结构体，它们实现了 <code>Deref</code> 和 <code>Drop</code> 特性。</p>
+<h5 id="a-boxt-堆空间分配"><a class="header" href="#a-boxt-堆空间分配">A. <code>Box&lt;T&gt;</code> (堆空间分配)</a></h5>
+<ul>
+<li><strong>功能</strong> ：在堆上分配空间存储类型为 <code>T</code> 的值，并在栈上保留指针。</li>
+<li><strong>场景</strong> ：当数据大小在编译时未知（如递归类型），或数据量巨大不适合在栈上拷贝时使用。</li>
+</ul>
+<h5 id="b-rct-引用计数指针"><a class="header" href="#b-rct-引用计数指针">B. <code>Rc&lt;T&gt;</code> (引用计数指针)</a></h5>
+<ul>
+<li><strong>功能</strong> ：全称 Reference Counting，允许多个变量通过增加计数来共享同一个堆数据的所有权。</li>
+<li><strong>场景</strong> ：用于单线程环境下，需要一个数据有多个所有者的复杂逻辑（如树或图的节点共享）。</li>
+</ul>
+<h5 id="c-arct-原子引用计数指针"><a class="header" href="#c-arct-原子引用计数指针">C. <code>Arc&lt;T&gt;</code> (原子引用计数指针)</a></h5>
+<ul>
+<li><strong>功能</strong> ：Atomic Reference Counting，是 <code>Rc&lt;T&gt;</code> 的线程安全版本。</li>
+<li><strong>场景</strong> ：多线程并发环境下，安全地共享同一份数据的所有权。</li>
+</ul>
+<h5 id="总结对比表"><a class="header" href="#总结对比表">总结对比表</a></h5>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>指针类型</strong></th><th><strong>语法表示</strong></th><th><strong>内存位置</strong></th><th><strong>长度(64位)</strong></th><th><strong>核心特性</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>引用</strong></td><td><code>&amp;T</code>/<code>&amp;mut T</code></td><td>栈/堆</td><td>8 或 16 字节</td><td>安全借用，编译器检查生命周期</td></tr>
+<tr><td><strong>原生指针</strong></td><td><code>*const T</code>/<code>*mut T</code></td><td>栈/堆</td><td>8 字节</td><td>不安全，类似 C 指针</td></tr>
+<tr><td><strong>函数指针</strong></td><td><code>fn(...) -&gt; ...</code></td><td>代码段</td><td>8 字节</td><td>指向函数地址</td></tr>
+<tr><td><strong>智能指针</strong></td><td><code>Box&lt;T&gt;</code>/<code>Rc&lt;T&gt;</code></td><td>堆</td><td>8 字节</td><td>管理堆内存，提供自动清理逻辑</td></tr>
+</tbody>
+</table>
+</div>
 <hr>
 <h3 id="d-optiont-与-resultt-e"><a class="header" href="#d-optiont-与-resultt-e">D. <code>Option&lt;T&gt;</code> 与 <code>Result&lt;T, E&gt;</code></a></h3>
 <p>Rust 不提供 <code>null</code>，用 <code>Option&lt;T&gt;</code> 表示“可能不存在”。</p>
@@ -467,7 +564,7 @@ fn main() {
 }
 <span class="boring">}</span></code></pre>
 <hr>
-<h2 id="类型转换注意"><a class="header" href="#类型转换注意">类型转换注意</a></h2>
+<h2 id="6-类型转换注意"><a class="header" href="#6-类型转换注意">6. 类型转换注意</a></h2>
 <p>Rust <strong>不会</strong>进行隐式类型转换。不同整数类型之间的转换必须显式完成。</p>
 <pre class="playground"><code class="language-rust editable edition2024">fn main() {
     let a: u8 = 10;
@@ -481,23 +578,6 @@ fn main() {
     let y = u8::try_from(x); // Err(...)
 }</code></pre>
 <hr>
-<h2 id="总结表格"><a class="header" href="#总结表格">总结表格</a></h2>
-<div class="table-wrapper">
-<table>
-<thead>
-<tr><th>类型名</th><th>存储位置</th><th>长度是否可变</th><th>类型是否可混搭</th></tr>
-</thead>
-<tbody>
-<tr><td><strong>Tuple</strong></td><td>栈</td><td>固定</td><td><strong>是</strong></td></tr>
-<tr><td><strong>Array</strong></td><td>栈(常见)</td><td>固定</td><td>否</td></tr>
-<tr><td><strong>Vec</strong></td><td>堆</td><td><strong>可变</strong></td><td>否</td></tr>
-<tr><td><strong>String</strong></td><td>堆</td><td><strong>可变</strong></td><td>否 (UTF-8)</td></tr>
-<tr><td><strong>&amp;str</strong></td><td>栈(引用) -&gt; 指向任意区域</td><td>固定</td><td>否</td></tr>
-</tbody>
-</table>
-</div>
-<p>接下来可以顺着类型的使用场景继续：一条路线是深入结构体与枚举的表达能力；另一条路线是把这些类型放进函数参数与返回值中，理解所有权与借用如何影响数据传递。</p>
-
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -506,7 +586,7 @@ fn main() {
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../Rust学习/基础语法/所有权和借用.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../Rust学习/基础语法/注释和打印.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -520,7 +600,7 @@ fn main() {
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../Rust学习/基础语法/所有权和借用.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../Rust学习/基础语法/注释和打印.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
