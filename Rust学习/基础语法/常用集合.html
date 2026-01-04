@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-b1f3c136.js";
+            window.path_to_searchindex_js = "../../searchindex-a77dd41d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2a4c8e05.js"></script>
@@ -182,6 +182,114 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="常用集合"><a class="header" href="#常用集合">常用集合</a></h1>
+<p>在 Rust 标准库 <code>std::collections</code> 模块下，集合被分为四大通用类型 <strong>线性序列</strong> 、<strong>Key-Value 映射表</strong> 、<strong>集合类型</strong>和 <strong>优先队列</strong> 。这些集合存储在堆内存中，并通过指针（如引用、智能指针）进行管理。</p>
+<hr>
+<h2 id="一-线性序列-linear-sequences"><a class="header" href="#一-线性序列-linear-sequences">一、 线性序列 (Linear Sequences)</a></h2>
+<p>这类集合按顺序存储数据，适合处理列表、队列等逻辑。</p>
+<ul>
+<li><strong>向量 (Vec)</strong> ：最常用的动态数组。支持快速随机访问，在末尾插入/删除效率最高。</li>
+<li><strong>双端队列 (VecDeque)</strong> ：基于循环缓冲区实现。在序列的<strong>头部和尾部</strong>插入或删除数据都非常高效。</li>
+<li><strong>链表 (LinkedList)</strong> ：双向链表。虽然支持快速合并和拆分，但由于内存不连续，现代硬件上性能通常不如 <code>Vec</code>。</li>
+</ul>
+<h3 id="代码示例vec-与-vecdeque"><a class="header" href="#代码示例vec-与-vecdeque">代码示例：Vec 与 VecDeque</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::collections::VecDeque;
+
+fn main() {
+    // 1. Vec: 动态数组
+    let mut v = vec![1, 2, 3];
+    v.push(4); 
+    println!("Vec 第三个元素: {}", v[2]); // 随机访问
+
+    // 2. VecDeque: 双端操作
+    let mut dq = VecDeque::new();
+    dq.push_back(10); // 尾部插入
+    dq.push_front(20); // 头部插入
+    println!("Deque 头部: {:?}", dq.front()); // 输出 Some(20)
+}</code></pre>
+<hr>
+<h2 id="二-key-value-映射表-key-value-maps"><a class="header" href="#二-key-value-映射表-key-value-maps">二、 Key-Value 映射表 (Key-Value Maps)</a></h2>
+<p>映射表用于存储“键-值”对，通过键来快速查找对应的值。</p>
+<ul>
+<li><strong>无序哈希表 (HashMap)</strong> ：通过哈希函数存储。查找速度极快（平均 <strong>$O(1)$</strong>），但由于哈希冲突和重新分配，内部顺序是无序的。</li>
+<li><strong>有序哈希表 (BTreeMap)</strong> ：基于 B 树实现。键（Key）必须实现 <code>Ord</code> 特征，数据会按键的大小<strong>自动排序</strong>存储。</li>
+</ul>
+<h3 id="代码示例hashmap-与-btreemap"><a class="header" href="#代码示例hashmap-与-btreemap">代码示例：HashMap 与 BTreeMap</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::collections::{HashMap, BTreeMap};
+
+fn main() {
+    // 1. HashMap: 无序
+    let mut scores = HashMap::new();
+    scores.insert("Alice", 90);
+    scores.insert("Bob", 85);
+
+    // 2. BTreeMap: 自动排序
+    let mut sorted_map = BTreeMap::new();
+    sorted_map.insert(3, "c");
+    sorted_map.insert(1, "a");
+    sorted_map.insert(2, "b");
+
+    // 遍历 BTreeMap 时，顺序始终是 1, 2, 3
+    for (key, value) in &amp;sorted_map {
+        println!("{}: {}", key, value);
+    }
+}</code></pre>
+<hr>
+<h2 id="三-集合类型-set-types"><a class="header" href="#三-集合类型-set-types">三、 集合类型 (Set Types)</a></h2>
+<p>集合类型实际上是不带“值”的映射表，主要用于保证元素的 <strong>唯一性</strong> 。</p>
+<ul>
+<li><strong>无序集合 (HashSet)</strong> ：基于 <code>HashMap</code> 实现。用于快速去重或检查某个元素是否存在。</li>
+<li><strong>有序集合 (BTreeSet)</strong> ：基于 <code>BTreeMap</code> 实现。元素会根据自身顺序进行 <strong>排序</strong> 。</li>
+</ul>
+<h3 id="代码示例hashset-的去重功能"><a class="header" href="#代码示例hashset-的去重功能">代码示例：HashSet 的去重功能</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::collections::HashSet;
+
+fn main() {
+    let mut books = HashSet::new();
+    books.insert("Rust Programming");
+    books.insert("Rust Programming"); // 重复插入会被忽略
+
+    if !books.contains("C++") {
+        println!("我们没有找到关于 C++ 的书。");
+    }
+}</code></pre>
+<hr>
+<h2 id="四-优先队列-priority-queues"><a class="header" href="#四-优先队列-priority-queues">四、 优先队列 (Priority Queues)</a></h2>
+<p>当需要始终优先处理“最大”或“最小”的元素时，使用此类集合。</p>
+<ul>
+<li><strong>二叉堆 (BinaryHeap)</strong> ：默认是 <strong>最大堆</strong> 。无论插入顺序如何，每次弹出的总是集合中最大的元素。</li>
+</ul>
+<h3 id="代码示例binaryheap"><a class="header" href="#代码示例binaryheap">代码示例：BinaryHeap</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::collections::BinaryHeap;
+
+fn main() {
+    let mut heap = BinaryHeap::new();
+
+    // 乱序插入
+    heap.push(1);
+    heap.push(5);
+    heap.push(2);
+
+    // 总是弹出当前最大的值
+    println!("弹出最大值: {:?}", heap.pop()); // 输出 Some(5)
+    println!("再次弹出: {:?}", heap.pop());   // 输出 Some(2)
+}</code></pre>
+<hr>
+<h2 id="总结如何选择集合"><a class="header" href="#总结如何选择集合">总结：如何选择集合？</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>需求场景</strong></th><th><strong>推荐集合类型</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>存储简单的列表、作为默认选择</strong></td><td><code>Vec</code></td></tr>
+<tr><td><strong>需要频繁从头部插入数据</strong></td><td><code>VecDeque</code></td></tr>
+<tr><td><strong>根据 ID 或名称快速查找数据</strong></td><td><code>HashMap</code></td></tr>
+<tr><td><strong>需要查找数据且要求结果按顺序排列</strong></td><td><code>BTreeMap</code></td></tr>
+<tr><td><strong>只需要去重，不关心关联值</strong></td><td><code>HashSet</code></td></tr>
+<tr><td><strong>始终要处理“优先级最高”的任务</strong></td><td><code>BinaryHeap</code></td></tr>
+</tbody>
+</table>
+</div>
 
                     </main>
 
