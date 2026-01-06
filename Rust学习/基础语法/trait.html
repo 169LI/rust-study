@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-25d84c8c.js";
+            window.path_to_searchindex_js = "../../searchindex-a9352766.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2a4c8e05.js"></script>
@@ -181,7 +181,431 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="trait"><a class="header" href="#trait">trait</a></h1>
+                        <h1 id="trait"><a class="header" href="#trait">Trait</a></h1>
+<p>Rust 中的 <code>trait</code> 是一种非常强大的特性，它允许我们定义共享行为的契约，并使得不同类型可以实现这些行为。学习 Rust 中的 <code>trait</code> 是深入理解 Rust 编程语言的重要一步，尤其是在类型系统和抽象的层次上。
+需掌握：</p>
+<ol>
+<li><strong>特征基础</strong>：定义、实现、默认实现。</li>
+<li><strong>特征约束 (静态分发)</strong>：Trait Bound、<code>where</code> 子句、<code>impl Trait</code>。</li>
+<li><strong>多态与分发 (核心)</strong>
+<ul>
+<li><strong>静态分发</strong>：泛型展开，性能最高。</li>
+<li><strong>动态分发</strong>：<code>dyn Trait</code> 对象，虚函数表 。</li>
+</ul>
+</li>
+<li><strong>进阶特性</strong>：关联类型、Supertraits（继承）、完全限定语法。</li>
+<li><strong>高级规则</strong>：孤儿规则、覆盖实现。</li>
+<li><strong>特殊特征</strong>
+<ul>
+<li><strong>标准库三巨头</strong>：<code>Debug</code>, <code>Display</code>, <code>Default</code></li>
+<li><strong>所有权控制</strong>：<code>Copy</code>, <code>Clone</code>, <code>Drop</code></li>
+<li><strong>标记特征</strong>：<code>Sized</code>, <code>Send</code>, <code>Sync</code></li>
+<li><strong>运算符重载</strong>：<code>std::ops</code></li>
+</ul>
+</li>
+</ol>
+<p>下面是学习 <code>trait</code> 时应该掌握的主要知识点，以及相关的代码示例：</p>
+<h2 id="1-定义-trait"><a class="header" href="#1-定义-trait">1. <strong>定义 Trait</strong></a></h2>
+<ul>
+<li><code>trait</code> 是行为的集合。你可以在 <code>trait</code> 中定义方法和关联类型，其他类型可以实现这些方法。</li>
+<li><code>trait</code> 定义了一组方法的签名，但不包含具体的实现。</li>
+</ul>
+<h3 id="示例定义-trait"><a class="header" href="#示例定义-trait">示例：定义 Trait</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 定义一个 trait
+trait Speak {
+    fn speak(&amp;self);
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="2-为类型实现-trait"><a class="header" href="#2-为类型实现-trait">2. <strong>为类型实现 Trait</strong></a></h2>
+<ul>
+<li>类型（例如结构体、枚举等）可以通过 <code>impl</code> 块来实现某个 <code>trait</code>。</li>
+<li>一个类型可以实现多个 <code>trait</code>，每个 <code>trait</code> 都可以定义一组方法。</li>
+</ul>
+<h3 id="示例为结构体实现-trait"><a class="header" href="#示例为结构体实现-trait">示例：为结构体实现 Trait</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Speak {
+    fn speak(&amp;self);
+}
+struct Dog;
+impl Speak for Dog {
+    fn speak(&amp;self) {
+        println!("Woof!");
+    }
+}
+struct Cat;
+impl Speak for Cat {
+    fn speak(&amp;self) {
+        println!("Meow!");
+    }
+}
+fn main() {
+    let dog = Dog;
+    let cat = Cat;
+    dog.speak();  // 输出 "Woof!"
+    cat.speak();  // 输出 "Meow!"
+}</code></pre>
+<hr>
+<h2 id="3-trait-默认实现"><a class="header" href="#3-trait-默认实现">3. <strong>Trait 默认实现</strong></a></h2>
+<ul>
+<li><code>trait</code> 可以为某些方法提供默认实现，这样某些类型可以选择不实现这些方法，而是使用默认实现。</li>
+</ul>
+<h3 id="示例trait-的默认实现"><a class="header" href="#示例trait-的默认实现">示例：Trait 的默认实现</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Speak {
+    fn speak(&amp;self) {
+        println!("I can speak in a default way!");
+    }
+}
+struct Dog;
+impl Speak for Dog {
+    // 不需要显式实现 speak 方法，使用默认实现
+}
+fn main() {
+    let dog = Dog;
+    dog.speak();  // 输出 "I can speak in a default way!"
+}</code></pre>
+<hr>
+<h2 id="4-trait-和生命周期"><a class="header" href="#4-trait-和生命周期">4. <strong>Trait 和生命周期</strong></a></h2>
+<ul>
+<li>你可以在 <code>trait</code> 中使用生命周期标注，确保实现该 <code>trait</code> 的类型处理引用时，能够正确管理引用的生命周期。</li>
+</ul>
+<h3 id="示例trait-和生命周期"><a class="header" href="#示例trait-和生命周期">示例：Trait 和生命周期</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait PrintWithLifetime&lt;'a&gt; {
+    fn print(&amp;self, s: &amp;'a str);
+}
+
+struct Printer;
+
+impl&lt;'a&gt; PrintWithLifetime&lt;'a&gt; for Printer {
+    fn print(&amp;self, s: &amp;'a str) {
+        println!("{}", s);
+    }
+}
+
+fn main() {
+    let printer = Printer;
+    let message = "Hello, world!";
+    printer.print(message);
+}</code></pre>
+<hr>
+<h2 id="5-关联类型"><a class="header" href="#5-关联类型">5. <strong>关联类型</strong></a></h2>
+<ul>
+<li><code>trait</code> 可以定义  <strong>关联类型</strong> ，这种类型在实现 <code>trait</code> 时需要指定。这种方式使得 <code>trait</code> 更加灵活和强大。</li>
+</ul>
+<h3 id="示例使用关联类型"><a class="header" href="#示例使用关联类型">示例：使用关联类型</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Iterator {
+    type Item;  // 关联类型
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
+}
+struct Counter {
+    count: i32,
+}
+impl Iterator for Counter {
+    type Item = i32;  // 为关联类型指定具体类型
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        self.count += 1;
+        Some(self.count)
+    }
+}
+
+fn main() {
+    let mut counter = Counter { count: 0 };
+    println!("{}", counter.next().unwrap()); // 输出 1
+    println!("{}", counter.next().unwrap()); // 输出 2
+}</code></pre>
+<hr>
+<h2 id="6-trait-的继承"><a class="header" href="#6-trait-的继承">6. <strong>Trait 的继承</strong></a></h2>
+<ul>
+<li>一个 <code>trait</code> 可以继承其他 <code>trait</code>。这使得一个 <code>trait</code> 可以继承另一个 <code>trait</code> 的方法和行为。</li>
+</ul>
+<h3 id="示例trait-的继承"><a class="header" href="#示例trait-的继承">示例：Trait 的继承</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Animal {
+    fn sound(&amp;self);
+}
+
+trait DogBehavior: Animal {  // DogBehavior 继承 Animal
+    fn fetch(&amp;self);
+}
+
+struct Dog;
+
+impl Animal for Dog {
+    fn sound(&amp;self) {
+        println!("Woof!");
+    }
+}
+//实现 DogBehavior 时，必须也实现 Animal。
+impl DogBehavior for Dog {
+    fn fetch(&amp;self) {
+        println!("Fetching the ball!");
+    }
+}
+
+fn main() {
+    let dog = Dog;
+    dog.sound();  // 输出 "Woof!"
+    dog.fetch();  // 输出 "Fetching the ball!"
+}</code></pre>
+<hr>
+<h2 id="7-trait-bound-和泛型"><a class="header" href="#7-trait-bound-和泛型">7. <strong>Trait Bound 和泛型</strong></a></h2>
+<ul>
+<li><code>trait</code> 可以和泛型一起使用，通过 <strong>trait bound</strong> 来约束泛型类型，确保传入的类型实现了特定的 <code>trait</code>。</li>
+</ul>
+<h3 id="示例trait-bound-和泛型"><a class="header" href="#示例trait-bound-和泛型">示例：Trait Bound 和泛型</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Speak {
+    fn speak(&amp;self);
+}
+struct Dog;
+impl Speak for Dog {
+    fn speak(&amp;self) {
+        println!("Woof!");
+    }
+}
+fn make_speak&lt;T: Speak&gt;(animal: T) {
+    animal.speak();
+}
+fn main() {
+    let dog = Dog;
+    make_speak(dog);  // 输出 "Woof!"
+}</code></pre>
+<p>在这个例子中，<code>make_speak</code> 函数的参数 <code>T</code> 被约束为实现了 <code>Speak</code> trait 的类型，因此它可以接受任何实现了 <code>Speak</code> 的类型作为参数。</p>
+<hr>
+<h2 id="8-trait-作为参数和返回类型"><a class="header" href="#8-trait-作为参数和返回类型">8. <strong>Trait 作为参数和返回类型</strong></a></h2>
+<p>在 Rust 的 <code>trait</code> 系统中，将 <code>trait</code> 用作参数或返回类型是实现抽象和多态的核心手段。根据性能需求和灵活性要求，Rust 提供了**静态分发（Static Dispatch）<strong>和</strong>动态分发（Dynamic Dispatch）**两种机制。</p>
+<h3 id="trait-作为参数"><a class="header" href="#trait-作为参数">Trait 作为参数</a></h3>
+<p>当你希望函数能够接受多种不同类型，只要这些类型实现了特定行为时，可以使用 <code>trait</code> 作为参数。</p>
+<h4 id="a-impl-trait-语法语法糖"><a class="header" href="#a-impl-trait-语法语法糖">A. <code>impl Trait</code> 语法（语法糖）</a></h4>
+<p>这是最简单、最常用的方式，适用于参数较少的情况。</p>
+<pre class="playground"><code class="language-rust editable edition2024">trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+}
+// 接受任何实现了 Summary 的类型
+fn notify(item: &amp;impl Summary) {
+    println!("新闻更新: {}", item.summarize());
+}
+fn main() {
+    struct Tweet { content: String }
+    impl Summary for Tweet {
+        fn summarize(&amp;self) -&gt; String { self.content.clone() }
+    }
+    let tweet = Tweet { content: String::from("Rust 是一种系统级语言") };
+    notify(&amp;tweet);  // 输出 "新闻更新: Rust 是一种系统级语言"
+}</code></pre>
+<h4 id="b-trait-bound特征约束"><a class="header" href="#b-trait-bound特征约束">B. Trait Bound（特征约束）</a></h4>
+<p><code>impl Trait</code> 实际上是泛型特征约束的简写。在复杂的场景下（例如要求两个参数必须是<strong>同一种</strong>泛型类型），必须使用特征约束。</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 强制要求 item1 和 item2 必须是相同的具体类型 T
+fn notify_double&lt;T: Summary&gt;(item1: &amp;T, item2: &amp;T) {
+    // ...
+}
+
+<span class="boring">}</span></code></pre>
+<h3 id="trait-作为返回类型"><a class="header" href="#trait-作为返回类型">Trait 作为返回类型</a></h3>
+<p>这是 Rust 抽象能力的高级体现，但根据返回的是“一种类型”还是“多种类型”，处理方式截然不同。</p>
+<h4 id="a-静态分发impl-trait"><a class="header" href="#a-静态分发impl-trait">A. 静态分发：<code>impl Trait</code></a></h4>
+<p>当你确定函数在<strong>编译时</strong>只会返回一种具体的类型，但不想写出冗长的类型名（如闭包或复杂的迭代器）时，使用 <code>impl Trait</code>。</p>
+<ul>
+<li><strong>优点</strong>：性能极高（零开销抽象），编译器会进行单态化处理。</li>
+<li><strong>局限</strong>：函数的所有分支<strong>必须返回同一种</strong>具体类型。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">struct NewsArticle { content: String }
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String { self.content.clone() }
+}
+fn returns_summarizable() -&gt; impl Summary {
+    NewsArticle { content: String::from("内容...") }
+}
+fn main() {
+    let article = returns_summarizable();
+    println!("{}", article.summarize());  // 输出 "内容..."
+}
+</code></pre>
+<h4 id="b-动态分发trait-对象-dyn-trait"><a class="header" href="#b-动态分发trait-对象-dyn-trait">B. 动态分发：Trait 对象 (<code>dyn Trait</code>)</a></h4>
+<p>如果你需要在运行时根据条件返回<strong>不同类型</strong>的对象，必须使用特征对象。特征对象必须通过指针来使用，如引用 <code>&amp;dyn Trait</code> 或智能指针 <code>Box&lt;dyn Trait&gt;</code>。</p>
+<ul>
+<li><strong>优点</strong>：支持真正的多态，允许在同一个函数中根据逻辑返回不同的结构体。</li>
+<li><strong>原理</strong>：使用虚函数表（vtable）在运行时查找方法。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">struct Dog;
+struct Cat;
+
+impl Summary for Dog { fn summarize(&amp;self) -&gt; String { "汪".into() } }
+impl Summary for Cat { fn summarize(&amp;self) -&gt; String { "喵".into() } }
+
+// 使用智能指针 Box 包装特征对象
+fn get_animal(is_dog: bool) -&gt; Box&lt;dyn Summary&gt; {
+    if is_dog {
+        Box::new(Dog)
+    } else {
+        Box::new(Cat)
+    }
+}
+fn main() {
+    let animal = get_animal(true);  // 返回 Dog 的特征对象
+    println!("{}", animal.summarize());  // 输出 "汪"
+    
+    let animal = get_animal(false);  // 返回 Cat 的特征对象
+    println!("{}", animal.summarize());  // 输出 "喵"
+}</code></pre>
+<pre class="playground"><code class="language-rust editable edition2024">trait Speak {
+    fn speak(&amp;self);
+}
+struct Dog;
+impl Speak for Dog {
+    fn speak(&amp;self) {
+        println!("Woof!");
+    }
+}
+fn make_speak(animal: &amp;dyn Speak) {
+    animal.speak();
+}
+fn main() {
+    let dog = Dog;
+    make_speak(&amp;dog);  // 使用 trait 对象动态分发
+}
+</code></pre>
+<h3 id="静态分发-vs-动态分发"><a class="header" href="#静态分发-vs-动态分发">静态分发 vs 动态分发</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th><code>impl Trait</code> (静态分发)</th><th><code>dyn Trait</code> (动态分发)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>分发时机</strong></td><td>编译期 (Compile-time)</td><td>运行期 (Runtime)</td></tr>
+<tr><td><strong>性能开销</strong></td><td><strong>无</strong>（类似于内联函数）</td><td><strong>有</strong>（虚表查询、无法内联优化）</td></tr>
+<tr><td><strong>二进制大小</strong></td><td>较大（代码膨胀/单态化）</td><td>较小</td></tr>
+<tr><td><strong>类型限制</strong></td><td>必须返回单一具体类型</td><td>可以返回多种实现了特征的类型</td></tr>
+<tr><td><strong>指针需求</strong></td><td>不需要</td><td><strong>必须</strong>通过 <code>Box</code>, <code>&amp;</code> 等指针使用</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="特征对象安全-object-safety"><a class="header" href="#特征对象安全-object-safety">特征对象安全 (Object Safety)</a></h3>
+<p>并非所有的 <code>trait</code> 都能转换成 <code>dyn Trait</code> 对象。为了保证对象安全，<code>trait</code> 必须满足以下条件：</p>
+<ol>
+<li>方法的返回类型不能是 <code>Self</code>。</li>
+<li>方法不能有泛型类型参数。</li>
+<li>方法的第一参数必须是 <code>&amp;self</code>, <code>&amp;mut self</code>, <code>Box&lt;Self&gt;</code> 等（不能没有 <code>self</code>）。</li>
+</ol>
+<blockquote>
+<p><strong>笔记要点</strong>：如果一个 <code>trait</code> 不满足“对象安全”，你只能将其用作泛型约束（静态分发），而不能创建特征对象。</p>
+</blockquote>
+<hr>
+<h2 id="9-where-子句与-trait-约束"><a class="header" href="#9-where-子句与-trait-约束">9. <strong><code>where</code> 子句与 trait 约束</strong></a></h2>
+<ul>
+<li><code>where</code> 子句可以用来指定泛型参数的 trait 约束，这使得代码更加清晰和可读。</li>
+</ul>
+<h3 id="示例where-子句和-trait-约束"><a class="header" href="#示例where-子句和-trait-约束">示例：<code>where</code> 子句和 trait 约束</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">fn print_value&lt;T&gt;(value: T) 
+where
+    T: std::fmt::Debug,  // 使用 where 子句进行 trait 约束
+{
+    println!("{:?}", value);
+}
+
+fn main() {
+    print_value(42);  // 可以，因为 i32 实现了 Debug trait
+    // print_value("Hello");  // 编译错误，字符串没有实现 Debug trait
+}</code></pre>
+<hr>
+<h2 id="10-copy-和-clone-特征"><a class="header" href="#10-copy-和-clone-特征">10. <strong><code>Copy</code> 和 <code>Clone</code> 特征</strong></a></h2>
+<ul>
+<li><code>Copy</code> 和 <code>Clone</code> 是两个常用的 <code>trait</code>，用于控制类型的值是否可以被复制（而不是移动）。它们在处理需要复制的类型时非常重要。</li>
+</ul>
+<h3 id="示例使用-copy-和-clone"><a class="header" href="#示例使用-copy-和-clone">示例：使用 <code>Copy</code> 和 <code>Clone</code></a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait CustomClone {
+    fn custom_clone(&amp;self) -&gt; Self;
+}
+#[derive(Clone)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+impl CustomClone for Point {
+    fn custom_clone(&amp;self) -&gt; Self {
+        Point { x: self.x, y: self.y }
+    }
+}
+fn main() {
+    let p1 = Point { x: 1, y: 2 };
+    let p2 = p1.custom_clone();
+    println!("p2: ({}, {})", p2.x, p2.y);
+}</code></pre>
+<hr>
+<h2 id="11-孤儿规则-orphan-rules"><a class="header" href="#11-孤儿规则-orphan-rules">11. <strong>孤儿规则 (Orphan Rules)</strong></a></h2>
+<p>这是 Rust 保证代码安全性的核心：<strong>你不能为外部类型实现外部特征</strong>。</p>
+<ul>
+<li><strong>规则</strong>：只有当特征或类型其中之一是在当前 crate（包）中定义的，你才能为该类型实现该特征。</li>
+<li><strong>目的</strong>：防止不同库之间因为冲突的实现而导致代码行为混乱。</li>
+</ul>
+<p><strong>示例</strong>：你不能在自己的项目中为 <code>Vec&lt;T&gt;</code>（标准库）实现 <code>Display</code> 特征（标准库），因为两者都不是你定义的。</p>
+<hr>
+<h2 id="12-完全限定语法-fully-qualified-syntax"><a class="header" href="#12-完全限定语法-fully-qualified-syntax">12. <strong>完全限定语法 (Fully Qualified Syntax)</strong></a></h2>
+<p>当一个类型实现的两个不同 <code>trait</code> 拥有<strong>同名方法</strong>时，Rust 需要你明确指定调用哪一个。</p>
+<h3 id="示例解决同名冲突"><a class="header" href="#示例解决同名冲突">示例：解决同名冲突</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Pilot {
+    fn fly(&amp;self);
+}
+trait Wizard {
+    fn fly(&amp;self);
+}
+struct Human;
+impl Pilot for Human {
+    fn fly(&amp;self) { println!("准备起飞。"); }
+}
+impl Wizard for Human {
+    fn fly(&amp;self) { println!("飞向云端。"); }
+}
+fn main() {
+    let person = Human;
+    // person.fly(); // ❌ 报错：歧义
+    
+    Pilot::fly(&amp;person);  // 调用 Pilot 的实现
+    Wizard::fly(&amp;person); // 调用 Wizard 的实现
+}
+</code></pre>
+<hr>
+<h2 id="13-blanket-implementations-覆盖实现"><a class="header" href="#13-blanket-implementations-覆盖实现">13. <strong>Blanket Implementations (覆盖实现)</strong></a></h2>
+<p>Rust 允许你为<strong>所有</strong>满足特定特征约束的类型实现另一个特征。这在标准库中非常常见（例如 <code>ToString</code>）。</p>
+<h3 id="示例覆盖实现"><a class="header" href="#示例覆盖实现">示例：覆盖实现</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait MyTrait {
+    fn info(&amp;self);
+}
+// 为所有实现了 Display 的类型实现 MyTrait
+impl&lt;T: std::fmt::Display&gt; MyTrait for T {
+    fn info(&amp;self) {
+        println!("信息: {}", self);
+    }
+}
+fn main() {
+    42.info(); // i32 实现了 Display，所以它自动拥有了 MyTrait
+}</code></pre>
+<hr>
+<h2 id="14-标记特征-marker-traits-sized-send-sync"><a class="header" href="#14-标记特征-marker-traits-sized-send-sync">14. <strong>标记特征 (Marker Traits): <code>Sized</code>, <code>Send</code>, <code>Sync</code></strong></a></h2>
+<p>标记特征没有方法定义，它们告诉编译器该类型具备某种<strong>属性</strong>。</p>
+<ul>
+<li><strong><code>Sized</code></strong>：编译时已知大小的类型（默认情况下泛型 <code>T</code> 都是 <code>T: Sized</code>）。</li>
+<li><strong><code>?Sized</code></strong>：专门用于解除 <code>Sized</code> 限制，常用于处理 <code>dyn Trait</code> 或 <code>[T]</code>。</li>
+<li><strong><code>Send</code> / <code>Sync</code></strong>：用于并发安全，标记类型是否可以安全地跨线程传递或共享。</li>
+</ul>
+<hr>
+<h2 id="15-运算符重载-operator-overloading"><a class="header" href="#15-运算符重载-operator-overloading">15. <strong>运算符重载 (Operator Overloading)</strong></a></h2>
+<p>在 Rust 中，所有的运算符（如 <code>+</code>, <code>-</code>, <code>*</code>）本质上都是通过特定的 <code>trait</code> 实现的（位于 <code>std::ops</code> 模块）。</p>
+<h3 id="示例重载-"><a class="header" href="#示例重载-">示例：重载 <code>+</code></a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::ops::Add;
+#[derive(Debug, PartialEq)]
+struct Point { x: i32, y: i32 }
+impl Add for Point {
+    type Output = Point;
+    fn add(self, other: Point) -&gt; Point {
+        Point { x: self.x + other.x, y: self.y + other.y }
+    }
+}
+fn main() {
+    let p1 = Point { x: 1, y: 0 } + Point { x: 2, y: 3 };
+    println!("{:?}", p1); // Point { x: 3, y: 3 }
+}</code></pre>
 
                     </main>
 

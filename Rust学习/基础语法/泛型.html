@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-25d84c8c.js";
+            window.path_to_searchindex_js = "../../searchindex-a9352766.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2a4c8e05.js"></script>
@@ -183,6 +183,12 @@
                     <main>
                         <h1 id="泛型"><a class="header" href="#泛型">泛型</a></h1>
 <p>泛型是 Rust 实现 零开销抽象（Zero-cost Abstractions） 的核心，它允许你编写不依赖于具体类型的通用代码。</p>
+<ul>
+<li><strong>什么是泛型？</strong>：使用类型参数（如 ）定义代码，允许在不同类型上重用。T 是占位符，在使用时替换为具体类型。</li>
+<li><strong>优势</strong>：代码复用、类型安全、性能高（编译时展开）。</li>
+<li><strong>语法</strong>：在函数、struct 等后用 &lt;参数&gt;，如 fn foo(arg: T)。</li>
+<li><strong>与 trait 的关系</strong>：泛型常结合 trait bound（如 T: Clone）限制类型。</li>
+</ul>
 <h2 id="1-泛型基础generics-basics"><a class="header" href="#1-泛型基础generics-basics">1. <strong>泛型基础(Generics Basics)</strong></a></h2>
 <h3 id="泛型类型参数"><a class="header" href="#泛型类型参数">泛型类型参数</a></h3>
 <p>Rust 中的泛型允许我们在编写函数或结构体时不指定具体类型，从而让代码更具通用性。例如：</p>
@@ -200,6 +206,10 @@ fn main() {
 <p>swap 函数接受两个相同类型的参数 x 和 y，并返回它们的交换值。T 在调用时会被具体类型替换，确保返回的元组类型与输入类型一致。</p>
 <h3 id="泛型约束"><a class="header" href="#泛型约束">泛型约束</a></h3>
 <p>有时我们希望泛型类型参数满足特定的条件，例如只允许实现了某个特征（<code>trait</code>）的类型。可以使用 <code>T: Trait</code> 来为泛型添加约束。</p>
+<ul>
+<li><strong>语法</strong>：fn foo&lt;T: Trait1 + Trait2&gt;(arg: T)</li>
+<li><strong>常见 bound</strong>：Copy、Clone、Debug、PartialEq、PartialOrd 等。</li>
+</ul>
 <pre class="playground"><code class="language-rust editable edition2024">fn print_debug&lt;T: std::fmt::Debug&gt;(val: T) {
     println!("{:?}", val);
 }
@@ -233,6 +243,21 @@ fn main() {
     println!("Pair: {} and {}", pair_str.get_x(), pair_str.get_y());
 }</code></pre>
 <p>在这个例子中，Pair 是一个泛型结构体，new 方法和 get_x、get_y 方法都是泛型方法。它们可以处理任何类型 T，确保类型一致性。</p>
+<h3 id="对于复杂-bound用-where-子句提高可读性"><a class="header" href="#对于复杂-bound用-where-子句提高可读性">对于复杂 bound，用 where 子句提高可读性</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn some_function&lt;T, U&gt;(t: T, u: U) -&gt; U
+where
+    T: Debug + Clone,
+    U: Clone + PartialEq,
+{
+    if t.clone() == u {  // 错误！T 和 U 类型不同，不能比较
+        // ...
+    }
+    u
+}
+<span class="boring">}</span></code></pre>
+<p>解释：where 在签名后。适用于函数、impl、trait。</p>
 <h2 id="2-结构体和枚举中的泛型"><a class="header" href="#2-结构体和枚举中的泛型">2. <strong>结构体和枚举中的泛型</strong></a></h2>
 <h3 id="泛型结构体"><a class="header" href="#泛型结构体">泛型结构体</a></h3>
 <p>结构体也可以使用泛型类型，字段类型由泛型决定,以便存储不同类型的数据。</p>
@@ -327,8 +352,8 @@ fn main() {
     println!("{:?}", iter.next());  // 输出 Some(3)
 }</code></pre>
 <h2 id="6-泛型与性能考虑"><a class="header" href="#6-泛型与性能考虑">6. <strong>泛型与性能考虑</strong></a></h2>
-<p>在 <code>Rust </code>中，泛型是非常强大的工具，它允许编写类型安全且灵活的代码。然而，许多人担心使用泛型是否会影响程序的性能。幸运的是，<code>Rust </code>的设计非常注重性能，尤其是与泛型相关的部分。让我们深入探讨泛型如何影响性能，以及如何最大程度地避免性能损失。</p>
-<p><code>Rust </code>使用一种称为 单态化<code>（Monomorphization）</code> 的机制来处理泛型。单态化是指编译器在编译时将泛型类型的代码转换为具体类型的实现。这意味着泛型代码在编译期间被实例化为不同类型的具体代码，因此没有运行时的性能开销。</p>
+<p>在 <code>Rust</code>中，泛型是非常强大的工具，它允许编写类型安全且灵活的代码。然而，许多人担心使用泛型是否会影响程序的性能。幸运的是，<code>Rust</code>的设计非常注重性能，尤其是与泛型相关的部分。让我们深入探讨泛型如何影响性能，以及如何最大程度地避免性能损失。</p>
+<p><code>Rust</code>使用一种称为 单态化<code>（Monomorphization）</code> 的机制来处理泛型。单态化是指编译器在编译时将泛型类型的代码转换为具体类型的实现。这意味着泛型代码在编译期间被实例化为不同类型的具体代码，因此没有运行时的性能开销。</p>
 <p>这种机制确保了泛型代码的 零成本抽象<code>（Zero-cost Abstraction）</code>。也就是说，使用泛型不会导致额外的运行时开销。</p>
 <p>尽管泛型本身不会带来运行时的性能损失，但它们可能会影响 <strong>内存布局</strong> 和 <strong>大小</strong>，特别是当涉及到<strong>动态分发</strong>时。泛型类型的大小由编译器在单态化时决定。如果泛型类型的大小变化较大，可能会导致更多的内存分配或数据拷贝。编译器会为每种具体类型生成不同的内存布局，从而避免了不必要的浪费。</p>
 <h2 id="7-与标准库的泛型交互"><a class="header" href="#7-与标准库的泛型交互">7. <strong>与标准库的泛型交互</strong></a></h2>
@@ -336,14 +361,14 @@ fn main() {
 <p>Rust 标准库几乎处处是泛型。</p>
 <ul>
 <li><strong>常见容器</strong>：<code>Vec&lt;T&gt;</code>（动态数组）、<code>HashMap&lt;K, V&gt;</code>（键值对）。</li>
-<li><strong>错误处理</strong>：<code>Result&lt;T, E&gt; </code>是编写健壮代码的核心。</li>
+<li><strong>错误处理</strong>：<code>Result&lt;T, E&gt;</code>是编写健壮代码的核心。</li>
 <li><strong>迭代器与闭包</strong>：它们利用泛型接口实现高度灵活的数据处理流。</li>
 </ul>
 <h2 id="8-高级泛型使用"><a class="header" href="#8-高级泛型使用">8. <strong>高级泛型使用</strong></a></h2>
 <h3 id="高阶类型hkt的模拟"><a class="header" href="#高阶类型hkt的模拟">高阶类型（HKT）的模拟</a></h3>
 <ul>
 <li><strong><code>HKT (Higher Kinded Types)</code></strong> 模拟：通过 <code>type alias</code> 和 <code>Trait</code> 模拟对“容器的抽象”。</li>
-<li><strong>并发/异步</strong>：使用 <code>Send </code>和 <code>Sync</code> 特征约束确保泛型数据在多线程间安全传递。</li>
+<li><strong>并发/异步</strong>：使用 <code>Send</code>和 <code>Sync</code>特征约束确保泛型数据在多线程间安全传递。</li>
 <li><strong>宏与泛型</strong>：结合使用以生成复杂的泛型 <code>boilerplate</code> 代码。</li>
 </ul>
 
