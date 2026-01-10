@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a9352766.js";
+            window.path_to_searchindex_js = "searchindex-68d2e57e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-2a4c8e05.js"></script>
@@ -2977,6 +2977,1069 @@ fn main() {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="智能指针"><a class="header" href="#智能指针">智能指针</a></h1>
+<p>Rust 里“智能指针”这块，按 <strong>“它解决什么问题 + 它的所有权/借用规则 + 运行时成本”</strong> 来系统学。下面把需要掌握的知识点尽量全列出来，并按学习路径组织。</p>
+<hr>
+<h2 id="定义"><a class="header" href="#定义">定义</a></h2>
+<h3 id="什么算智能指针"><a class="header" href="#什么算智能指针">什么算“智能指针”</a></h3>
+<ul>
+<li><strong>智能指针 vs 普通引用 <code>&amp;T</code> / <code>&amp;mut T</code></strong> ：智能指针是“像指针一样用（<code>Deref</code>）+ 还带管理/策略”的类型</li>
+<li>三个核心 trait：
+<ul>
+<li><code>Deref</code> / <code>DerefMut</code>：让 <code>*p</code>、方法调用、解引用自动转换成立</li>
+<li><code>Drop</code>：离开作用域时自动清理资源（RAII）</li>
+<li><code>CoerceUnsized</code>/<code>DispatchFromDyn</code>（了解即可）：<code>Box&lt;T&gt;</code> 到 <code>Box&lt;dyn Trait&gt;</code> 的不定大小转换等</li>
+</ul>
+</li>
+</ul>
+<p>要理解为什么 <code>Box</code> 或 <code>String</code> 是智能指针，必须先看它们背后的两个关键特征。智能指针本质上是一个<strong>实现了 <code>Deref</code> 和 <code>Drop</code> 的结构体</strong>。</p>
+<h3 id="a-deref-特征让结构体像指针"><a class="header" href="#a-deref-特征让结构体像指针">A. <code>Deref</code> 特征：让结构体“像”指针</a></h3>
+<p>普通的结构体不能被解引用（即不能用 <code>*</code>）。实现了 <code>Deref</code> 之后，智能指针就可以像普通引用一样工作。</p>
+<ul>
+<li><strong>解引用强制转换 (Deref Coercion)</strong>：这是 <code>Rust</code> 的魔法。如果一个函数需要 <code>&amp;str</code> 参数，你传给它 <code>&amp;String</code>（<code>String</code>实现了 <code>Deref</code>），<code>Rust</code>会自动帮你转换。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::ops::Deref;
+struct MyBox&lt;T&gt;(T);
+impl&lt;T&gt; MyBox&lt;T&gt; {
+    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+        MyBox(x)
+    }
+}
+// 实现 Deref 告诉编译器：当我对 MyBox 使用 * 时，返回内部的那个值
+impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+    type Target = T;
+    fn deref(&amp;self) -&gt; &amp;T {
+        &amp;self.0
+    }
+}
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y); // 这里的 *y 实际上执行的是 *(y.deref())
+    println!("{}", *y); 
+}
+</code></pre>
+<h3 id="b-drop-特征自动清理的析构函数"><a class="header" href="#b-drop-特征自动清理的析构函数">B. <code>Drop</code> 特征：自动清理的“析构函数”</a></h3>
+<p><code>Drop</code> 特征允许你自定义：当一个变量离开作用域时该发生什么。对于智能指针，这通常意味着<strong>释放它所拥有的堆内存</strong>。</p>
+<ul>
+<li><strong>自动调用</strong>：你不需要手动调用 <code>drop</code>，Rust 会自动在变量生命周期结束时插入清理代码。</li>
+<li><strong>防止泄漏</strong>：有了 <code>Drop</code>，Rust 确保了即便程序在中间出错退出，堆内存也会被正确回收。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">struct CustomSmartPointer {
+    data: String,
+}
+impl Drop for CustomSmartPointer {
+    fn drop(&amp;mut self) {
+        println!("正在清理数据: {}！", self.data);
+    }
+}
+fn main() {
+    let c = CustomSmartPointer { data: String::from("我的数据") };
+    let d = CustomSmartPointer { data: String::from("其他数据") };
+    println!("智能指针已创建。");
+    // 函数结束时，d 先被清理，c 后被清理（先进后出）
+}
+</code></pre>
+<p>智能指针通过 <code>Deref</code> 让我们能方便地访问数据，通过 <code>Drop</code> 让我们不再担心内存回收。</p>
+<hr>
+<h2 id="1-boxt堆分配--递归类型"><a class="header" href="#1-boxt堆分配--递归类型">1. <code>Box&lt;T&gt;</code>：堆分配 &amp; 递归类型</a></h2>
+<p>你要会的点：</p>
+<ul>
+<li><strong>什么时候需要 <code>Box</code></strong>
+<ul>
+<li>把值放到<strong>堆</strong>上（存储实际的数据 <code>T</code>）,而在<strong>栈</strong>(存储指针地址,64 位系统通常是8字节）上仅保留一个指向堆数据的指针</li>
+<li>处理  <strong>递归类型</strong> （编译期需要知道每个类型占用多少内存空间–如：链表）</li>
+<li>作为 <strong>trait object</strong> 的持有者：当你需要一个“实现了某个特征的类型”而不是具体类型时，通常使用<code>Box&lt;dyn Trait&gt;</code></li>
+<li>转移大数据所有权,如果你有一个非常大的结构体或数组，将其作为参数传递给函数时，如果不使用指针，<code>Rust</code>默认会进行栈拷贝，这非常消耗性能。</li>
+</ul>
+</li>
+<li><strong>所有权语义</strong> ：<code>Box&lt;T&gt;</code> 独占所有权，同一时间只能有一个 <code>Box</code> 指向该堆数据,移动后原变量不可用</li>
+<li><strong>解引用与方法调用</strong> ：<code>Box&lt;T&gt;</code> 自动 <code>Deref</code> 到 <code>T</code></li>
+</ul>
+<h3 id="示例递归类型链表"><a class="header" href="#示例递归类型链表">示例：递归类型（链表）</a></h3>
+<pre><code class="language-rust ignore">enum List {
+    Cons(i32, List), // 错误：List 包含 List，会导致无限大小
+    Nil,
+}</code></pre>
+<p>编译器会报错，因为 Cons 变体包含另一个 <code>List</code>，这会形成无限递归，编译器无法计算 <code>List</code> 结构的大小。解决方案： 使用<code>Box</code> 智能指针，将递归类型“在堆上间接存储”，<code>List</code>本身就有固定大小了。</p>
+<pre class="playground"><code class="language-rust editable edition2024">// 递归 enum：如果没有 Box，编译器无法在编译期知道 List 的大小。
+// Box&lt;List&gt; 让递归“在堆上间接存储”，List 本身就有固定大小了。
+#[derive(Debug)]
+enum List {
+    Cons(i32, Box&lt;List&gt;),//Cons 占用：一个 i32 的空间 + 一个指针的空间
+    Nil,
+}
+impl List {
+    fn new() -&gt; Self {
+        List::Nil
+    }
+    fn prepend(self, v: i32) -&gt; Self {
+        List::Cons(v, Box::new(self))
+    }
+    fn len(&amp;self) -&gt; usize {
+        match self {
+            List::Cons(_, next) =&gt; 1 + next.len(),
+            List::Nil =&gt; 0,
+        }
+    }
+}
+fn main() {
+    let list = List::new().prepend(3).prepend(2).prepend(1);
+    println!("{list:?}");
+    println!("len = {}", list.len());
+}</code></pre>
+<h3 id="示例返回-trait-object动态分发"><a class="header" href="#示例返回-trait-object动态分发">示例：返回 trait object（动态分发）</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">trait Draw {
+    fn draw(&amp;self);
+}
+struct Circle {r: f32}
+impl Draw for Circle {
+    fn draw(&amp;self) {
+        println!("Circle radius = {}", self.r);
+    }
+}
+struct Square {side: f32}
+impl Draw for Square {
+    fn draw(&amp;self) {
+        println!("Square side = {}", self.side);
+    }
+}
+// 返回 Box&lt;dyn Draw&gt;：调用者只知道“它能 draw”，不关心具体类型。
+// 这会使用动态分发（vtable）。
+fn make_shape(kind: &amp;str) -&gt; Box&lt;dyn Draw&gt; {
+    match kind {
+        "circle" =&gt; Box::new(Circle { r: 2.0 }),
+        _ =&gt; Box::new(Square { side: 3.0 }),
+    }
+}
+fn main() {
+    let s1 = make_shape("circle");
+    let s2 = make_shape("square");
+    s1.draw();
+    s2.draw();
+}</code></pre>
+<hr>
+<h2 id="2-rct单线程引用计数共享所有权"><a class="header" href="#2-rct单线程引用计数共享所有权">2. <code>Rc&lt;T&gt;</code>：单线程引用计数共享所有权</a></h2>
+<p>在 <code>Rust</code> 的所有权规则中，通常一个值只能有一个所有者。但在某些复杂的应用场景中（例如图结构、社交网络或共享配置），一个数据可能需要被多个不同的部分共同拥有。这时，<code>Box&lt;T&gt;</code> 的独占所有权就不够用了，我们需要 <code>Rc&lt;T&gt;</code>(<code>Reference Counted</code>引用计数)。</p>
+<p>你要会的点：</p>
+<ul>
+<li><strong>为什么需要 Rc</strong> ：它允许一个数据拥有多个所有者。它在堆上存储数据，并额外记录一个“引用计数器”，用来统计目前有多少个指针指向这份数据</li>
+<li><strong>只读共享</strong>：<code>Rc&lt;T&gt;</code> 默认只允许你不可变地借用数据。如果你想通过其中一个 <code>Rc</code> 修改数据，编译器会拒绝（除非配合后面要讲的 <code>RefCell</code>）。</li>
+<li><strong>共享而非拷贝</strong>：当你“克隆”一个 <code>Rc&lt;T&gt;</code> 时，Rust 并不会在堆上重新分配内存并拷贝数据，而是
+<ul>
+<li><strong>增加引用计数</strong>：计数器加 1。</li>
+<li><strong>拷贝指针地址</strong>：在栈上创建一个新的指针指向同一个堆位置。</li>
+<li>只有当<strong>计数器归零</strong>时: 堆上的数据才会被真正清理。</li>
+</ul>
+</li>
+<li><strong>强引用/弱引用</strong>
+<ul>
+<li><code>Rc::clone(&amp;rc)</code> 增加强引用计数（不是深拷贝）</li>
+<li><code>Weak&lt;T&gt;</code> 用于打破环，避免内存泄漏</li>
+</ul>
+</li>
+<li><strong>循环引用问题</strong> ：<code>Rc</code> 形成环会  <strong>泄漏</strong> （计数永远不为 0）</li>
+<li>常用 API：<code>Rc::new</code>、<code>Rc::clone</code>、<code>Rc::strong_count</code>、<code>Rc::weak_count</code>、<code>Rc::downgrade</code></li>
+</ul>
+<h3 id="示例共享一段数据"><a class="header" href="#示例共享一段数据">示例：共享一段数据</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::rc::Rc;
+fn main() {
+    // 1. 在堆上创建共享数据，初始计数为 1
+    let config = Rc::new(String::from("核心配置程序"));
+    
+    println!("--- 初始状态 ---");
+    println!("内容: {}", config);
+    println!("引用计数: {}", Rc::strong_count(&amp;config));
+
+    // 2. 共享数据：创建两个新的指针指向同一块堆内存
+    // Rc::clone 仅增加计数，不会拷贝字符串文本
+    let user_a = Rc::clone(&amp;config);
+    let user_b = Rc::clone(&amp;config);
+
+    println!("\n--- 共享后 ---");
+    println!("User A 看到的内容: {}", user_a);
+    println!("User B 看到的内容: {}", user_b);
+    println!("当前总引用计数: {}", Rc::strong_count(&amp;config));
+
+    // 3. 释放其中一个引用
+    drop(user_a);
+    println!("\n--- 释放 User A 后 ---");
+    println!("剩余引用计数: {}", Rc::strong_count(&amp;config));
+}</code></pre>
+<ul>
+<li><strong>内存物理表现</strong>：<code>config</code>、<code>user_a</code> 和 <code>user_b</code> 是三个存储在栈上的指针，它们内部存储的内存地* 址完全相同，都指向堆上的同一个 <code>String</code>。</li>
+<li><strong>内容访问</strong>：由于实现了 <code>Deref</code> 特征，你可以像使用普通 <code>String</code> 一样直接打印 <code>user_a</code> 或 <code>user_b</code>。</li>
+<li><strong>计数变化</strong>：每次调用 <code>Rc::clone</code>，计数器加 1；每次指针离开作用域（或被 <code>drop</code>），计数器减 1。</li>
+</ul>
+<h3 id="强引用-strong-reference-与-弱引用-weak-reference"><a class="header" href="#强引用-strong-reference-与-弱引用-weak-reference">强引用 (Strong Reference) 与 弱引用 (Weak Reference)</a></h3>
+<p>这是管理 <code>Rc</code> 生命周期的两种手段：</p>
+<ul>
+<li>
+<p><strong>强引用 (<code>Rc&lt;T&gt;</code>)</strong>：</p>
+<ul>
+<li><strong>行为</strong>：使用 <code>Rc::clone(&amp;rc)</code> 会增加<strong>强引用计数</strong>。</li>
+<li><strong>本质</strong>：它不是深拷贝（Deep Copy），只是在栈上多了一个指向堆内存的指针，并在堆上把计数器加 1。</li>
+<li><strong>作用</strong>：只要强引用计数大于 0，堆上的数据就<strong>绝对不会</strong>被销毁。</li>
+</ul>
+</li>
+<li>
+<p><strong>弱引用 (<code>Weak&lt;T&gt;</code>)</strong>：</p>
+<ul>
+<li><strong>行为</strong>：通过 <code>Rc::downgrade(&amp;rc)</code> 创建。</li>
+<li><strong>本质</strong>：它会增加<strong>弱引用计数</strong>，但<strong>不影响</strong>强引用计数。</li>
+<li><strong>作用</strong>：它不拥有数据的所有权。即便还有 100 个 <code>Weak</code> 指针指向数据，只要强引用计数归零，数据依然会被清理。</li>
+<li><strong>使用</strong>：因为数据可能已被销毁，使用前必须通过 <code>weak_ptr.upgrade()</code> 将其“升级”回 <code>Option&lt;Rc&lt;T&gt;&gt;</code> 进行检查。</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::rc::Rc;
+fn main() {
+    // 1. 创建一个强引用 Rc
+    let strong_ptr = Rc::new(String::from("Rust 智能指针"));
+    
+    // 2. 从强引用创建一个弱引用
+    // downgrade 不会增加 strong_count
+    let weak_ptr = Rc::downgrade(&amp;strong_ptr);
+    let weak_ptr2 = Rc::downgrade(&amp;strong_ptr);
+
+    println!("--- 初始状态 ---");
+    println!("强引用计数: {}", Rc::strong_count(&amp;strong_ptr)); // 1
+    println!("弱引用计数: {}", Rc::weak_count(&amp;strong_ptr));   // 2
+
+    // 3. 尝试使用弱引用访问数据
+    // 必须通过 upgrade() 升级为 Option&lt;Rc&lt;T&gt;&gt;
+    match weak_ptr.upgrade() {
+        Some(rc) =&gt; println!("弱引用升级成功，得到数据: {}", rc),
+        None =&gt; println!("弱引用升级失败，数据已销毁"),
+    }
+
+    // 销毁一个弱引用
+    drop(weak_ptr2);
+    println!("销毁一个弱引用后强引用计数: {}", Rc::strong_count(&amp;strong_ptr)); // 1
+    println!("销毁一个弱引用后弱引用计数: {}", Rc::weak_count(&amp;strong_ptr));   // 1
+
+    println!("\n--- 销毁强引用后 ---");
+    // 4. 手动销毁强引用（模拟离开作用域）
+    drop(strong_ptr);
+
+    // 5. 再次尝试使用弱引用访问数据
+    // 此时强引用计数为 0，数据已被回收
+    match weak_ptr.upgrade() {
+        Some(rc) =&gt; println!("弱引用升级成功: {}", rc),
+        None =&gt; println!("弱引用升级失败，数据已销毁"),
+    }
+}</code></pre>
+<h3 id="rc-环"><a class="header" href="#rc-环">Rc 环</a></h3>
+<p><strong>循环引用问题</strong>:这是<code>Rc</code> 最危险的陷阱。</p>
+<ul>
+<li><strong>成因</strong>：如果两个 <code>Rc</code> 指针互相指向对方（例如：节点 A 拥有指向节点 B 的 Rc，而节点 B 也拥有指向节点 A 的 Rc），就会形成一个环。</li>
+<li><strong>后果</strong>：由于环的存在，这两个对象的强引用计数永远至少为 1。当外部作用域结束时，它们无法被清理，导致<strong>内存泄漏</strong>（<code>Memory Leak</code>）。</li>
+<li><strong>解决方案</strong>：将其中一条路径改为 <code>Weak&lt;T&gt;</code>。例如：父节点用 <code>Rc</code> 指向子节点（强引用），而子节点用 <code>Weak</code> 指向父节点（弱引用）。这样环就被打破了。</li>
+</ul>
+<p>由于 <code>Rc&lt;T&gt;</code> 默认是只读的，为了在创建节点后能修改指针指向对方，我们需要配合使用 <code>RefCell&lt;T&gt;</code>演示环形引用。</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::rc::Rc;
+use std::cell::RefCell;
+// 定义一个简单的 Node，它可以指向另一个 Node
+#[derive(Debug)]
+struct Node {
+    next: RefCell&lt;Option&lt;Rc&lt;Node&gt;&gt;&gt;,
+}
+impl Drop for Node {
+    fn drop(&amp;mut self) {
+        println!("Node 被销毁了！");
+    }
+}
+fn main() {
+    // 1. 创建两个节点 A 和 B
+    let a = Rc::new(Node { next: RefCell::new(None) });
+    let b = Rc::new(Node { next: RefCell::new(None) });
+
+    println!("--- 建立环之前 ---");
+    println!("A 的强引用计数: {}", Rc::strong_count(&amp;a)); // 1
+    println!("B 的强引用计数: {}", Rc::strong_count(&amp;b)); // 1
+
+    // 2. 建立环：A 指向 B，B 指向 A
+    *a.next.borrow_mut() = Some(Rc::clone(&amp;b));
+    *b.next.borrow_mut() = Some(Rc::clone(&amp;a));
+
+    println!("--- 建立环之后 ---");
+    println!("A 的强引用计数: {}", Rc::strong_count(&amp;a)); // 2
+    println!("B 的强引用计数: {}", Rc::strong_count(&amp;b)); // 2
+
+    // 3. 函数结束前，我们尝试让 a 和 b 离开作用域
+    println!("--- main 函数即将结束 ---");
+} 
+// 正常情况下，这里应该打印两次 "Node 被销毁了！"，但实际上什么都不会打印。</code></pre>
+<blockquote>
+<p>笔记：为什么会泄漏？</p>
+</blockquote>
+<ul>
+<li><strong>计数器逻辑</strong>：当 main 函数结束时，变量 a 和 b 被丢弃。
+<ul>
+<li><strong>a 被丢弃</strong>，其对应的堆内存计数从 2 降到 1。</li>
+<li><strong>b 被丢弃</strong>，其对应的堆内存计数从 2 降到 1。</li>
+</ul>
+</li>
+<li><strong>死循环</strong>：堆内存 A 还在等待堆内存 B 释放以便将其计数减为 0；而堆内存 B 也在等待堆内存 A 释放。</li>
+<li><strong>结果</strong>：两个内存块的计数器永远卡在 1，drop 方法永远不会被触发，这块堆内存就泄漏了。</li>
+</ul>
+<h4 id="解决方案"><a class="header" href="#解决方案">解决方案</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">use std::cell::RefCell;
+use std::rc::{Rc, Weak};
+
+// 一个“父-子”节点结构：
+// - 子节点用 Rc 拥有（多个地方可以共享孩子）
+// - 父指针用 Weak 指向父（避免形成 Rc 环）
+#[derive(Debug)]
+struct Node {
+    value: i32,
+    parent: RefCell&lt;Weak&lt;Node&gt;&gt;,  // Weak&lt;Node&gt;：这是指向父节点的指针, Weak 不增加强引用计数
+    children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;,    // children 拥有子节点
+}
+impl Drop for Node {
+    fn drop(&amp;mut self) {
+        println!("Node 被销毁了！");
+    }
+}
+fn main() {
+    let parent = Rc::new(Node {
+        value: 1,
+        parent: RefCell::new(Weak::new()),// 初始化时，父节点没有“父”，设为空弱引用
+        children: RefCell::new(vec![]),// 初始化时，子节点列表为空向量
+    });//将 Node 实例放入堆中，并返回一个智能指针，此时 parent 的强引用计数为 1，弱计数 = 0
+
+    let child = Rc::new(Node {
+        value: 2,
+        parent: RefCell::new(Weak::new()),
+        children: RefCell::new(vec![]),
+    });//child 的强计数 = 1，弱计数 = 0
+
+    // 建立父 -&gt; 子 的强引用关系
+    parent.children.borrow_mut().push(Rc::clone(&amp;child));
+    // 通过 borrow_mut() 获取 Vec 的可变借用，然后把 child 的一个克隆存进去。
+    // 此时 child 的强引用计数变为 2（一个是变量 child，一个是 parent.children 里的克隆）
+
+    // 建立子 -&gt; 父 的弱引用关系（关键：避免环）
+    *child.parent.borrow_mut() = Rc::downgrade(&amp;parent);
+    //通过 Rc::downgrade 将 parent 的强引用转为弱引用并存入 child.parent
+    //parent 的强计数保持为 1。parent 的弱计数变为 1。
+
+    println!("parent strong = {}, weak = {}",
+        Rc::strong_count(&amp;parent),
+        Rc::weak_count(&amp;parent)
+    );
+    println!("child strong = {}, weak = {}",
+        Rc::strong_count(&amp;child),
+        Rc::weak_count(&amp;child)
+    );
+
+    // Weak::upgrade：尝试把 Weak 变回 Rc（如果父节点已释放则返回 None）
+    if let Some(p) = child.parent.borrow().upgrade() {
+        println!("child's parent value = {}", p.value);
+    } else {
+        println!("parent already dropped");
+    }
+}
+</code></pre>
+<blockquote>
+<p>核心设计：为什么这样设计结构？</p>
+</blockquote>
+<p>在 Rust 中，指针是表示内存地址的类型。为了实现父子双向链接，代码采用了“强弱结合”的策略：</p>
+<ul>
+<li><code>children: RefCell&lt;Vec&lt;Rc&lt;Node&gt;&gt;&gt;</code>(向下强引用)：
+<ul>
+<li>父节点需要“拥有”它的子节点，所以使用 <code>Rc&lt;Node&gt;</code>。只要父节点存在，子节点就不会被销毁。</li>
+</ul>
+</li>
+<li><code>parent: RefCell&lt;Weak&lt;Node&gt;&gt;</code> (向上弱引用)：
+<ul>
+<li>这是破环关键。子节点只需要“知道”父节点是谁，但不应该“拥有”父节点。</li>
+<li>使用 <code>Weak&lt;Node&gt;</code> 不会增加父节点的强引用计数，因此不会阻止父节点被回收。</li>
+</ul>
+</li>
+<li><code>RefCell</code>(内部可变性)：
+<ul>
+<li>因为节点创建时是孤立的，必须在创建后修改属性（建立连接），所以需要 RefCell 绕过编译期的不可变检查。</li>
+</ul>
+</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>执行阶段</th><th>Parent 计数 (Strong/Weak)</th><th>Child 计数 (Strong/Weak)</th><th>逻辑说明</th></tr>
+</thead>
+<tbody>
+<tr><td>创建后</td><td>1 / 0</td><td>1 / 0</td><td>变量 parent 和 child 各自拥有 1 个所有权</td></tr>
+<tr><td>建立父-&gt;子连接</td><td>1 / 0</td><td>2 / 0</td><td>parent.children 存了一个 Rc::clone(&amp;child)，强计数加 1</td></tr>
+<tr><td>建立子-&gt;父连接</td><td>1 / 1</td><td>2 / 0</td><td>child.parent 存了一个 downgrade(&amp;parent)，仅增加弱计数</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="常用-api-速查表"><a class="header" href="#常用-api-速查表">常用 API 速查表</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>API</th><th>功能描述</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Rc::new(val)</code></td><td>创建一个新的 Rc 实例，初始强计数为 1。</td></tr>
+<tr><td><code>Rc::clone(&amp;rc)</code></td><td>增加强引用计数，返回新指针。</td></tr>
+<tr><td><code>Rc::strong_count(&amp;rc)</code></td><td>查看当前的强引用数量。</td></tr>
+<tr><td><code>Rc::weak_count(&amp;rc)</code></td><td>查看当前的弱引用数量。</td></tr>
+<tr><td><code>Rc::downgrade(&amp;rc)</code></td><td>获取一个 <code>Weak&lt;T&gt;</code> 指针。</td></tr>
+<tr><td><code>weak.upgrade()</code></td><td>尝试将弱引用转回强引用，返回 <code>Option&lt;Rc&lt;T&gt;&gt;</code>。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="3-arct多线程引用计数共享所有权"><a class="header" href="#3-arct多线程引用计数共享所有权">3. <code>Arc&lt;T&gt;</code>：多线程引用计数共享所有权</a></h2>
+<p>如果在多线程环境下使用 <code>Rc&lt;T&gt;</code>，编译器会直接报错，因为 <code>Rc&lt;T&gt;</code> 内部的引用计数是非原子的，无法在多个线程间安全地更新。为了解决这个问题，<code>Rust</code> 提供了 <code>Arc&lt;T&gt;</code>（<code>Atomic Reference Counted</code> 原子引用计数）,它允许在多个线程之间安全地共享同一个堆数据的所有权。和 <code>Rc&lt;T&gt;</code> 一样，<code>Arc&lt;T&gt;</code> 默认也是只读的。如果你需要多个线程同时修改数据，你还需要配合下一阶段我们要讲的锁机制（如 Mutex）。</p>
+<p>在计算机中，普通的整数加减（如 <code>count += 1</code>）并不是一个不可分割的操作。如果两个线程同时尝试修改 <code>Rc</code> 的计数器，可能会导致计数错误，进而引发提前释放内存或内存泄漏。<code>Arc&lt;T&gt;</code> 使用了 原子操作来更新计数。这是一种硬件层面的特殊指令，能确保在多线程竞争时计数器依然准确。</p>
+<p>你要会的点：</p>
+<ul>
+<li><code>Arc</code> = Atomic Rc（线程安全，计数操作是原子的）</li>
+<li>成本：比 <code>Rc</code> 更贵（原子操作），单线程场景优先 <code>Rc</code>以获得最佳性能</li>
+<li>常见组合：<code>Arc&lt;Mutex&lt;T&gt;&gt;</code>、<code>Arc&lt;RwLock&lt;T&gt;&gt;</code></li>
+<li>线程安全标志：
+<ul>
+<li><strong><code>Rc&lt;T&gt;</code></strong> 未实现 <code>Send</code> 和 <code>Sync</code> 特征，因此不能跨线程传递</li>
+<li><strong><code>Arc&lt;T&gt;</code></strong> 实现了 <code>Send</code> 和 <code>Sync</code>（前提是内部的 <code>T</code> 也是线程安全的），可以在线程间自由穿梭</li>
+</ul>
+</li>
+</ul>
+<h3 id="示例多线程共享只读"><a class="header" href="#示例多线程共享只读">示例：多线程共享只读</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::sync::Arc;
+use std::thread;
+fn main() {
+    // 1. 创建一个 Arc 指针
+    let data = Arc::new(String::from("多线程共享数据"));
+    println!("Arc-data 初始计数: {}", Arc::strong_count(&amp;data));
+    let mut handles = vec![];
+    for i in 0..5 {
+        // 2. 克隆 Arc 指针：这只是增加原子计数，不拷贝字符串本身
+        let data_clone = Arc::clone(&amp;data);
+        let handle = thread::spawn(move || {
+            // 3. 在子线程中使用数据
+            println!("线程 {} 看到的数据: {}", i, data_clone);
+        });
+        handles.push(handle);
+    }
+    // 等待所有线程结束
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    println!("所有线程已完成，最后计数: {}", Arc::strong_count(&amp;data));
+}</code></pre>
+<hr>
+<h2 id="4-线程安全内部可变性mutext--rwlockt"><a class="header" href="#4-线程安全内部可变性mutext--rwlockt">4. 线程安全内部可变性：<code>Mutex&lt;T&gt;</code> / <code>RwLock&lt;T&gt;</code></a></h2>
+<p>在多线程环境下，单靠 <code>Arc&lt;T&gt;</code> 只能解决“谁拥有数据”的问题，但由于 <code>Arc&lt;T&gt;</code> 提供的引用是不可变的，我们无法修改数据。为了在多线程中修改数据，我们需要使用“<strong>锁</strong>”。</p>
+<p>你要会的点：</p>
+<ul>
+<li><code>Mutex&lt;T&gt;</code>：互斥锁，提供独占可变访问（锁守卫 <code>MutexGuard</code>）</li>
+<li><code>RwLock&lt;T&gt;</code>：读写锁，多读单写</li>
+<li><strong>死锁、锁粒度、持锁时间</strong> （工程上很关键）</li>
+<li>常见组合：<code>Arc&lt;Mutex&lt;T&gt;&gt;</code>、<code>Arc&lt;RwLock&lt;T&gt;&gt;</code></li>
+<li>运行时成本：加锁/解锁、竞争、可能阻塞</li>
+</ul>
+<h3 id="示例mutext-互斥锁"><a class="header" href="#示例mutext-互斥锁">示例：<code>Mutex&lt;T&gt;</code> (互斥锁)</a></h3>
+<p><code>Mutex</code> 是 <code>Mutual Exclusion</code>（互斥）的缩写。它保证在任何时刻，只有一个线程可以访问数据。</p>
+<p>工作机制：</p>
+<ol>
+<li>线程尝试通过 <code>.lock()</code> 获取锁。</li>
+<li>如果锁已被占用，线程会阻塞（等待）。</li>
+<li>获取成功后，返回一个 <code>MutexGuard</code>（智能指针）。</li>
+<li><strong>自动释放</strong>：由于 <code>MutexGuard</code> 实现了 <code>Drop</code> 特征，当它离开作用域时，锁会自动释放，无需手动解锁。</li>
+</ol>
+<pre class="playground"><code class="language-rust editable edition2024">use std::sync::Mutex;
+fn main() {
+    let m = Mutex::new(5);
+    {
+        // lock() 返回一个 Result，因为如果另一个线程在持有锁时 panic，锁会变得“中毒”
+        let mut num = m.lock().unwrap(); 
+        *num = 6; // 通过解引用修改内部数据
+    } // num 离开作用域，锁自动释放
+
+    println!("m = {:?}", m);
+}</code></pre>
+<h3 id="示例rwlockt-读写锁"><a class="header" href="#示例rwlockt-读写锁">示例：<code>RwLock&lt;T&gt;</code> (读写锁)</a></h3>
+<p>RwLock 代表 <code>Read-Write Lock</code>。它比 Mutex 更灵活，遵循“多读单写”规则：</p>
+<ul>
+<li><strong>多读</strong>：允许多个线程同时持有只<strong>读锁</strong> (<code>.read()</code>)。</li>
+<li><strong>单写</strong>：同一时间只允许一个线程持有<strong>写锁</strong> (<code>.write()</code>)。此时<strong>不允许任何读锁</strong>。</li>
+</ul>
+<p><strong>适用场景</strong>：适用于“<strong>读多写少</strong>”的场景，性能通常优于 <code>Mutex</code>。</p>
+<p><code>Mutex&lt;T&gt;</code> 的规则很简单：任何人要用，必须排队。
+而 <code>RwLock&lt;T&gt;</code> 引入了“多读”逻辑，这虽然提高了并发效率，但也让逻辑变得复杂：你不能直接把一个读锁“升级”为写锁。你必须先释放读锁，然后再去竞争写锁</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::sync::{Arc, RwLock};
+use std::thread;
+use std::time::Duration;
+fn main() {
+    // 1. 使用 Arc 包装 RwLock，实现多线程共享所有权
+    let lock = Arc::new(RwLock::new(5));
+    let mut handles = vec![];
+    // --- 模拟多个读取者 ---
+    for i in 0..3 {
+        let lock_clone = Arc::clone(&amp;lock);
+        let handle = thread::spawn(move || {
+            // 获取读锁：允许多个线程同时进入此处
+            let r = lock_clone.read().unwrap();
+            println!("读者 {} 读取到的值: {}", i, *r);
+            // 读锁在这里自动释放
+        });
+        handles.push(handle);
+    }
+    // --- 模拟一个写入者 ---
+    {
+        let lock_clone = Arc::clone(&amp;lock);
+        let handle = thread::spawn(move || {
+            println!("写入者正在尝试获取写锁...");
+            // 获取写锁：此时所有读锁和其他写锁都会被阻塞
+            let mut w = lock_clone.write().unwrap();
+            *w += 10;
+            println!("写入者已将值修改为: {}", *w);
+            // 写锁在这里自动释放
+        });
+        handles.push(handle);
+    }
+    // 等待所有线程结束
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("最终结果: {}", *lock.read().unwrap());
+}</code></pre>
+<h4 id="关键细节解析"><a class="header" href="#关键细节解析">关键细节解析</a></h4>
+<ul>
+<li>
+<p><strong><code>.read().unwrap()</code></strong>：</p>
+<ul>
+<li>返回一个 <code>ReadGuard</code>。只要这个 guard 存在，其他线程也可以调用 <code>.read()</code> 获取读锁。</li>
+<li><strong>限制</strong>：一旦有人持有读锁，任何尝试调用 <code>.write()</code> 的线程都会进入睡眠等待状态。</li>
+</ul>
+</li>
+<li>
+<p><strong><code>.write().unwrap()</code></strong>：</p>
+<ul>
+<li>返回一个 <code>WriteGuard</code>。</li>
+<li><strong>排他性</strong>：只有当没有任何人持有读锁且没有任何人持有写锁时，它才能成功获取。</li>
+</ul>
+</li>
+<li>
+<p><strong>死锁风险</strong>：</p>
+<ul>
+<li>如果在同一个线程中，你已经持有了读锁，又尝试去获取写锁，会导致<strong>死锁</strong>。</li>
+<li>在写操作频繁的场景下，可能会出现“读者饥饿”。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结对比mutex-vs-rwlock"><a class="header" href="#总结对比mutex-vs-rwlock">总结对比：<code>Mutex</code> vs <code>RwLock</code></a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th><code>Mutex&lt;T&gt;</code></th><th><code>RwLock&lt;T&gt;</code></th></tr>
+</thead>
+<tbody>
+<tr><td>访问规则</td><td>一次只能一个线程访问,</td><td>多个读者 OR 一个写者</td></tr>
+<tr><td>内部可变性</td><td>是（通过锁获取可变引用）</td><td>是（通过写锁获取可变引用）</td></tr>
+<tr><td>线程安全</td><td>是</td><td>是</td></tr>
+<tr><td>性能</td><td>简单、开销固定</td><td>读操作多时性能更好，管理成本略高</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>💡 笔记要点：为什么它们也叫“内部可变性”？</p>
+</blockquote>
+<p>因为即使你只有一个指向 <code>Mutex&lt;T&gt;</code> 的不可变引用 <code>&amp;Mutex&lt;T&gt;</code>，你依然可以通过调用 <code>.lock()</code> 方法来修改其内部包裹的数据。这种“<strong>外表不可变，内部可变</strong>”的特性正是它们被称为内部可变性的原因。</p>
+<h3 id="示例多线程共享可变arcmutext"><a class="header" href="#示例多线程共享可变arcmutext">示例：多线程共享可变（<code>Arc&lt;Mutex&lt;T&gt;&gt;</code>）</a></h3>
+<p><strong>核心分工:</strong></p>
+<ul>
+<li>Arc（<strong>所有权管理者</strong>）：解决“<strong>谁拥有数据</strong>”的问题。它让多个线程可以同时持有指向同一个堆内存的指针</li>
+<li>Mutex（<strong>访问权限管理者</strong>）：解决“<strong>谁能修改数据</strong>”的问题。它确保即使多个线程都有指针，同一时间也只有一个线程能真正碰到里面的数据</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::sync::{Arc, Mutex};
+use std::thread;
+fn main() {
+    let counter = Arc::new(Mutex::new(0));//最外层是 Arc，给这把锁加上引用计数功能,中间层是 Mutex，给数据加上一把锁
+    let mut handles = vec![];
+    for _ in 0..4 {
+        let c = Arc::clone(&amp;counter);//克隆的是指针地址和计数器，锁和数据始终只有一份
+        handles.push(thread::spawn(move || {
+            // lock() 返回一个 guard：guard 活着就持有锁
+            let mut guard = c.lock().unwrap();
+            *guard += 1;
+            // 不需要手动写 unlock(), guard drop 时自动解锁（RAII）
+        }));
+    }
+    for h in handles {
+        h.join().unwrap();
+    }
+    println!("counter = {}", *counter.lock().unwrap()); // 4
+}
+</code></pre>
+<h3 id="示例多线程共享可变读多写少arcrwlockt"><a class="header" href="#示例多线程共享可变读多写少arcrwlockt">示例：多线程共享可变（读多写少<code>Arc&lt;RwLock&lt;T&gt;&gt;</code>）</a></h3>
+<p><strong>核心分工:</strong></p>
+<ul>
+<li>Arc：解决“<strong>谁拥有数据</strong>”的问题，确保堆内存地址在所有线程执行完毕前保持有效。</li>
+<li>RwLock：解决“<strong>如何高效访问</strong>”的问题。它允许 100 个线程同时读取（并发），但只要有 1 个线程在写，其他人都必须等待（排他）。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::sync::{Arc, RwLock};
+use std::thread;
+use std::time::Duration;
+fn main() {
+    // 1. 初始化数据，Arc 负责跨线程共享，RwLock 负责并发权限
+    let data = Arc::new(RwLock::new(0));
+    let mut handles = vec![];
+    let start_time = std::time::Instant::now();
+    // 2. 开启 5 个读者线程
+    for i in 0..5 {
+        let d = Arc::clone(&amp;data);
+        handles.push(thread::spawn(move || {
+            // 获取读锁：注意！多个线程可以同时成功获取读锁
+            let _guard = d.read().unwrap();
+            println!("读者 {} 正在读取...", i);
+            // 模拟一个耗时的读取操作（1秒）
+            thread::sleep(Duration::from_secs(1)); 
+            println!("读者 {} 读取完毕", i);
+        }));
+    }
+    // 3. 开启 1 个写者线程
+    let d_writer = Arc::clone(&amp;data);
+    handles.push(thread::spawn(move || {
+        // 模拟等待一段时间再写，确保读者们已经先拿到了锁
+        thread::sleep(Duration::from_millis(500));
+        println!("写者：尝试获取写锁（会被阻塞，直到所有读者读完）...");
+        // 获取写锁：必须等所有读锁释放
+        let mut w = d_writer.write().unwrap();
+        *w += 1;
+        println!("写者：修改完毕！");
+    }));
+    for h in handles {
+        h.join().unwrap();
+    }
+    println!("--- 总耗时: {:?} ---", start_time.elapsed());
+}</code></pre>
+<h4 id="代码逻辑深度拆解"><a class="header" href="#代码逻辑深度拆解">代码逻辑深度拆解</a></h4>
+<ul>
+<li>读锁并发 (<code>.read().unwrap()</code>)
+<ul>
+<li>当 <code>reader1</code> 调用 <code>read()</code> 时，如果此时没有写线程，它会立即获得 <code>ReadGuard</code>。</li>
+<li><strong>优势</strong>：如果有 <code>reader2、reader3</code> 同时进来，只要当前没有线程持有“写锁”, 它们都可以获取读锁。这比 <code>Mutex</code> 快得多，因为 <code>Mutex</code> 会强制让读者也排队。</li>
+</ul>
+</li>
+<li>写锁独占 (<code>.write().unwrap()</code>)：
+<ul>
+<li>当 <code>writer</code> 调用 <code>write()</code> 时，写锁具有排他性, 它必须等待所有正在读取的线程释放读锁，且没有其他写线程在工作。反之，只要有任何读锁未释放，写锁获取也会被阻塞。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="5-celltcopy-类型的轻量内部可变性"><a class="header" href="#5-celltcopy-类型的轻量内部可变性">5. <code>Cell&lt;T&gt;</code>：<code>Copy</code> 类型的轻量内部可变性</a></h2>
+<p>在掌握了 <code>Rc</code> 和 <code>Arc</code> 之后，你可能已经发现它们默认是<strong>不可变共享</strong>的。为了在“不可变”的外壳下修改数据，我们需要<strong>内部可变性</strong>（<code>Interior Mutability</code>）。</p>
+<p>在 <code>Rust</code> 中，如果你使用普通引用，最怕的是：“<strong>我手里拿着指向数据的指针，结果别人把数据改了/删了，导致我手里的指针失效</strong>”。
+但 <code>Cell</code> 完美避开了这个问题，因为它禁止你获取内部数据的指针：</p>
+<ul>
+<li>没有借用：你调用 <code>c.get()</code> 时，它直接给你一个全新的副本。你手里的副本和 <code>Cell</code> 里面的原始数据已经没关系了。</li>
+<li>随便覆盖：既然谁也拿不到指向 <code>Cell</code> 内部的指针，那么无论你调用多少次 <code>set</code>，都只是在修改那一块内存的值，不会破坏任何人的指针（因为根本没人持有指针）。</li>
+</ul>
+<p>你要会的点：</p>
+<ul>
+<li><code>Cell&lt;T&gt;</code> 主要用于实现了 <code>Copy</code> 特征的类型（如 <code>i32, bool, f64</code> 等简单类型）</li>
+<li><code>Cell</code> 的操作逻辑不是“借用”，而是“<strong>值拷贝</strong>”。它不会给你内部数据的引用，而是让你把值取出来或存进去。</li>
+<li>与其它智能指针不同，<code>Cell</code> 不提供 <code>.borrow()</code> 或 <code>.borrow_mut()</code> 方法,只有两个核心动作：
+<ul>
+<li><code>.get()</code>：返回内部值的一个<strong>全新的副本</strong>（<code>Copy</code>）</li>
+<li><code>.set(value)</code>：将新值拷贝进去，覆盖旧值</li>
+</ul>
+</li>
+<li>应用场景:
+<ul>
+<li><strong>简单标志位</strong>：在结构体内部存储一些状态标记（如 <code>is_valid: Cell&lt;bool&gt;</code>），即使结构体是以不可变引用的形式传递，也能随时更新这些标记。</li>
+<li><strong>性能敏感场景</strong>：如果你只需要操作简单的数字或布尔值，且不需要获取它们的引用，选 <code>Cell</code> 而不是 <code>RefCell</code>。</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::cell::Cell;
+fn main() {
+    // 即使变量 c 本身没有声明为 mut
+    let c = Cell::new(10);
+    // 我们可以通过不可变引用修改它的值
+    let c_ref1 = &amp;c;
+    let c_ref2 = &amp;c;
+    c_ref1.set(20); 
+    c_ref2.set(30);
+    println!("当前值: {}", c.get()); // 输出 30
+}</code></pre>
+<hr>
+<h2 id="6-refcellt运行时借用检查内部可变性"><a class="header" href="#6-refcellt运行时借用检查内部可变性">6. <code>RefCell&lt;T&gt;</code>：运行时借用检查（内部可变性）</a></h2>
+<p>如果说 <code>Cell&lt;T&gt;</code> 是通过“不给你指针”来保证安全，那么 <code>RefCell&lt;T&gt;</code>(<code>Reference Cell</code>) 就是通过<strong>雇佣一个运行时保安</strong>来让你安全地持有指针。</p>
+<p>你要会的点：</p>
+<ul>
+<li>用于那些不方便拷贝（非 <code>Copy</code> 类型，比如 <code>Vec</code> 或自定义结构体），且你需要获取其引用的场景</li>
+<li><strong>内部可变性（Interior Mutability）</strong> ：即便外面是不可变绑定，也能在内部修改</li>
+<li>借用规则从编译时延后到运行时：
+<ul>
+<li><code>borrow()</code> 获取一个不可变引用, 得到 <code>Ref&lt;T&gt;</code></li>
+<li><code>borrow_mut()</code> 获取一个可变引用, 得到 <code>RefMut&lt;T&gt;</code></li>
+<li>在程序运行时，RefCell 内部会维护一个计数器来记录当前的借用状态,运行时违反了规则则会 <strong>panic</strong></li>
+</ul>
+</li>
+<li>与 <code>Rc</code> 组合：<code>Rc&lt;RefCell&lt;T&gt;&gt;</code> 是单线程常见共享可变方案</li>
+</ul>
+<h3 id="示例共享--可变单线程"><a class="header" href="#示例共享--可变单线程">示例：共享 + 可变（单线程）</a></h3>
+<pre class="playground"><code class="language-rust editable edition2024">use std::cell::RefCell;
+
+fn main() {
+    // 数据包裹在 RefCell 中
+    let data = RefCell::new(vec![1, 2, 3]);
+    // 即使 data 是不可变的，我们也能获取可变借用
+    {
+        let mut mut_ref = data.borrow_mut();
+        mut_ref.push(4);
+    } // mut_ref 在这里离开作用域，借用标记被释放
+    // 获取两个不可变借用
+    let ref1 = data.borrow();
+    let ref2 = data.borrow();
+    println!("数据内容: {:?}", ref1);
+}</code></pre>
+<h4 id="为什么会-panic违反规则的后果"><a class="header" href="#为什么会-panic违反规则的后果">为什么会 Panic？（违反规则的后果）</a></h4>
+<p>如果你尝试在同一个作用域内同时进行不可变和可变借用，RefCell 就会报错：</p>
+<pre><code class="language-rust ignore">let data = RefCell::new(5);
+let r1 = data.borrow();     // 运行时：不可变借用计数 +1
+let r2 = data.borrow_mut(); // 运行时：发现已有不可变借用，直接 PANIC！</code></pre>
+<h4 id="cellt-与-refcellt-的深度对比"><a class="header" href="#cellt-与-refcellt-的深度对比"><code>Cell&lt;T&gt;</code> 与 <code>RefCell&lt;T&gt;</code> 的深度对比</a></h4>
+<p>这是笔记中最重要的部分：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th><code>Cell&lt;T&gt;</code></th><th><code>RefCell&lt;T&gt;</code></th></tr>
+</thead>
+<tbody>
+<tr><td><strong>适用类型</strong></td><td>实现了 <code>Copy</code> 的简单类型</td><td>任何类型（通常是较大的对象）</td></tr>
+<tr><td><strong>获取方式</strong></td><td>返回值的副本（<code>.get()</code>）</td><td>返回数据的引用（<code>.borrow()</code>）</td></tr>
+<tr><td><strong>性能开销</strong></td><td><strong>零开销</strong>（仅内存拷贝）</td><td><strong>有开销</strong>（运行时维护借用计数）</td></tr>
+<tr><td><strong>安全性</strong></td><td>编译时安全（无引用）</td><td><strong>运行时可能 Panic</strong></td></tr>
+<tr><td><strong>线程安全</strong></td><td><strong>不安全</strong> (<code>!Sync</code>)</td><td><strong>不安全</strong> (<code>!Sync</code>)</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="-为什么需要-refcell"><a class="header" href="#-为什么需要-refcell">💡 为什么需要 <code>RefCell</code>？</a></h4>
+<p>最常见的场景是：<strong>你实现了一个 Trait，而该 Trait 的方法签名要求使用不可变引用 <code>&amp;self</code>，但你的具体实现却需要修改内部状态（比如缓存、日志记录等）</strong>。</p>
+<h4 id="总结一句话"><a class="header" href="#总结一句话">总结一句话</a></h4>
+<blockquote>
+<p><strong><code>Cell</code> 是“搬家”（拷贝值），<code>RefCell</code> 是“登记处”（在运行时盯着谁拿了钥匙，违规就报警）。</strong></p>
+</blockquote>
+<h3 id="rcrefcellt单线程共享--可变"><a class="header" href="#rcrefcellt单线程共享--可变"><code>Rc&lt;RefCell&lt;T&gt;&gt;</code>：单线程共享 + 可变</a></h3>
+<p>这是 Rust 单线程开发中最强大的<strong>组合拳</strong>。如果你理解了 <code>Rc</code>（解决所有权共享）和 <code>RefCell</code>（解决不可变外壳下的修改），那么把它们套在一起就得到了：<strong>一个可以被多个地方同时持有、且每个地方都能修改的“共享变量”。</strong></p>
+<p>在 <code>Rust</code>中，指针是表示内存地址的类型。为了实现“多处读写”这种在其他语言中很常见的行为，我们需要这种“套娃”结构。</p>
+<h4 id="核心逻辑"><a class="header" href="#核心逻辑">核心逻辑</a></h4>
+<ul>
+<li><strong>外层 <code>Rc&lt;T&gt;**</code>：负责</strong>共享**。它允许多个变量持有指向同一块堆内存的指针，解决了“谁能拿到这块内存”的问题。</li>
+<li><strong>内层 <code>RefCell&lt;T&gt;**</code>：负责</strong>修改**。它允许你在只有 <code>Rc</code> 提供的不可变引用的情况下，通过运行时检查来修改内部数据。</li>
+</ul>
+<p>当你创建 <code>let x = Rc::new(RefCell::new(5))</code> 时，内存中发生了以下情况：</p>
+<ul>
+<li><strong>栈上</strong>：有一个 <code>Rc</code> 指针</li>
+<li><strong>堆上</strong>：分配了一块空间，包含
+<ul>
+<li><code>Rc</code> 的引用计数器</li>
+<li><code>RefCell</code> 的借用状态标志位</li>
+<li>实际的数据 <code>T</code>。</li>
+</ul>
+</li>
+</ul>
+<h4 id="代码示例共享计数器"><a class="header" href="#代码示例共享计数器">代码示例：共享计数器</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">use std::rc::Rc;
+use std::cell::RefCell;
+fn main() {
+    // 1. 创建共享的可变数据
+    let shared_data = Rc::new(RefCell::new(vec![1, 2, 3]));
+    // 2. 克隆 Rc 指针（增加强引用计数）
+    let shared_data_clone = Rc::clone(&amp;shared_data);
+    // 3. 在一处修改
+    {
+        let mut mut_ref = shared_data.borrow_mut();
+        mut_ref.push(4);
+    } 
+    // 4. 在另一处读取，发现数据已经变了
+    println!("克隆端看到的数据: {:?}", shared_data_clone.borrow());
+    // 输出: [1, 2, 3, 4]
+}
+</code></pre>
+<h4 id="深度对比单线程-vs-多线程"><a class="header" href="#深度对比单线程-vs-多线程">深度对比：单线程 vs 多线程</a></h4>
+<p>这个组合有一个完美的“多线程对应版本”，请务必记在笔记中对比：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>场景</th><th>工具组合</th><th>逻辑</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>单线程</strong></td><td><strong><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></strong></td><td><strong>引用计数 + 运行时借用检查</strong></td></tr>
+<tr><td><strong>多线程</strong></td><td><strong><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></strong></td><td><strong>原子计数 + 互斥锁</strong></td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="风险警示运行时崩溃"><a class="header" href="#风险警示运行时崩溃">风险警示：运行时崩溃</a></h4>
+<p>虽然这个组合很强，但它保留了 <code>RefCell</code> 的风险：</p>
+<ul>
+<li>如果你在同一个线程中，通过 <code>shared_data.borrow()</code> 拿到了一个引用还没放手，又尝试用 <code>shared_data_clone.borrow_mut()</code> 去修改，<strong>程序会直接 Panic</strong>。</li>
+<li>它依然不是线程安全的，不能跨线程传递。</li>
+</ul>
+<hr>
+<h2 id="7-cowa-t写时克隆copy-on-write"><a class="header" href="#7-cowa-t写时克隆copy-on-write">7. <code>Cow&lt;'a, T&gt;</code>：写时克隆（Copy-On-Write）</a></h2>
+<p>这是 <code>Rust</code> 中一个非常“聪明”且能显著提升性能的智能指针。<code>Cow</code> 的全称是 <code>Copy-On-Write</code>（写时克隆）。它的核心思想是：<strong>不到万不得已，绝不分配内存</strong>。将内存分配<strong>推迟到真正发生修改</strong>的那一刻。</p>
+<h3 id="核心定义"><a class="header" href="#核心定义">核心定义</a></h3>
+<p><code>Cow</code> 是一个枚举类型，包含两个变体：<code>Borrowed(&amp;'a T)</code> 和 <code>Owned(T::Owned)</code>。它允许你以一种统一的方式处理借用的数据和拥有的数据。</p>
+<ul>
+<li><code>Borrowed(&amp;'a T)</code>：持有数据的只读引用</li>
+<li><code>Owned(T::Owned)</code>：持有数据的所有权（通常在堆上）</li>
+</ul>
+<h3 id="懒惰是美德"><a class="header" href="#懒惰是美德">懒惰是美德</a></h3>
+<ul>
+<li>初始状态: 当你创建一个 <code>Cow</code> 时，它通常从 <code>Borrowed</code> 开始。这不需要分配新内存，开销极小。</li>
+<li>读取数据：当你只需要读取时，它保持 Borrowed 状态，性能损耗为 <code>O(1)</code>。</li>
+<li>修改数据：当你调用 <code>.to_mut()</code> 尝试修改数据时，<code>Cow</code> 会检查：如果已经是 <code>Owned</code>，直接返回引用。如果是 <code>Borrowed</code>，此时才会执行克隆（<code>Clone</code>），将数据变为 <code>Owned</code>，然后再让你修改。</li>
+</ul>
+<p>你要会的点：</p>
+<ul>
+<li>表示“要么借用，要么拥有”</li>
+<li>读操作零拷贝，写操作才会 <code>to_mut()</code> 触发克隆</li>
+<li>常见场景：字符串处理、API 既接受 <code>&amp;str</code> 又能返回 <code>String</code> 的优化</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">use std::borrow::Cow;
+// 如果不需要修改，就借用输入（零拷贝）；
+// 如果需要修改，再转成拥有的 String。
+fn normalize(s: &amp;str) -&gt; Cow&lt;'_, str&gt; {
+    if s.contains(' ') {
+        // 需要修改：分配新 String（Owned）
+        Cow::Owned(s.replace(' ', "_"))
+    } else {
+        // 不需要修改：直接借用（Borrowed）
+        Cow::Borrowed(s)
+    }
+}
+fn main() {
+    let a = normalize("hello");
+    let b = normalize("hello world");
+
+    println!("a = {}", a);
+    println!("b = {}", b);
+}</code></pre>
+<hr>
+<h2 id="8-pinp禁止被移动自引用异步"><a class="header" href="#8-pinp禁止被移动自引用异步">8. <code>Pin&lt;P&gt;</code>：禁止被移动（自引用/异步）</a></h2>
+<p>这是 Rust 中最“玄学”但也最底层、最重要的智能指针之一。如果说 <code>Box</code> 是为了放进堆里，那么 <code>Pin</code> 就是为了<strong>锁死内存地址</strong>。</p>
+<h3 id="define"><a class="header" href="#define">Define</a></h3>
+<h4 id="a-核心危机自引用结构-self-referential-structs"><a class="header" href="#a-核心危机自引用结构-self-referential-structs">A. 核心危机：自引用结构 (Self-referential Structs)</a></h4>
+<p>在 Rust 中，几乎所有类型都是可以移动的（<code>Move</code>）。这意味着如果你把一个变量传给另一个函数，它的<strong>内存地址可能会发生改变</strong>。但在某些特殊场景下，这种“移动”会导致程序崩溃。</p>
+<p>想象一个结构体，它的一个字段是指向另一个字段的指针：</p>
+<pre><code class="language-rust ignore">struct SelfRef {
+    data: String,
+    ptr: *const String, // 这个指针指向同一个结构体里的 data
+}
+</code></pre>
+<ol>
+<li><strong>初始状态</strong>：<code>ptr</code> 记录了 <code>data</code> 在内存中的地址（比如 <code>0x100</code>）。</li>
+<li><strong>发生移动</strong>：如果你把这个结构体移动到堆上或者传给另一个线程，整个结构体的内存地址变了（变成了 <code>0x200</code>）。</li>
+<li><strong>结果</strong>：<code>data</code> 的新地址是 <code>0x200</code>，但 <code>ptr</code> 仍然指着旧地址 <code>0x100</code>。<strong>指针失效了！</strong> 这会导致未定义行为。</li>
+</ol>
+<h4 id="b-pinp-的作用"><a class="header" href="#b-pinp-的作用">B. <code>Pin&lt;P&gt;</code> 的作用</a></h4>
+<p><code>Pin</code> 的作用就是：<strong>给指针加一个约束，保证它指向的数据在内存中永远不会被移动。</strong></p>
+<ul>
+<li>一旦数据被 <code>Pin</code> 住，你无法再通过 <code>mem::swap</code> 或移动所有权等方式改变它的物理位置。</li>
+<li>它主要配合 <code>P</code>（通常是 <code>Box</code> 或引用）使用，形成 <code>Pin&lt;Box&lt;T&gt;&gt;</code> 或 <code>Pin&lt;&amp;mut T&gt;</code>。</li>
+</ul>
+<h4 id="c-为什么异步asyncawait必须用它"><a class="header" href="#c-为什么异步asyncawait必须用它">C. 为什么异步（Async/Await）必须用它？</a></h4>
+<p>这是 <code>Pin</code> 最主要的应用场景。</p>
+<ul>
+<li>当你写 <code>async</code> 块时，编译器会将其转换为一个状态机（实现了 <code>Future</code> trait）。</li>
+<li>这个状态机内部经常包含自引用（例如：一个局部变量被引用后跨越了 <code>.await</code> 点）。</li>
+<li>因此，<code>Future</code> 的 <code>poll</code> 方法签名必须是 <code>fn poll(self: Pin&lt;&amp;mut Self&gt;, ...)</code>。<strong>没有 <code>Pin</code>，异步代码就无法保证内存安全。</strong></li>
+</ul>
+<hr>
+<h4 id="d-unpin-特征谁可以豁免"><a class="header" href="#d-unpin-特征谁可以豁免">D. <code>Unpin</code> 特征：谁可以豁免？</a></h4>
+<p>并不是所有东西都需要被“锁死”。Rust 定义了一个标记特征 <strong><code>Unpin</code></strong>：</p>
+<ul>
+<li><strong><code>Unpin</code> 类型</strong>：绝大多数普通类型（如 <code>i32</code>, <code>String</code>, <code>Box</code>）。它们即便被移动也是安全的。对于这些类型，<code>Pin&lt;P&gt;</code> 没有任何实际限制，可以随意拿回可变引用。</li>
+<li><strong><code>!Unpin</code> 类型</strong>：不能被移动的类型（如异步生成的 <code>Future</code>、自引用结构）。它们必须被 <code>Pin</code> 保护，否则编译器会阻止某些危险操作。</li>
+</ul>
+<hr>
+<h4 id="如何通俗理解-pin"><a class="header" href="#如何通俗理解-pin">如何通俗理解 <code>Pin</code>？</a></h4>
+<ul>
+<li><strong>普通指针</strong>：像一张写着地址的便签。你可以把便签传来传去，房子（数据）也可能搬家。</li>
+<li><strong><code>Pin</code> 指针</strong>：像一颗<strong>钉子</strong>。它不仅告诉你地址，还将房子死死地钉在原地，不准搬家，直到房子被拆除（Drop）为止。</li>
+</ul>
+<h4 id="选型指南"><a class="header" href="#选型指南">选型指南</a></h4>
+<ol>
+<li>如果你的数据不包含指向自身的指针，**不需要 <code>Pin**</code>。</li>
+<li>如果你在手写复杂的 <code>Future</code> 或者构建自引用底层库，**必须用 <code>Pin**</code>。</li>
+</ol>
+<p>这个示例只是让你看到 <code>Pin&lt;Box&lt;T&gt;&gt;</code>的写法；真正需要 <code>Pin</code> 的场景主要在 <code>async/Future</code> 或自引用结构里。</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::pin::Pin;
+fn main() {
+    let x = Box::new(123);
+    // Pin&lt;Box&lt;T&gt;&gt;：把堆上的 T “固定住”，承诺之后不会再移动它的内存地址
+    let pinned: Pin&lt;Box&lt;i32&gt;&gt; = Box::pin(*x);
+    // 访问内部值：as_ref 得到 Pin&lt;&amp;T&gt;，get_ref 拿到 &amp;T
+    let r: &amp;i32 = pinned.as_ref().get_ref();
+    println!("pinned value = {}", r);
+}</code></pre>
+<hr>
+<h2 id="9-boxdyn-trait--rcdyn-traittrait-object-与动态分发"><a class="header" href="#9-boxdyn-trait--rcdyn-traittrait-object-与动态分发">9. <code>Box&lt;dyn Trait&gt;</code> / <code>Rc&lt;dyn Trait&gt;</code>：trait object 与动态分发</a></h2>
+<p>这是 Rust 智能指针系列的最后一项核心应用。如果你需要处理<strong>不同类型但实现了相同特征</strong>的对象（例如一个数组里既有“圆形”又有“正方形”），你就必须用到 <code>Box&lt;dyn Trait&gt;</code> 或 <code>Rc&lt;dyn Trait&gt;</code>。</p>
+<p>在 Rust 中，指针是表示内存地址的类型。由于不同类型的大小不同，我们无法直接在栈上存储“某个特征”，必须通过智能指针将其包装成 <strong>Trait Object</strong>。</p>
+<p>你要会的点：</p>
+<ul>
+<li><strong>静态分发（泛型） vs 动态分发（trait object）</strong></li>
+<li>对象安全（object safety）限制：哪些 trait 能变成 <code>dyn Trait</code></li>
+<li>fat pointer（数据指针 + vtable），大小/性能直觉</li>
+</ul>
+<h3 id="前置知识"><a class="header" href="#前置知识">前置知识</a></h3>
+<h4 id="a-为什么必须用-box-或-rc"><a class="header" href="#a-为什么必须用-box-或-rc">A. 为什么必须用 <code>Box</code> 或 <code>Rc</code>？</a></h4>
+<p>特征（Trait）本身是 <strong>DST (Dynamically Sized Type)</strong>，即“动态大小类型”。</p>
+<ul>
+<li>编译器在编译时不知道具体是哪个结构体实现了该特征，因此不知道它占用多少内存。</li>
+<li><strong>解决方案</strong>：将对象放入堆中。<code>Box&lt;dyn Trait&gt;</code> 的大小是固定的（指针大小），无论堆上的对象实际有多大。</li>
+</ul>
+<h4 id="b-物理结构胖指针-fat-pointer"><a class="header" href="#b-物理结构胖指针-fat-pointer">B. 物理结构：胖指针 (Fat Pointer)</a></h4>
+<p>当你使用 <code>Box&lt;dyn Trait&gt;</code> 时，这个指针在栈上占用 <strong>2 个单元</strong>（通常是 16 字节）：</p>
+<ol>
+<li><strong>数据指针</strong>：指向堆内存中具体的对象数据。</li>
+<li><strong>vtable 指针</strong>：指向一个“虚函数表”。表中记录了该特定类型实现该 Trait 的方法地址。</li>
+</ol>
+<h4 id="c-静态分发-vs-动态分发"><a class="header" href="#c-静态分发-vs-动态分发">C. 静态分发 vs 动态分发</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th>静态分发 (Generics <code>&lt;T: Trait&gt;</code>)</th><th>动态分发 (<code>dyn Trait</code>)</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>原理</strong></td><td>编译时为每种类型生成一份代码（单态化）。</td><td>运行时通过 vtable 查找函数地址。</td></tr>
+<tr><td><strong>性能</strong></td><td><strong>极快</strong>。编译器可以进行内联优化。</td><td><strong>略慢</strong>。存在指针跳转开销，无法内联。</td></tr>
+<tr><td><strong>灵活性</strong></td><td>集合中只能存同一种类型。</td><td><strong>极高</strong>。集合中可以存多种不同类型。</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="d-代码示例不同类型的绘图"><a class="header" href="#d-代码示例不同类型的绘图">D. 代码示例：不同类型的“绘图”</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">trait Draw {
+    fn draw(&amp;self);
+}
+
+struct Button { width: u32 }
+impl Draw for Button {
+    fn draw(&amp;self) { println!("渲染按钮，宽度: {}", self.width); }
+}
+
+struct Image { url: String }
+impl Draw for Image {
+    fn draw(&amp;self) { println!("渲染图片，源自: {}", self.url); }
+}
+
+fn main() {
+    // 使用 Box&lt;dyn Draw&gt; 存储不同类型的对象
+    let components: Vec&lt;Box&lt;dyn Draw&gt;&gt; = vec![
+        Box::new(Button { width: 100 }),
+        Box::new(Image { url: String::from("logo.png") }),
+    ];
+
+    for comp in components {
+        comp.draw(); // 运行时动态分发：查表并调用对应方法
+    }
+}
+</code></pre>
+<h3 id="什么时候用-boxdyn-trait"><a class="header" href="#什么时候用-boxdyn-trait">什么时候用 <code>Box&lt;dyn Trait&gt;</code>？</a></h3>
+<ol>
+<li><strong>异质集合</strong>：当你需要一个 <code>Vec</code> 存储多种实现了相同接口的类型时。</li>
+<li><strong>解耦</strong>：当你不想在函数签名中暴露具体类型，只想表达“只要实现了这个特征就行”时。</li>
+<li><strong>减少编译时间</strong>：泛型会导致代码膨胀（单态化），而 <code>dyn Trait</code> 只有一份代码，可以缩短大型项目的编译时间。</li>
+</ol>
+<hr>
+<h2 id="10-自定义智能指针进阶"><a class="header" href="#10-自定义智能指针进阶">10. 自定义智能指针（进阶）</a></h2>
+<p>你要会的点：</p>
+<ul>
+<li>如何实现自己的指针类型：
+<ul>
+<li>实现 <code>Deref/DerefMut</code>，让它像引用一样用</li>
+<li>实现 <code>Drop</code>，在释放时执行资源回收</li>
+</ul>
+</li>
+<li>RAII 模式（文件句柄、网络连接、锁守卫等）</li>
+<li><code>PhantomData</code>（用于告诉编译器“我逻辑上拥有/借用某个 T”，影响 drop check/variance）——偏高级，但智能指针写多了会遇到</li>
+</ul>
+<p>要自定义一个智能指针，本质上是创建一个结构体，并为它实现两个核心特征（Trait）：<strong><code>Deref</code></strong> 和 <strong><code>Drop</code></strong>。在 Rust 中，正是这两个特征让普通结构体拥有了“像指针一样工作”和“自动管理资源”的超能力。</p>
+<h3 id="1-自定义智能指针的核心公式"><a class="header" href="#1-自定义智能指针的核心公式">1. 自定义智能指针的核心公式</a></h3>
+<ul>
+<li><strong><code>Deref</code> 特征</strong>：允许你通过解引用操作符（<code>*</code>）访问内部数据。</li>
+<li><strong><code>Drop</code> 特征</strong>：定义当指针离开作用域时该执行什么清理逻辑（例如释放内存、关闭文件、打印日志）。</li>
+</ul>
+<h3 id="2-实战演练创建一个简单的-myboxt"><a class="header" href="#2-实战演练创建一个简单的-myboxt">2. 实战演练：创建一个简单的 <code>MyBox&lt;T&gt;</code></a></h3>
+<p>我们将模仿 <code>Box&lt;T&gt;</code> 的行为，创建一个能包裹数据的智能指针。</p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::ops::Deref;
+
+//A. 定义结构体
+struct MyBox&lt;T&gt;(T); // 元组结构体
+impl&lt;T&gt; MyBox&lt;T&gt; {
+    fn new(x: T) -&gt; MyBox&lt;T&gt; {
+        MyBox(x)
+    }
+}
+
+//B. 实现 `Deref` (让它能被 `*` 解引用)
+//如果不实现 `Deref`，编译器就不知道执行 `*my_box` 时该返回什么。
+impl&lt;T&gt; Deref for MyBox&lt;T&gt; {
+    type Target = T; // 关联类型，指定解引用后得到的类型
+    fn deref(&amp;self) -&gt; &amp;Self::Target {
+        &amp;self.0 // 返回元组中的第一个元素引用
+    }
+}
+//C. 实现 `Drop` (赋予它自动清理的能力)
+impl&lt;T&gt; Drop for MyBox&lt;T&gt; {
+    fn drop(&amp;mut self) {
+        println!("MyBox 指针被销毁了，资源已释放！");
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+    assert_eq!(5, x);
+    assert_eq!(5, *y); // 这里触发了 y.deref()
+    println!("y 的值是: {}", *y);
+} // y 在这里离开作用域，触发 drop() 方法</code></pre>
+<h3 id="3-深度原理deref-强制转换-deref-coercion"><a class="header" href="#3-深度原理deref-强制转换-deref-coercion">3. 深度原理：Deref 强制转换 (Deref Coercion)</a></h3>
+<p>这是 Rust 智能指针极其好用的秘密武器。<strong>Deref 强制转换</strong>可以将一个实现了 <code>Deref</code> 的类型的引用转换为它内部类型的引用。</p>
+<p><strong>例子：</strong>
+如果你有一个 <code>MyBox&lt;String&gt;</code>，Rust 可以自动将其转换为 <code>&amp;str</code>：</p>
+<pre><code class="language-rust ignore">fn hello(name: &amp;str) {
+    println!("Hello, {}!", name);
+}
+fn main() {
+    let m = MyBox::new(String::from("Rust"));
+    // &amp;m 是 &amp;MyBox&lt;String&gt;
+    // Rust 自动调用 deref 将其变为 &amp;String
+    // String 也实现了 Deref，再次调用 deref 变为 &amp;str
+    hello(&amp;m); 
+}</code></pre>
+<hr>
+<h2 id="11-选择指南"><a class="header" href="#11-选择指南">11. 选择指南</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>需求场景</th><th>推荐指针</th><th>备注</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>堆分配、大数据传递、递归类型</strong></td><td><strong><code>Box&lt;T&gt;</code></strong></td><td>唯一所有权，开销最低。</td></tr>
+<tr><td><strong>单线程、多处共享只读数据</strong></td><td><strong><code>Rc&lt;T&gt;</code></strong></td><td>引用计数。</td></tr>
+<tr><td><strong>多线程、多处共享只读数据</strong></td><td><strong><code>Arc&lt;T&gt;</code></strong></td><td>原子引用计数，线程安全。</td></tr>
+<tr><td><strong>单线程、小对象内部可变 (Copy类型)</strong></td><td><strong><code>Cell&lt;T&gt;</code></strong></td><td>get/set 值拷贝。</td></tr>
+<tr><td><strong>单线程、大对象内部可变 (非Copy)</strong></td><td><strong><code>RefCell&lt;T&gt;</code></strong></td><td>运行时借用检查。</td></tr>
+<tr><td><strong>单线程、多所有权共享且可修改</strong></td><td><strong><code>Rc&lt;RefCell&lt;T&gt;&gt;</code></strong></td><td>经典套娃组合。</td></tr>
+<tr><td><strong>多线程、共享且可修改</strong></td><td><strong><code>Arc&lt;Mutex&lt;T&gt;&gt;</code></strong></td><td>并发黄金搭档。</td></tr>
+<tr><td><strong>避免循环引用、内存泄漏</strong></td><td><strong><code>Weak&lt;T&gt;</code></strong></td><td>配合 Rc 或 Arc 使用。</td></tr>
+<tr><td><strong>性能优化、按需克隆</strong></td><td><strong><code>Cow&lt;T&gt;</code></strong></td><td>写时克隆。</td></tr>
+<tr><td><strong>异步编程、锁死内存地址</strong></td><td><strong><code>Pin&lt;P&gt;</code></strong></td><td>防止自引用结构移动。</td></tr>
+</tbody>
+</table>
+</div>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="生命周期"><a class="header" href="#生命周期">生命周期</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
