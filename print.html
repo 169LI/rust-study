@@ -29,7 +29,7 @@
         <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
-        <link rel="stylesheet" href="custom-7e8a6fc2.css">
+        <link rel="stylesheet" href="custom-f3fb0f0a.css">
 
 
         <!-- Provide site root and default themes to javascript -->
@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-abfe0e6f.js";
+            window.path_to_searchindex_js = "searchindex-98b89cf1.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-2a4c8e05.js"></script>
+        <script src="toc-9f6e11fd.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -4066,6 +4066,609 @@ fn main() {
 <h1 id="三方库"><a class="header" href="#三方库">三方库</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="serde"><a class="header" href="#serde">serde</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="seaorm"><a class="header" href="#seaorm">SeaORM</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="介绍-1"><a class="header" href="#介绍-1">介绍</a></h1>
+<h2 id="了解-seaorm-的核心工作流"><a class="header" href="#了解-seaorm-的核心工作流">了解 SeaORM 的核心工作流</a></h2>
+<h3 id="请记住这三个核心角色之间的转换关系"><a class="header" href="#请记住这三个核心角色之间的转换关系">请记住这三个核心角色之间的转换关系</a></h3>
+<ul>
+<li>Entity (实体): 对应数据库里的“表”。它定义了结构、关联关系和主键。</li>
+<li>Model (模型): 这是一个纯粹的 Rust 结构体，代表了数据库中的一行数据。它是只读的，通常用于查询结果。</li>
+<li>ActiveModel (活跃模型): 这是用于修改数据的结构体。当你需要 INSERT 或 UPDATE 时，你会把 Model 转换为ActiveModel，设置好字段后再存入数据库。</li>
+</ul>
+<h3 id="seaorm-的核心逻辑"><a class="header" href="#seaorm-的核心逻辑">SeaORM 的核心逻辑</a></h3>
+<h4 id="1-读写分离model-vs-activemodel"><a class="header" href="#1-读写分离model-vs-activemodel">1. 读写分离（Model vs ActiveModel）</a></h4>
+<p>SeaORM 把“数据”分成了两种状态，这是它最特别的地方：</p>
+<p>*<strong>Model (只读卡片)：</strong> 你从数据库里查出来的数据。它就像一张 <strong>照片</strong> ，你可以看，但不能直接在上面改。</p>
+<p>*<strong>ActiveModel (可写表单)：</strong> 当你要新增或改动数据时，必须把照片变成“表单”。它会记录哪个字段改了，哪个没改，最后再保存回数据库。</p>
+<h4 id="2-entity-是地图"><a class="header" href="#2-entity-是地图">2. Entity 是“地图”</a></h4>
+<p>*<strong>Entity</strong> 就是数据库表的 <strong>定义（Schema）</strong> 。</p>
+<ul>
+<li>它告诉程序：表名是什么、有哪些列、主键是谁、表与表之间怎么关联。</li>
+</ul>
+<h4 id="3-连接要亲手传递"><a class="header" href="#3-连接要亲手传递">3. 连接要“亲手传递”</a></h4>
+<ul>
+<li>SeaORM  <strong>没有全局变量</strong> （不像某些框架可以直接调用 <code>DB::save()</code>）。</li>
+<li>你必须自己拿着“数据库连接对象”（<code>DatabaseConnection</code>），把它传给需要操作数据库的函数。这样做虽然麻烦一点点，但代码更安全、更易于测试。</li>
+</ul>
+<hr>
+<p><strong>总结成一句话：</strong></p>
+<blockquote>
+<p><strong>Entity</strong> 定义表，<strong>Model</strong> 用来读，<strong>ActiveModel</strong> 用来写，<strong>Connection</strong> 手动传。</p>
+</blockquote>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="安装与配置"><a class="header" href="#安装与配置">安装与配置</a></h1>
+<p><strong>PostgreSQL + SeaORM</strong> 的标准化安装与配置流程。按照这个顺序操作，你可以快速搭建起开发环境。</p>
+<hr>
+<h2 id="第一步配置-cargotoml-依赖安装首先在你的-rust-项目中引入-seaorm既然你使用-postgresql请务必开启-sqlx-postgres-驱动"><a class="header" href="#第一步配置-cargotoml-依赖安装首先在你的-rust-项目中引入-seaorm既然你使用-postgresql请务必开启-sqlx-postgres-驱动">第一步：配置 <code>Cargo.toml</code> (依赖安装)首先，在你的 Rust 项目中引入 SeaORM。既然你使用 <strong>PostgreSQL</strong>，请务必开启 <code>sqlx-postgres</code> 驱动</a></h2>
+<pre><code class="language-toml">[dependencies]
+# SeaORM 核心配置
+sea-orm = { version = "1.1.0", features = [ 
+    "sqlx-postgres",          # 必选：PostgreSQL 驱动
+    "runtime-tokio-rustls",   # 必选：异步运行时
+    "macros",                 # 必选：用于自动生成代码
+    "debug-print",            # 建议：开发时查看 SQL 日志
+    "with-chrono",            # 建议：处理数据库的时间类型
+] }
+# 日志捕获（用于配合 debug-print）
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# 异步库
+tokio = { version = "1.0", features = ["full"] }
+</code></pre>
+<h3 id="extra-features"><a class="header" href="#extra-features">Extra features</a></h3>
+<ul>
+<li>
+<p><strong>debug-print</strong> - 将每个 SQL 语句打印到记录器</p>
+</li>
+<li>
+<p><strong>mock</strong> - 用于单元测试的模拟接口</p>
+</li>
+<li>
+<p><strong>macros</strong> - 过程宏，例如 DeriveEntityModel</p>
+</li>
+<li>
+<p><strong>rbac</strong> - 基于角色的访问控制</p>
+</li>
+<li>
+<p><strong>seaography</strong> - 启用 GraphQL 支持</p>
+</li>
+<li>
+<p><strong>schema-sync</strong> - 启用 SchemaBuilder 中的同步功能</p>
+</li>
+<li>
+<p><strong>with-chrono</strong> - 支持 chrono 类型</p>
+</li>
+<li>
+<p><strong>with-time</strong> - 支持 time 类型</p>
+</li>
+<li>
+<p><strong>with-json</strong> - 支持 serde-json 类型</p>
+</li>
+<li>
+<p><strong>with-rust_decimal</strong> - 支持 rust_decimal 类型</p>
+</li>
+<li>
+<p><strong>with-bigdecimal</strong> - 支持 bigdecimal 类型</p>
+</li>
+<li>
+<p><strong>with-uuid</strong> - 支持 uuid 类型</p>
+</li>
+<li>
+<p><strong>with-ipnetwork</strong> - 支持 Postgres ipnetwork</p>
+</li>
+<li>
+<p><strong>postgres-vector</strong> - 支持 Postgres pgvector</p>
+</li>
+<li>
+<p><strong>postgres-array</strong> - 支持 Postgres 数组类型，默认开启</p>
+</li>
+<li>
+<p><strong>sqlite-use-returning-for-3_35</strong> - 为 SQLite 3.35+ 版本使用 RETURNING 语句，默认开启</p>
+</li>
+<li>
+<p><strong>mariadb-use-returning</strong> - 为 MariaDB 使用 RETURNING 语句，默认开启</p>
+</li>
+</ul>
+<hr>
+<h2 id="第二步配置连接选项-database-connection"><a class="header" href="#第二步配置连接选项-database-connection">第二步：配置连接选项 (Database Connection)</a></h2>
+<p>在代码中通过 <code>ConnectOptions</code> 建立与 PostgreSQL 的连接。你可以设置连接池的大小和超时时间。
+<strong>用法说明：</strong></p>
+<pre><code class="language-rust ignore">usesea_orm::{ConnectOptions, Database, DatabaseConnection};
+usestd::time::Duration;
+pubasyncfnsetup_db() -&gt;Result&lt;DatabaseConnection, sea_orm::DbErr&gt; {
+    // PostgreSQL 连接字符串格式
+    letdb_url="postgres://username:password@localhost:5432/database_name";
+    letmutopt=ConnectOptions::new(db_url);
+    opt.max_connections(20)           // 最大连接数
+       .min_connections(5)            // 最小连接数
+       .connect_timeout(Duration::from_secs(8)) // 连接超时
+       .sqlx_logging(false);          // 关闭 SQLx 原生日志，改用 SeaORM 的 debug-print
+    // 返回连接对象 (DatabaseConnection)
+    Database::connect(opt).await
+}</code></pre>
+<hr>
+<h2 id="第三步开启调试日志-logging"><a class="header" href="#第三步开启调试日志-logging">第三步：开启调试日志 (Logging)</a></h2>
+<p>为了在控制台看到 SeaORM 生成的 SQL 语句，你需要在 <code>main</code> 函数开头初始化日志订阅者。</p>
+<p><strong>用法说明：</strong></p>
+<pre class="playground"><code class="language-rust edition2024">#[tokio::main]
+async fn main() {
+    // 初始化日志系统，这样才能看到 debug-print 输出的 SQL
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+    letdb=setup_db().await.expect("数据库连接失败");
+    // ... 开始你的业务逻辑
+}</code></pre>
+<hr>
+<h2 id="第四步理解操作逻辑-crud-模式"><a class="header" href="#第四步理解操作逻辑-crud-模式">第四步：理解操作逻辑 (CRUD 模式)</a></h2>
+<p>配置完成后，你在编写业务逻辑时只需记住这套“三位一体”的操作流：</p>
+<p>1.<strong>定义阶段 (Entity)</strong>：写一个结构体代表 PostgreSQL 的表。</p>
+<p>2.<strong>读取阶段 (Model)</strong>：使用 <code>Entity::find()</code> 查询，结果存入 <code>Model</code>（只读）。</p>
+<p>3.<strong>写入阶段 (ActiveModel)</strong>：</p>
+<ul>
+<li>要把 <code>Model</code> 转成 <code>ActiveModel</code> 才能修改。</li>
+<li>直接创建 <code>ActiveModel</code> 用于插入新数据。</li>
+</ul>
+<p>4.<strong>手动传递连接</strong>：把第二步生成的 <code>db</code> (DatabaseConnection) 对象传给查询函数。</p>
+<hr><div style="break-before: page; page-break-before: always;"></div>
+<h1 id="迁移系统"><a class="header" href="#迁移系统">迁移系统</a></h1>
+<p>迁移系统（<code>Migration</code>）简单来说就是数据库的版本控制工具。就像 <code>Git</code> 记录代码改动一样，<code>Migration</code> 记录数据库表结构的改动（新建表、加字段、删索引等）。</p>
+<hr>
+<h2 id="1-完整的工作区-workspace-结构"><a class="header" href="#1-完整的工作区-workspace-结构">1. 完整的工作区 (Workspace) 结构</a></h2>
+<p>在 Rust 中，SeaORM 官方强烈建议使用 <strong>Workspace</strong> 模式。这能让你的“业务代码”和“数据库迁移代码”彻底解耦。</p>
+<p>推荐的目录树如下：</p>
+<pre><code class="language-text">my_project/
+├── Cargo.toml          # 根目录虚拟清单
+├── src/                # 你的业务逻辑 (App Crate)
+│   └── main.rs
+└── migration/          # 迁移逻辑 (Migration Crate)
+    ├── Cargo.toml
+    └── src/
+        ├── lib.rs      # 定义迁移器
+        ├── main.rs     # CLI 入口
+        └── m20240110_000001_create_user_table.rs  # 具体的表变动记录
+</code></pre>
+<hr>
+<h2 id="2-第一步初始化与配置"><a class="header" href="#2-第一步初始化与配置">2. 第一步：初始化与配置</a></h2>
+<p>首先，安装工具并创建迁移目录。</p>
+<h3 id="安装-cli"><a class="header" href="#安装-cli">安装 CLI</a></h3>
+<pre><code class="language-bash">cargo install sea-orm-cli
+</code></pre>
+<h3 id="初始化"><a class="header" href="#初始化">初始化</a></h3>
+<p>在你的项目根目录下运行：</p>
+<pre><code class="language-bash">sea-orm-cli migrate init
+</code></pre>
+<h3 id="配置-migrationcargotoml"><a class="header" href="#配置-migrationcargotoml">配置 <code>migration/Cargo.toml</code></a></h3>
+<p>这是最容易出错的地方。你需要为迁移脚本开启 <strong>PostgreSQL</strong> 支持：</p>
+<pre><code class="language-toml">[dependencies.sea-orm-migration]
+version = "1.1.0" 
+features = [
+  "runtime-tokio-rustls", # 异步运行时
+  "sqlx-postgres",        # 明确指定使用 Postgres
+]
+</code></pre>
+<hr>
+<h2 id="3-第二步编写迁移逻辑-核心细节"><a class="header" href="#3-第二步编写迁移逻辑-核心细节">3. 第二步：编写迁移逻辑 (核心细节)</a></h2>
+<p>迁移文件（如 <code>m..._create_table.rs</code>）是纯 Rust 代码。SeaORM 使用 <strong>SeaQuery</strong>（一种 DSL）来描述 SQL。</p>
+<h3 id="up-函数创建表"><a class="header" href="#up-函数创建表"><code>up</code> 函数：创建表</a></h3>
+<p>假设我们要创建一个用户表：</p>
+<pre><code class="language-rust ignore">use sea_orm_migration::prelude::*;
+
+//SeaORM 需要给每个迁移任务起个名字（存到 PostgreSQL 的 seaql_migrations 表里）。这个宏会自动把你的文件名（比如 m20240110_...）提取出来作为名字，省得你手动写。
+#[derive(DeriveMigrationName)]
+pub struct Migration;
+
+// 实现 MigrationTrait 来定义具体的迁移逻辑
+#[async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+        // 使用 manager 创建表
+        manager
+            .create_table(
+                Table::create()
+                    .table(User::Table) // 表名
+                    .if_not_exists()    // 防御性编程
+                    .col(
+                        ColumnDef::new(User::Id)
+                            .integer()
+                            .not_null()
+                            .auto_increment()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(User::Username).string().not_null().unique_key())
+                    .col(ColumnDef::new(User::CreatedAt).date_time().default(Expr::current_timestamp()))
+                    .to_owned(),
+            )
+            .await
+    }
+
+    async fn down(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+        // 回滚操作：删除表
+        manager
+            .drop_table(Table::drop().table(User::Table).to_owned())
+            .await
+    }
+}
+
+// 定义表和列的枚举，方便在 Rust 里引用. 在 SQL 里我们需要写 user（表名）、id（列名）,如果不加这个，你得手写字符串 "user", "id"。加了它，你就可以写 User::Table 或 User::Id。如果有拼写错误，编译器会直接报错，这非常安全。
+#[derive(DeriveIden)]
+enum User {
+    Table,
+    Id,
+    Username,
+    CreatedAt,
+}</code></pre>
+<p>在数据库迁移（Migration）中，<code>up</code> 和 <code>down</code> 就像是版本控制里的 <strong>“前进”</strong> 和 <strong>“后退”</strong>。你可以把它们想象成一对“反义词”操作：<code>up</code> 负责<strong>建立</strong>，<code>down</code> 负责<strong>拆除</strong>。</p>
+<h4 id="1-fn-up"><a class="header" href="#1-fn-up">1. <code>fn up</code></a></h4>
+<p>当你运行 <code>sea-orm-cli migrate up</code> 时，执行的就是这个函数。</p>
+<ul>
+<li><strong>目的</strong>：改变数据库的结构，让它变成你想要的新样子。</li>
+<li><strong>常见操作</strong>：
+<ul>
+<li>创建新表（<code>create_table</code>）。</li>
+<li>给现有的表增加新列（<code>alter_table</code>）。</li>
+<li>创建索引或外键。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-fn-down"><a class="header" href="#2-fn-down">2. <code>fn down</code></a></h4>
+<p>当你发现这次改动有问题，或者想回到上一个数据库版本，运行 <code>sea-orm-cli migrate down</code>，执行的就是这个函数。</p>
+<ul>
+<li><strong>目的</strong>：把 <code>up</code> 函数做过的事情<strong>原样撤销</strong>，让数据库回到没改之前的状态。</li>
+<li><strong>常见操作</strong>：
+<ul>
+<li>如果 <code>up</code> 是创建表，<code>down</code> 就是删除表（<code>drop_table</code>）。</li>
+<li>如果 <code>up</code> 是加了一列，<code>down</code> 就是删掉那一列。</li>
+</ul>
+</li>
+<li><strong>重要性</strong>：<strong>对称性</strong>。为了保证数据库的整洁，<code>down</code> 逻辑必须写得准确。如果 <code>up</code> 建了表但 <code>down</code> 没写删表，数据库就会留下“垃圾”。</li>
+</ul>
+<h4 id="3-它们是如何工作的"><a class="header" href="#3-它们是如何工作的">3. 它们是如何工作的？</a></h4>
+<p>SeaORM 会在你的 <strong>PostgreSQL</strong> 数据库里自动维护一张表，叫 <code>seaql_migrations</code>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>版本号 (Version)</th><th>应用时间 (Applied At)</th></tr>
+</thead>
+<tbody>
+<tr><td>m20220101_000001</td><td>2024-05-20 …</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>**当你执行 <code>up**</code>：SeaORM 运行 <code>up</code> 函数。如果成功，就把这个文件名（版本号）记入这张表。<strong>下次再跑 <code>up</code> 时，发现表里已经有了，它就会跳过，不会重复执行。</strong></li>
+<li>**当你执行 <code>down**</code>：SeaORM 查找表里最后一条记录，找到对应的文件，执行它的 <code>down</code> 函数。如果成功，就从表里删掉这条记录。</li>
+</ul>
+<h4 id="4-深入代码细节"><a class="header" href="#4-深入代码细节">4. 深入代码细节</a></h4>
+<p>让我们看看你刚才提供的代码块里，这两个函数具体在干什么：</p>
+<pre><code class="language-rust ignore">// --- UP: 增加功能 ---
+async fn up(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+    manager
+        .create_table(               // 动作：创建表
+            Table::create()          // 建造者模式开始
+                .table(User::Table)  // 表名：user
+                .col(...)            // 具体的列定义
+                .to_owned()
+        )
+        .await
+}
+
+// --- DOWN: 撤销功能 ---
+async fn down(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+    manager
+        .drop_table(                 // 动作：删除表（撤销 up 的创建）
+            Table::drop()
+                .table(User::Table)  // 指定要删哪张表
+                .to_owned()
+        )
+        .await
+}</code></pre>
+<hr>
+<h2 id="4-第三步如何执行迁移"><a class="header" href="#4-第三步如何执行迁移">4. 第三步：如何执行迁移</a></h2>
+<p>你有两个选择：<strong>命令行</strong>或<strong>代码内运行</strong>。</p>
+<h3 id="a-命令行方式-手动"><a class="header" href="#a-命令行方式-手动">A. 命令行方式 (手动)</a></h3>
+<p>你需要设置环境变量来告诉 CLI 你的 PostgreSQL 连接串：</p>
+<pre><code class="language-bash"># 设置环境变量 (Linux/macOS)
+export DATABASE_URL="postgres://user:pass@localhost:5432/my_db"
+# 查看当前迁移状态
+sea-orm-cli migrate status
+# 执行所有待处理的迁移
+sea-orm-cli migrate up
+# 撤销最后一次迁移
+sea-orm-cli migrate down
+</code></pre>
+<h3 id="b-代码方式-自动化"><a class="header" href="#b-代码方式-自动化">B. 代码方式 (自动化)</a></h3>
+<p>在 <code>src/main.rs</code> 中，连接数据库后立即执行迁移。这样每次你部署新代码，数据库都会自动更新。</p>
+<pre><code class="language-rust ignore">use migration::{Migrator, MigratorTrait}; // 引入你的 migration crate
+#[tokio::main]
+async fn main() {
+    let db = sea_orm::Database::connect("postgres://...").await.unwrap();
+    // 这一行会自动运行所有未执行的 .rs 迁移文件
+    Migrator::up(&amp;db, None).await.expect("迁移失败");
+    println!("数据库已就绪");
+}</code></pre>
+<hr>
+<h2 id="5-迁移系统的生命周期-关键点"><a class="header" href="#5-迁移系统的生命周期-关键点">5. 迁移系统的生命周期 (关键点)</a></h2>
+<p>为了防止弄乱 PostgreSQL，请务必理解这三个概念：</p>
+<ol>
+<li><strong><code>seaql_migrations</code> 表</strong>：SeaORM 会自动在你的数据库里建这张表。它记录了哪些 <code>.rs</code> 文件已经跑过了。不要手动删它。</li>
+<li><strong>不可变性</strong>：一旦某个迁移文件已经 <code>up</code> 到了生产环境，<strong>不要修改它</strong>。如果你想加字段，应该建一个<strong>新</strong>的迁移文件。</li>
+<li><strong>Iden 宏</strong>：代码最后的 <code>enum User { Table, Id... }</code> 是为了避免在代码里写硬编码字符串（如 <code>"username"</code>），增加类型安全性。</li>
+</ol>
+<hr><div style="break-before: page; page-break-before: always;"></div>
+<h1 id="编写迁移"><a class="header" href="#编写迁移">编写迁移</a></h1>
+<h2 id="1-迁移系统的核心配置migratortrait"><a class="header" href="#1-迁移系统的核心配置migratortrait">1. 迁移系统的核心配置：<code>MigratorTrait</code></a></h2>
+<p>迁移文件写好后，如果不进行 <strong>注册</strong> ，系统是找不到它们的。这是通过 <code>migration/src/lib.rs</code> 实现的。</p>
+<ul>
+<li><strong><code>Migrator</code> 结构体</strong> ：它是整个迁移的控制塔。</li>
+<li><strong><code>migrations</code> 函数</strong> ：
+<ul>
+<li>它返回一个 <code>Vec&lt;Box&lt;dyn MigrationTrait&gt;&gt;</code>。</li>
+<li><strong>重要细节</strong> ：必须手动将每一个迁移文件（如 <code>m20220101_...::Migration</code>）用 <code>Box::new()</code> 包裹并放入数组。</li>
+<li><strong>顺序要求</strong> ：数组内的顺序必须是 <strong>时间顺序</strong> 。SeaORM 依赖这个顺序来依次执行。</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-rust ignore">// migration/src/lib.rs 完整还原
+pub struct Migrator;
+
+#[async_trait]
+impl MigratorTrait for Migrator {
+    fn migrations() -&gt; Vec&lt;Box&lt;dyn MigrationTrait&gt;&gt; {
+        vec![
+            Box::new(m20220101_000001_create_table::Migration),
+            // 每一个新生成的迁移文件，都要手动在这里“挂号”
+        ]
+    }
+}</code></pre>
+<hr>
+<h2 id="2-深入-schemamanager"><a class="header" href="#2-深入-schemamanager">2. 深入 <code>SchemaManager</code></a></h2>
+<p>你在 <code>up</code> 和 <code>down</code> 函数中使用的 <code>manager</code> 对象提供了极丰富的 API。</p>
+<h3 id="a-结构创建-creation"><a class="header" href="#a-结构创建-creation">A. 结构创建 (Creation)</a></h3>
+<pre><code class="language-rust ignore">use sea_orm_migration::{prelude::*, schema::*};
+manager
+    .create_table(
+        Table::create()
+            .table("post")
+            .if_not_exists()
+            .col(pk_auto("id"))
+            .col(string("title"))
+            .col(string("text"))
+            .col(enumeration_null("category", "category", ["Feed", "Store"]))
+    )
+    .await</code></pre>
+<p>除了 <code>create_table</code>，还有这些你可能忽略的细节：</p>
+<ul>
+<li><strong><code>create_index</code></strong> ：创建索引,eg: <code>manager.create_index(sea_query::Index::create()..)</code>。</li>
+<li><strong><code>create_foreign_key</code></strong> ：创建外键约束, eg: <code>manager.create_foreign_key(sea_query::ForeignKey::create()..)</code>。</li>
+<li><strong><code>create_type</code> (PostgreSQL 专有)</strong> ：</li>
+</ul>
+<pre><code class="language-rust ignore">  use sea_orm_migration::prelude::extension::postgres::Type;
+manager
+    .create_type(
+        Type::create()
+            .as_enum(CategoryEnum)
+            .values(["feed", "story"])
+            .to_owned()
+    )
+    .await?;</code></pre>
+<h3 id="b-结构变更与删除"><a class="header" href="#b-结构变更与删除">B. 结构变更与删除</a></h3>
+<ul>
+<li><strong><code>drop_table</code></strong> ：删除表,eg: <code>manager.drop_table(sea_query::Table::drop()..)</code></li>
+<li><strong><code>alter_table</code></strong> ：修改表结构（加字段、改类型）eg: <code>manager.alter_table(sea_query::Table::alter()..)</code></li>
+<li><strong><code>rename_table</code></strong> ：重命名。eg: <code>manager.rename_table(sea_query::Table::rename()..)</code></li>
+<li><strong><code>truncate_table</code></strong> ：清空表数据但保留结构。eg: <code>manager.truncate_table(sea_query::Table::truncate()..)</code></li>
+<li><strong><code>drop_index</code> / <code>drop_foreign_key</code></strong> ：删除索引或外键,eg: <code>manager.drop_index(sea_query::Index::drop()..)</code>;<code>manager.drop_foreign_key(sea_query::ForeignKey::drop()..)</code></li>
+<li><strong><code>truncate_table</code></strong> ：截断表数据,eg: <code>manager.truncate_table(sea_query::Table::truncate()..)</code></li>
+<li><strong><code>alter_type</code></strong> ：修改数据类型（仅限 PostgreSQL）,eg: <code>manager.alter_type(sea_query::Type::alter()..)</code></li>
+<li><strong><code>drop_type</code></strong> ：删除数据类型（仅限 PostgreSQL）,eg: <code>manager.drop_type(sea_query::extension::postgres::Type::drop()..)</code></li>
+</ul>
+<h3 id="c-结构检查"><a class="header" href="#c-结构检查">C. 结构检查</a></h3>
+<p>在执行高风险操作前，可以使用检查方法防止报错：</p>
+<ul>
+<li><strong><code>has_table("name")</code></strong> ：是否存在某表,eg: <code>manager.has_table("table_name").await?</code>。</li>
+<li><strong><code>has_column("table", "col")</code></strong> ：是否存在某列,eg: <code>manager.has_column("table_name", "column_name")</code>。</li>
+<li><strong><code>has_index("table", "idx")</code></strong> ：是否存在某索引,eg: <code>manager.has_index("table_name", "index_name")</code>。</li>
+</ul>
+<hr>
+<h2 id="3-原始-sql-的两种执行方式"><a class="header" href="#3-原始-sql-的两种执行方式">3. 原始 SQL 的两种执行方式</a></h2>
+<p>虽然 SeaQuery 很好，但有时候你必须写原始 SQL。文档提到了两种方法，区别非常大：</p>
+<ol>
+<li>
+<p><strong><code>execute_unprepared(sql)</code></strong> ：</p>
+<ul>
+<li>用于<strong>不带参数</strong>的纯 SQL（如 <code>CREATE TABLE</code>）。</li>
+<li>它是最直接的字符串执行。</li>
+</ul>
+<pre><code class="language-rust ignore">// Use `execute_unprepared` if the SQL statement doesn't have value bindings
+db.execute_unprepared(
+    "CREATE TABLE `cake` (
+        `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        `name` varchar(255) NOT NULL
+    )"
+)
+.await?;</code></pre>
+</li>
+<li>
+<p><strong><code>execute_raw(Statement)</code></strong> ：</p>
+</li>
+</ol>
+<ul>
+<li>用于<strong>带参数绑定</strong>的 SQL（如 <code>INSERT INTO table (name) VALUES (?)</code>）。</li>
+<li><strong>原理</strong> ：它通过 <code>Statement::from_sql_and_values</code> 构建，能有效防御 SQL 注入。</li>
+</ul>
+<pre><code class="language-rust ignore">// Construct a `Statement` if the SQL contains value bindings
+db.execute_raw(Statement::from_sql_and_values(
+    manager.get_database_backend(),
+    r#"INSERT INTO `cake` (`name`) VALUES (?)"#,
+    ["Cheese Cake".into()]
+)).await?;</code></pre>
+<hr>
+<h2 id="4-高级技巧与最佳实践-tips"><a class="header" href="#4-高级技巧与最佳实践-tips">4. 高级技巧与最佳实践 (Tips)</a></h2>
+<h3 id="tip-1多原子操作组合"><a class="header" href="#tip-1多原子操作组合">Tip 1：多原子操作组合</a></h3>
+<p>你可以在一个 <code>up</code> 函数里写多个操作。<strong>注意：</strong> 因为你用的是  <strong>PostgreSQL</strong> ，这些操作会自动被包裹在一个 <strong>Transaction（事务）</strong> 中。如果第 3 个操作失败了，前 2 个会自动回滚。</p>
+<h3 id="tip-2手动实现-add-column-if-not-exists"><a class="header" href="#tip-2手动实现-add-column-if-not-exists">Tip 2：手动实现 <code>ADD COLUMN IF NOT EXISTS</code></a></h3>
+<p>MySQL 不支持这个 SQL 语法，所以 SeaORM 建议通过代码逻辑实现：</p>
+<pre><code class="language-rust ignore">async fn up(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+    if !manager.has_column("user", "email").await? {
+        // 只有不存在时才执行 alter_table
+    }
+    Ok(())
+}</code></pre>
+<p>初学者暂时可以不考虑，直接写 <code>create_table</code> 和 <code>add_column</code>。等以后遇到报错了，再回来学这个“<strong>手动检查</strong>”的方法。</p>
+<h3 id="tip-3数据种子填充"><a class="header" href="#tip-3数据种子填充">Tip 3：数据种子填充</a></h3>
+<p>你可以在 <code>up</code> 逻辑里直接使用 <code>ActiveModel</code> 插入初始数据。迁移文件不仅能改表结构，还能利用你已经写好的实体模型来操作数据。 它是将“结构变更”与“数据初始化”合二为一的优雅手段。</p>
+<ul>
+<li><strong>逻辑</strong> ：先 <code>create_table</code>，紧接着 <code>insert(db)</code>。</li>
+</ul>
+<pre><code class="language-rust ignore">#[async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+        // 1. 先用 SeaQuery 建表
+        manager.create_table(
+            Table::create().table(cake::Entity).if_not_exists()
+                .col(ColumnDef::new(cake::Column::Id).integer().not_null().auto_increment().primary_key())
+                .col(ColumnDef::new(cake::Column::Name).string().not_null())
+                .to_owned()
+        ).await?;
+
+        // 2. 表建好了，立刻塞入一条初始数据
+        let db = manager.get_connection();
+        cake::ActiveModel {
+            name: Set("Cheesecake".to_owned()),
+            ..Default::default() // 其他字段用默认值
+        }
+        .insert(db)// 真正的插入动作
+        .await?; 
+
+        Ok(())
+    }
+}</code></pre>
+<hr>
+<p>迁移系统不仅仅是建表。它是通过 MigratorTrait 注册、利用 SchemaManager 丰富的 API 进行结构演进、并利用 PostgreSQL 的 原子性事务 确保数据安全的一整套工程化方案。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="运行迁移"><a class="header" href="#运行迁移">运行迁移</a></h1>
+<h2 id="1-命令行操作-cli"><a class="header" href="#1-命令行操作-cli">1. 命令行操作 (CLI)</a></h2>
+<p>在终端里，你可以手动控制数据库的进化。</p>
+<blockquote>
+<p><strong>注意</strong> ：运行这些命令前，必须先在终端设置环境变量：<code>export DATABASE_URL="postgres://user:pass@localhost:5432/db"</code>。</p>
+</blockquote>
+<h3 id="常用命令对比表"><a class="header" href="#常用命令对比表">常用命令对比表</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th><strong>命令</strong></th><th><strong>行为</strong></th><th><strong>危险等级</strong></th><th><strong>适用场景</strong></th></tr>
+</thead>
+<tbody>
+<tr><td><strong><code>up</code></strong></td><td>运行所有未执行的迁移。</td><td>🟢 安全</td><td>日常更新数据库。</td></tr>
+<tr><td><strong><code>down</code></strong></td><td>撤销最后一次迁移。</td><td>🟡 中等</td><td>发现刚写的脚本有错，回滚一下。</td></tr>
+<tr><td><strong><code>status</code></strong></td><td>列出哪些已跑，哪些还没跑。</td><td>🟢 安全</td><td>检查当前数据库版本。</td></tr>
+<tr><td><strong><code>refresh</code></strong></td><td>先回滚所有迁移，再重新全部跑一遍。</td><td>🔴 危险</td><td>相当于重置数据，但保留表结构的变化。</td></tr>
+<tr><td><strong><code>fresh</code></strong></td><td><strong>直接删掉所有表</strong> ，再重新跑一遍。</td><td>💀 极高</td><td>数据库搞乱了，想彻底推倒重来。</td></tr>
+<tr><td><strong><code>reset</code></strong></td><td>回滚所有已应用的迁移。</td><td>🔴 危险</td><td>清空数据库结构。</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="a-命令行界面-cli-常用操作"><a class="header" href="#a-命令行界面-cli-常用操作">A. 命令行界面 (CLI) 常用操作</a></h3>
+<ul>
+<li><code>sea-orm-cli migrate init</code>: 初始化迁移目录，生成基础结构, eg: <code>sea-orm-cli migrate init</code>。</li>
+<li><code>sea-orm-cli migrate generate [NAME]</code>: 生成带时间戳的新迁移文件, eg: <code>sea-orm-cli migrate generate create_user_table</code>。</li>
+<li><code>sea-orm-cli migrate up</code>: 应用所有挂起的（未执行的）迁移任务, eg: <code>sea-orm-cli migrate up</code>。</li>
+<li><code>sea-orm-cli migrate up -n [NUM]</code>: 应用指定数量的挂起迁移任务, eg: <code>sea-orm-cli migrate up -n 3</code>。</li>
+<li><code>sea-orm-cli migrate down</code>: 撤销最后一次应用的迁移任务, eg: <code>sea-orm-cli migrate down</code>。</li>
+<li><code>sea-orm-cli migrate down -n [NUM]</code>: 撤销最近指定数量的迁移任务, eg: <code>sea-orm-cli migrate down -n 2</code>。</li>
+<li><code>sea-orm-cli migrate status</code>: 查看所有迁移任务的状态（已应用或挂起）, eg: <code>sea-orm-cli migrate status</code>。</li>
+<li><code>sea-orm-cli migrate fresh</code>: 删除数据库中的所有表，并重新从头应用所有迁移, eg: <code>sea-orm-cli migrate fresh</code>。</li>
+<li><code>sea-orm-cli migrate refresh</code>: 回滚所有已应用的迁移，然后重新应用它们, eg: <code>sea-orm-cli migrate refresh</code>。</li>
+<li><code>sea-orm-cli migrate reset</code>: 回滚所有已应用的迁移任务, eg: <code>sea-orm-cli migrate reset</code>。</li>
+</ul>
+<hr>
+<h3 id="b-程序化调用-在-rust-代码中运行"><a class="header" href="#b-程序化调用-在-rust-代码中运行">B. 程序化调用 (在 Rust 代码中运行)</a></h3>
+<ul>
+<li><code>Migrator::up(db, None)</code>: 在程序启动时自动应用所有挂起的迁移, eg: <code>Migrator::up(&amp;db, None).await?</code>。</li>
+<li><code>Migrator::up(db, Some(n))</code>: 在代码中应用前 <code>n</code> 个挂起的迁移, eg: <code>Migrator::up(&amp;db, Some(5)).await?</code>。</li>
+<li><code>Migrator::down(db, None)</code>: 在代码中回滚所有已应用的迁移（等同于 reset）, eg: <code>Migrator::down(&amp;db, None).await?</code>。</li>
+<li><code>Migrator::down(db, Some(n))</code>: 在代码中回滚最后 <code>n</code> 个迁移, eg: <code>Migrator::down(&amp;db, Some(1)).await?</code>。</li>
+<li><code>Migrator::status(db)</code>: 在代码中检查迁移状态, eg: <code>let status = Migrator::status(&amp;db).await?</code>。</li>
+<li><code>Migrator::fresh(db)</code>: 在代码中执行“删表重练”操作, eg: <code>Migrator::fresh(&amp;db).await?</code>。</li>
+<li><code>Migrator::refresh(db)</code>: 在代码中执行“重置并重启”迁移, eg: <code>Migrator::refresh(&amp;db).await?</code>。</li>
+<li><code>Migrator::reset(db)</code>: 在代码中撤销所有迁移, eg: <code>Migrator::reset(&amp;db).await?</code>。</li>
+<li><code>Migrator::get_pending_migrations(db)</code>: 获取所有尚未应用的迁移列表, eg: <code>let pending = Migrator::get_pending_migrations(&amp;db).await?</code>。</li>
+<li><code>Migrator::get_applied_migrations(db)</code>: 获取所有已经成功应用的迁移列表, eg: <code>let applied = Migrator::get_applied_migrations(&amp;db).await?</code>。</li>
+</ul>
+<hr>
+<h2 id="2-代码自动执行生产环境必备"><a class="header" href="#2-代码自动执行生产环境必备">2. 代码自动执行：生产环境必备</a></h2>
+<p>在生产环境，你不可能手动去敲命令行。通常在 <code>main.rs</code> 程序启动时自动检测并升级数据库。</p>
+<pre><code class="language-rust ignore">use migration::{Migrator, MigratorTrait};
+// 在连接数据库后调用
+let db = Database::connect(url).await?;
+// 自动把所有没跑的迁移补上
+Migrator::up(&amp;db, None).await?; </code></pre>
+<hr><div style="break-before: page; page-break-before: always;"></div>
+<h1 id="初始化数据"><a class="header" href="#初始化数据">初始化数据</a></h1>
+<p>如何在数据库迁移过程中 <strong>初始化数据（Seeding Data）</strong> 。当你建好表后，通常需要塞入一些初始数据（如默认管理员、配置项等）。</p>
+<hr>
+<h2 id="1-数据初始化-seeding-data-的三种方式"><a class="header" href="#1-数据初始化-seeding-data-的三种方式">1. 数据初始化 (Seeding Data) 的三种方式</a></h2>
+<ul>
+<li><strong>使用 ActiveModel 初始化</strong> : 借用已经定义好的 Rust 实体类来插入数据，具有最强的类型安全性:</li>
+</ul>
+<pre><code class="language-rust ignore">let db = manager.get_connection();
+cake::ActiveModel { 
+   name: Set(
+       "Cheesecake".to_owned()), 
+       ..Default::default() 
+   }
+  .insert(db)
+   .await?;</code></pre>
+<ul>
+<li><strong>使用 SeaQuery 语句初始化</strong> : 不需要依赖具体的实体类，直接通过代码构造插入语句，适合在实体类尚未生成时使用, eg:</li>
+</ul>
+<pre><code class="language-rust ignore">let stmt = Query::insert()
+      .into_table("cake")
+      .columns(["name"])
+      .values_panic(["Tiramisu".into()])
+      .to_owned();
+manager.execute(&amp;stmt).await?;</code></pre>
+<ul>
+<li><strong>事务式初始化 (Transactional)</strong> : 手动开启一个事务，确保数据插入要么全部成功，要么全部回滚，保证数据的一致性, eg:</li>
+</ul>
+<pre><code class="language-rust ignore">let db = manager.get_connection();
+let txn = db.begin().await?; // 开启事务
+cake::ActiveModel {
+    name: Set("Cheesecake".to_owned()),
+    ..Default::default()
+}
+.insert(&amp;txn)
+.await?;
+txn.commit().await?; // 提交事务</code></pre>
+<hr>
+<h2 id="2-深度细节解析"><a class="header" href="#2-深度细节解析">2. 深度细节解析</a></h2>
+<h3 id="①-为什么使用-activemodel"><a class="header" href="#①-为什么使用-activemodel">① 为什么使用 <code>ActiveModel</code>？</a></h3>
+<p>这是最推荐的方式。因为它是<strong>强类型</strong>的，如果你的数据库字段改了，这段代码在编译阶段就会报错，而不是等到运行时才崩溃。</p>
+<blockquote>
+<p><strong>注意</strong> ：这要求你的 <code>migration</code> crate 能够引用到 <code>entity</code> crate。</p>
+</blockquote>
+<h3 id="②-为什么使用-seaquery"><a class="header" href="#②-为什么使用-seaquery">② 为什么使用 <code>SeaQuery</code>？</a></h3>
+<p>如果你在写迁移脚本时，还没生成对应的 <code>entity</code> 代码，或者不想让迁移脚本和业务代码耦合得太深，就可以用 <code>Query::insert()</code>。它直接操作字符串表名和列名，灵活性更高。</p>
+<h3 id="③-关于-postgresql-的事务-important"><a class="header" href="#③-关于-postgresql-的事务-important">③ 关于 PostgreSQL 的事务 (Important!)</a></h3>
+<p>你使用的是  <strong>PostgreSQL</strong> ，有一个非常大的优势：</p>
+<ul>
+<li><strong>自动事务</strong> ：SeaORM 在 Postgres 上运行 <code>up</code> 函数时，默认会把整个函数包裹在一个事务里。</li>
+<li><strong>手动事务的作用</strong> ：虽然有自动事务，但文档中的 <code>db.begin()</code> 允许你在迁移逻辑内部进行更细粒度的控制，或者在复杂的逻辑中明确标注事务边界。</li>
+</ul>
+<hr>
+<h2 id="3-核心-api-说明"><a class="header" href="#3-核心-api-说明">3. 核心 API 说明</a></h2>
+<ul>
+<li><code>manager.get_connection()</code>: 从迁移管理器中获取当前的数据库连接对象 (<code>DbConn</code>)。</li>
+<li><code>Query::insert()</code>: SeaQuery 的插入语句构造器。</li>
+<li><code>manager.execute(&amp;stmt)</code>: 执行构造好的 SeaQuery 语句。</li>
+<li><code>db.begin()</code>: 在当前连接上开启一个异步事务。</li>
+<li><code>txn.commit()</code>: 提交事务，让所有更改永久生效。</li>
+</ul>
+<hr>
+<p>迁移脚本不只是能改“结构（表）”，还能改“内容（数据）”。在 PostgreSQL 中，利用其原子性特点，结合 ActiveModel 的类型安全，你可以非常稳健地完成数据库的初始化。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="leetcode"><a class="header" href="#leetcode">LeetCode</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
