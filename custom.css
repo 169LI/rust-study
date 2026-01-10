@@ -7,10 +7,10 @@ code {
 /* 代码块 (Code Blocks) 样式 */
 pre code {
     /* 增加行高，提升代码可读性 (推荐 1.5 - 1.7) */
-    line-height: 1.6 !important;
+    line-height: 1.4 !important;
     
     /* 调整字体大小 (根据需要微调，默认通常是 1em 或 0.9em) */
-    font-size: 1em !important;
+    font-size: 0.9em !important;
 }
 
 /* 代码块容器 */

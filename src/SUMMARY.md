@@ -34,6 +34,13 @@
     - [Cargo 工具链](./Rust学习/Cargo/Cargo工具链.md)
   - [三方库](./Rust学习/三方库.md)
     - [serde](./Rust学习/三方库/serde.md)
+    - [SeaORM](./Rust学习/三方库/SeaORM/SeaORM.md)
+      - [介绍](./Rust学习/三方库/SeaORM/介绍.md)
+      - [安装与配置](./Rust学习/三方库/SeaORM/安装与配置.md)
+      - [迁移系统](./Rust学习/三方库/SeaORM/迁移系统.md)
+      - [编写迁移](./Rust学习/三方库/SeaORM/编写迁移.md)
+      - [运行迁移](./Rust学习/三方库/SeaORM/运行迁移.md)
+      - [初始化数据](./Rust学习/三方库/SeaORM/初始化数据.md)
 
 ---
 
