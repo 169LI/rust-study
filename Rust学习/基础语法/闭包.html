@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-68d2e57e.js";
+            window.path_to_searchindex_js = "../../searchindex-abfe0e6f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2a4c8e05.js"></script>
@@ -211,7 +211,7 @@ fn main() {
 }</code></pre>
 <hr>
 <h2 id="二-闭包-closures"><a class="header" href="#二-闭包-closures">二、 闭包 (Closures)</a></h2>
-<p><code>Rust</code> 中的闭包（<code>closures</code>）是一种匿名函数，可以捕获其环境中的变量。闭包类似于其他语言中的 <code>lambda</code> 表达式，但 <code>Rust</code> 的闭包系统与所有权和借用紧密集成，确保内存安全。闭包可以作为函数参数、返回值，或存储在变量中，常用于迭代器、线程和回调。<code>Rust</code> 闭包实现了<code> Fn trait</code> 家族（<code>Fn、FnMut、FnOnce</code>），根据捕获方式决定其行为。最核心的特性是 <strong>捕获环境</strong> 。它们通常比函数更简洁，且支持类型推导。</p>
+<p><code>Rust</code> 中的闭包（<code>closures</code>）是一种匿名函数，可以捕获其环境中的变量。闭包类似于其他语言中的 <code>lambda</code> 表达式，但 <code>Rust</code> 的闭包系统与所有权和借用紧密集成，确保内存安全。闭包可以作为函数参数、返回值，或存储在变量中，常用于迭代器、线程和回调。<code>Rust</code> 闭包实现了<code>Fn trait</code> 家族（<code>Fn、FnMut、FnOnce</code>），根据捕获方式决定其行为。最核心的特性是 <strong>捕获环境</strong> 。它们通常比函数更简洁，且支持类型推导。</p>
 <h3 id="1-语法与自动推导"><a class="header" href="#1-语法与自动推导">1. 语法与自动推导</a></h3>
 <p>闭包不强制写类型，编译器会根据第一次调用的上下文锁定类型。语法：<code>|params| expression</code> 或 <code>{ body }</code>。</p>
 <pre class="playground"><code class="language-rust editable edition2024">fn main() {
@@ -316,10 +316,10 @@ fn main() {
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th><strong>特性</strong></th><th><strong>普通函数 (fn)</strong></th><th><strong>impl Trait 闭包</strong></th><th><strong>Box<code>&lt;dyn Trait&gt;</code> 闭包</strong></th></tr>
+<tr><th><strong>特性</strong></th><th><strong>普通函数 (fn)</strong></th><th><strong>impl Trait 闭包</strong></th><th><strong><code>Box&lt;dyn Trait&gt;</code> 闭包</strong></th></tr>
 </thead>
 <tbody>
-<tr><td><strong>捕获变量</strong></td><td>不支持</td><td>支持 (需用 <code>move</code>)</td><td>支持 (需用 <code>move</code>)</td></tr>
+<tr><td><strong>捕获变量</strong></td><td>不支持</td><td>支持（需用 <code>move</code>）</td><td>支持（需用 <code>move</code>）</td></tr>
 <tr><td><strong>返回类型</strong></td><td><code>fn(A) -&gt; B</code></td><td><code>impl Fn(A) -&gt; B</code></td><td><code>Box&lt;dyn Fn(A) -&gt; B&gt;</code></td></tr>
 <tr><td><strong>内存位置</strong></td><td>代码段</td><td>栈</td><td>堆</td></tr>
 <tr><td><strong>性能</strong></td><td>极高（静态）</td><td>高（静态）</td><td>略低（动态寻址）</td></tr>

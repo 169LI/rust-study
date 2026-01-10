@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-68d2e57e.js";
+            window.path_to_searchindex_js = "../../searchindex-abfe0e6f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2a4c8e05.js"></script>
@@ -286,14 +286,14 @@ fn main() {
 <div class="table-wrapper">
 <table>
 <thead>
-<tr><th><strong>组合器</strong></th><th><strong>作用描述</strong></th><th><strong>示例逻辑</strong></th></tr>
+<tr><th><strong>组合器</strong></th><th><strong>作用描述</strong></th></tr>
 </thead>
 <tbody>
-<tr><td><strong><code>.map()</code></strong></td><td>仅对成功（<code>Some</code>/<code>Ok</code>）的值进行转换</td><td><code>Ok(2).map()</code></td></tr>
-<tr><td><strong><code>.and_then()</code></strong></td><td>类似 <code>map</code>，但闭包也返回一个 <code>Result/Option</code>(平铺嵌套)</td><td>避免出现 <code>Some(Some(x))</code></td></tr>
-<tr><td><strong><code>.unwrap_or()</code></strong></td><td>如果是失败/缺失，则返回一个默认值</td><td><code>None.unwrap_or(0)</code>-&gt;<code>0</code></td></tr>
-<tr><td><strong><code>.unwrap_or_else()</code></strong></td><td>类似 <code>unwrap_or</code>，但默认值通过闭包计算（延迟求值）</td><td>适合计算默认值开销大的场景</td></tr>
-<tr><td><strong><code>.map_err()</code></strong></td><td>仅对 <code>Err</code>进行转换（通常用于转换错误类型）</td><td>`Err(e).map_err(</td></tr>
+<tr><td><strong><code>.map()</code></strong></td><td>仅对成功（<code>Some</code>/<code>Ok</code>）的值进行转换</td></tr>
+<tr><td><strong><code>.and_then()</code></strong></td><td>类似 <code>map</code>，但闭包也返回 <code>Result/Option</code>（自动平铺嵌套）</td></tr>
+<tr><td><strong><code>.unwrap_or()</code></strong></td><td>如果失败/缺失，则返回一个默认值</td></tr>
+<tr><td><strong><code>.unwrap_or_else()</code></strong></td><td>类似 <code>unwrap_or</code>，但默认值通过闭包计算（延迟求值）</td></tr>
+<tr><td><strong><code>.map_err()</code></strong></td><td>仅对 <code>Err</code> 进行转换（通常用于转换错误类型）</td></tr>
 </tbody>
 </table>
 </div>
