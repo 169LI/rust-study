@@ -1,0 +1,734 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>生成实体 - Rust study</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../../../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../../../custom-f3fb0f0a.css">
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../../../searchindex-081f710b.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../../toc-0a04486d.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust study</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/169li/rust-study" title="Git repository" aria-label="Git repository">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg></span>
+                        </a>
+                        <a href="https://github.com/169li/rust-study/edit/master/src/Rust学习/三方库/SeaORM/生成实体.md" title="Suggest an edit" aria-label="Suggest an edit" rel="edit">
+                            <span class=fa-svg id="git-edit-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M421.7 220.3l-11.3 11.3-22.6 22.6-205 205c-6.6 6.6-14.8 11.5-23.8 14.1L30.8 511c-8.4 2.5-17.5 .2-23.7-6.1S-1.5 489.7 1 481.2L38.7 353.1c2.6-9 7.5-17.2 14.1-23.8l205-205 22.6-22.6 11.3-11.3 33.9 33.9 62.1 62.1 33.9 33.9zM96 353.9l-9.3 9.3c-.9 .9-1.6 2.1-2 3.4l-25.3 86 86-25.3c1.3-.4 2.5-1.1 3.4-2l9.3-9.3H112c-8.8 0-16-7.2-16-16V353.9zM453.3 19.3l39.4 39.4c25 25 25 65.5 0 90.5l-14.5 14.5-22.6 22.6-11.3 11.3-33.9-33.9-62.1-62.1L314.3 67.7l11.3-11.3 22.6-22.6 14.5-14.5c25-25 65.5-25 90.5 0z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="生成实体"><a class="header" href="#生成实体">生成实体</a></h1>
+<h2 id="using-sea-orm-cli"><a class="header" href="#using-sea-orm-cli">Using sea-orm-cli</a></h2>
+<p><code>sea-orm-cli</code> 的实体生成功能（Generate Entity）可以让你不用手写复杂的 Rust 结构体，直接根据数据库里已经建好的表“一键生成”对应的代码。</p>
+<h3 id="1-基础安装与配置"><a class="header" href="#1-基础安装与配置">1. 基础安装与配置</a></h3>
+<ul>
+<li><code>cargo install sea-orm-cli</code>: 安装 SeaORM 命令行工具, eg: <code>cargo install sea-orm-cli</code>。</li>
+<li><code>DATABASE_URL=...</code>: 在 <code>.env</code> 文件或环境变量中设置 PostgreSQL 连接字符串, eg: <code>DATABASE_URL=postgres://user:pass@localhost/db</code>。</li>
+<li><code>sea-orm-cli -h</code>: 查看所有可用的命令列表, eg: <code>sea-orm-cli -h</code>。</li>
+</ul>
+<h3 id="2-实体生成命令"><a class="header" href="#2-实体生成命令">2. 实体生成命令</a></h3>
+<p>这是最核心的命令，它会扫描数据库并生成 Rust 文件。</p>
+<ul>
+<li><code>sea-orm-cli generate entity</code>: 发现数据库中的所有表并生成对应的实体文件, eg: <code>sea-orm-cli generate entity -o src/entities</code>。</li>
+<li><code>-u / --database-url</code>: 手动指定数据库连接地址（覆盖环境变量）, eg: <code>sea-orm-cli generate entity -u postgres://root:root@localhost/my_db</code>。</li>
+<li><code>-s / --database-schema</code>: <strong>(PostgreSQL 特有)</strong> 指定要扫描的 Schema（默认是 public）, eg: <code>sea-orm-cli generate entity -s my_custom_schema</code>。</li>
+<li><code>-o / --output-dir</code>: 指定生成文件的存放目录, eg: <code>sea-orm-cli generate entity -o src/models</code>。</li>
+<li><code>--with-serde</code>: 为生成的实体自动添加 Serde 序列化/反序列化宏, eg: <code>sea-orm-cli generate entity --with-serde both</code>。</li>
+<li><code>--expanded-format</code>: 使用“展开格式”生成代码（将 Column, Relation 等拆开写，更清晰）, eg: <code>sea-orm-cli generate entity --expanded-format</code>。</li>
+<li><code>--compact-format</code>: 使用“紧凑格式”生成代码（默认模式）, eg: <code>sea-orm-cli generate entity --compact-format</code>。</li>
+<li><code>--date-time-crate</code>: 指定时间处理库（chrono 或 time）, eg: <code>sea-orm-cli generate entity --date-time-crate time</code>。</li>
+<li><code>--ignore-tables</code>: 跳过指定的表不生成实体, eg: <code>sea-orm-cli generate entity --ignore-tables seaql_migrations,secret_table</code>。</li>
+<li><code>--model-extra-derives</code>: 为生成的 Model 结构体额外添加指定的 Derive 宏, eg: <code>sea-orm-cli generate entity --model-extra-derives "Default, Clone"</code>。</li>
+</ul>
+<hr>
+<h3 id="3-postgresql-用户的实战建议"><a class="header" href="#3-postgresql-用户的实战建议">3. PostgreSQL 用户的实战建议</a></h3>
+<p>当你运行生成命令时，建议带上以下参数，这在实际开发中最常用：</p>
+<pre><code class="language-bash">sea-orm-cli generate entity \
+    -u postgres://user:pass@localhost/my_db \
+    -o src/entities \
+    --with-serde both \
+    --expanded-format
+
+</code></pre>
+<p><strong>参数解释：</strong></p>
+<ol>
+<li><strong><code>-o src/entities</code></strong>: 把代码放在专门的目录，方便管理。</li>
+<li><strong><code>--with-serde both</code></strong>: 几乎所有的 Web 项目都需要把数据库结果转成 JSON 传给前端，开启这个可以省去手动加 <code>#[derive(Serialize, Deserialize)]</code>。</li>
+<li><strong><code>--expanded-format</code></strong>: 虽然代码量会变多，但当你需要自定义关联关系（Relation）或者给字段加注释时，这种格式比“紧凑格式”更容易修改。</li>
+</ol>
+<hr>
+<h2 id="entity-format"><a class="header" href="#entity-format">Entity Format</a></h2>
+<p>在 SeaORM 中，一个“实体”不仅仅是一个结构体，它是 <strong>Rust 对象与数据库表之间的桥梁</strong></p>
+<pre><code class="language-rust ignore">use sea_orm::entity::prelude::*;
+
+#[sea_orm::model]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[sea_orm(table_name = "cake")]
+pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    pub name: String,
+    #[sea_orm(has_one)]
+    pub fruit: Option&lt;super::fruit::Entity&gt;,
+    #[sea_orm(has_many, via = "cake_filling")]
+    pub fillings: Vec&lt;super::filling::Entity&gt;,
+}
+
+impl ActiveModelBehavior for ActiveModel {}</code></pre>
+<h3 id="核心组成部分"><a class="header" href="#核心组成部分">核心组成部分</a></h3>
+<ol>
+<li><strong>Model (模型结构体)</strong>：这是你最常打交道的。它定义了表中每一列的名字和数据类型。当你执行 <code>SELECT</code> 查询时，结果会被填充进这个结构体。</li>
+<li><strong>DeriveEntityModel 宏</strong>：这是 SeaORM 的魔法所在。你只需定义一个 <code>Model</code> 结构体并加上这个宏，它会自动在后台帮你生成：</li>
+</ol>
+<ul>
+<li><code>Entity</code> 结构体：用于代表整张表，执行 <code>find</code> 等操作。</li>
+<li><code>Column</code> 枚举：代表表中的每一列，用于过滤和排序。</li>
+<li><code>PrimaryKey</code> 枚举：定义谁是主键。</li>
+</ul>
+<blockquote>
+<p>INFO
+<strong>ActiveModelBehavior (行为钩子)</strong>：它允许你在数据“落库”前或“出库”后做逻辑处理。即使你什么都不写，也必须声明它，因为 SeaORM 需要它来完成 <code>ActiveModel</code> 的闭环。</p>
+</blockquote>
+<h3 id="完整代码演示postgresql-风格的-user-实体"><a class="header" href="#完整代码演示postgresql-风格的-user-实体">完整代码演示：PostgreSQL 风格的 User 实体</a></h3>
+<p>假设我们要为 PostgreSQL 建立一张用户表，包含主键、唯一索引、可选字段以及自动转换逻辑。</p>
+<pre><code class="language-rust ignore">use sea_orm::entity::prelude::*;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
+#[sea_orm(table_name = "users", schema_name = "public")] // 指定表名和 PG 的 schema
+pub struct Model {
+    #[sea_orm(primary_key)] // 标记为主键，默认自增
+    pub id: i32,// Postgres 本身不支持无符号整数类型，不建议使用无符号类型（例如 u64 ）
+
+    #[sea_orm(unique)] // 唯一约束
+    pub username: String,
+
+    #[sea_orm(column_type = "Text", nullable)] // 指定 PG 类型为 Text，允许为空
+    pub bio: Option&lt;String&gt;,
+
+    // 逻辑转换：数据库里存 citext（大小写不敏感），Rust 里用 String
+    #[sea_orm(select_as = "text", save_as = "citext")]
+    pub email: String,
+
+    #[sea_orm(ignore)] // 这个字段不会在数据库中创建，仅供 Rust 逻辑内部使用
+    pub temp_token: String,
+}
+
+// 定义关联关系（如果没有关联，写空即可）
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
+
+// 即使它是空的，也不要删除 ActiveModelBehavior impl 块。
+// 生命周期钩子
+#[async_trait::async_trait]
+impl ActiveModelBehavior for ActiveModel {
+    // 每次创建新的 ActiveModel（比如插入前）时触发
+    fn new() -&gt; Self {
+        println!("准备创建一个新的用户记录");
+        Self {
+            ..ActiveModelTrait::default()
+        }
+    }
+
+    // Will be triggered before insert / update
+    async fn before_save&lt;C&gt;(self, _db: &amp;C, insert: bool) -&gt; Result&lt;Self, DbErr&gt;
+    where C: ConnectionTrait,
+    {
+        if insert {
+            println!("正在插入新用户...");
+        }
+        Ok(self)
+    }
+    /// Will be triggered before insert / update
+    async fn before_save&lt;C&gt;(self, db: &amp;C, insert: bool) -&gt; Result&lt;Self, DbErr&gt;
+    where
+        C: ConnectionTrait,
+    {
+        if self.price.as_ref() &lt;= &amp;0.0 {
+            Err(DbErr::Custom(format!(
+                "[before_save] Invalid Price, insert: {}",
+                insert
+            )))
+        } else {
+            Ok(self)
+        }
+    }
+
+    /// Will be triggered after insert / update
+    async fn after_save&lt;C&gt;(model: Model, db: &amp;C, insert: bool) -&gt; Result&lt;Model, DbErr&gt;
+    where
+        C: ConnectionTrait,
+    {
+        Ok(model)
+    }
+
+    /// Will be triggered before delete
+    async fn before_delete&lt;C&gt;(self, db: &amp;C) -&gt; Result&lt;Self, DbErr&gt;
+    where
+        C: ConnectionTrait,
+    {
+        Ok(self)
+    }
+
+    /// Will be triggered after delete
+    async fn after_delete&lt;C&gt;(self, db: &amp;C) -&gt; Result&lt;Self, DbErr&gt;
+    where
+        C: ConnectionTrait,
+    {
+        Ok(self)
+    }
+}
+</code></pre>
+<h3 id="核心标签attributes深度解析"><a class="header" href="#核心标签attributes深度解析">核心标签（Attributes）深度解析</a></h3>
+<p>如果你手动看代码，最困惑的可能是 <code>#[sea_orm(...)]</code> 里的内容。我为你详细解释它们的<strong>设计意图</strong>：</p>
+<h4 id="a-命名与映射"><a class="header" href="#a-命名与映射">A. 命名与映射</a></h4>
+<p><code>#[sea_orm(table_name = "user", rename_all = "camelCase")]</code></p>
+<ul>
+<li><strong><code>table_name</code></strong>: 必须指定。因为 Rust 结构体习惯大驼峰（<code>UserModel</code>），而 SQL 表习惯小写蛇形（<code>users</code>）。</li>
+<li><strong><code>rename_all</code></strong>: 如果你的 PostgreSQL 表全是驼峰命名（非常少见），用这个可以一次性转换，不用给每个字段写 <code>column_name</code>。</li>
+</ul>
+<h4 id="b-类型微调"><a class="header" href="#b-类型微调">B. 类型微调</a></h4>
+<ul>
+<li><strong><code>column_type</code></strong>: Rust 的 <code>String</code> 默认映射到 <code>Varchar(255)</code>。如果你在 PostgreSQL 中想用更长的 <code>TEXT</code> 类型，就必须通过这个标签明确指定。</li>
+<li><strong><code>Option&lt;T&gt;</code></strong>: 这是处理 <strong>Nullable（可为空）</strong> 的唯一方式。Rust 的类型安全强制你必须用 <code>Option</code> 来包裹数据库中可能为 <code>NULL</code> 的字段。</li>
+</ul>
+<h4 id="c-主键逻辑"><a class="header" href="#c-主键逻辑">C. 主键逻辑</a></h4>
+<ul>
+<li><strong><code>primary_key</code></strong>: SeaORM 看到它后，会自动把这个字段放进生成的 <code>PrimaryKey</code> 枚举里。</li>
+<li><strong><code>auto_increment</code></strong>: 对于 PostgreSQL 的 <code>SERIAL</code> 类型，默认就是 <code>true</code>。如果你用 UUID 或者手动指定 ID，记得把它设为 <code>false</code>。</li>
+</ul>
+<hr>
+<h3 id="为什么会有-activemodelbehavior"><a class="header" href="#为什么会有-activemodelbehavior">为什么会有 ActiveModelBehavior？</a></h3>
+<p>可能觉得 <code>impl ActiveModelBehavior for ActiveModel {}</code> 很多余。</p>
+<p><strong>文字说明：</strong>
+它是为了实现 <strong>“领域驱动设计” (DDD)</strong>。</p>
+<ul>
+<li>比如：你想在用户每次修改密码时，自动更新 <code>updated_at</code> 时间戳。</li>
+<li>你可以把这个逻辑写在 <code>before_save</code> 钩子里。</li>
+<li>这样无论你在项目的哪个位置执行 <code>user.update(db)</code>，更新时间的逻辑都会<strong>自动触发</strong>，保证了业务逻辑的内聚性，不用到处复制粘贴代码。</li>
+</ul>
+<p>这一章节非常关键，它详细定义了 <strong>Rust 类型</strong>与 <strong>PostgreSQL 类型</strong>之间的“翻译规则”。作为 PostgreSQL 用户，你需要特别关注那些 PG 特有的功能（如 JSONB、Array 和 Vector）。</p>
+<p>以下是内容的详细拆解与文字说明：</p>
+<hr>
+<h2 id="列类型"><a class="header" href="#列类型">列类型</a></h2>
+<h3 id="1-基础类型映射表"><a class="header" href="#1-基础类型映射表">1. 基础类型映射表</a></h3>
+<p>在 SeaORM 中，大多数基础类型是自动转换的。但请注意：<strong>PostgreSQL 不支持无符号整数（Unsigned）</strong>。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Rust 类型</th><th>PostgreSQL 类型</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>String</code></td><td><code>VARCHAR</code> / <code>TEXT</code></td><td>默认是 <code>varchar</code>，可用 <code>column_type="Text"</code> 改为 <code>text</code>。</td></tr>
+<tr><td><code>i32</code></td><td><code>INTEGER</code></td><td>标准 4 字节整数。</td></tr>
+<tr><td><code>i64</code></td><td><code>BIGINT</code></td><td>8 字节长整数。</td></tr>
+<tr><td>**<code>u32</code> / <code>u64**</code></td><td><strong>不支持</strong></td><td><strong>重要：</strong> 在 PG 中请统一使用 <code>i32</code> 或 <code>i64</code>。</td></tr>
+<tr><td><code>f64</code></td><td><code>DOUBLE PRECISION</code></td><td>高精度浮点数。</td></tr>
+<tr><td><code>bool</code></td><td><code>BOOL</code></td><td>布尔值。</td></tr>
+<tr><td><code>Vec&lt;u8&gt;</code></td><td><code>BYTEA</code></td><td>二进制大对象。</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="2-时间与特殊类型映射"><a class="header" href="#2-时间与特殊类型映射">2. 时间与特殊类型映射</a></h3>
+<p>这些类型通常需要你在 <code>Cargo.toml</code> 中开启对应的 feature（如 <code>with-chrono</code> 或 <code>with-uuid</code>）。</p>
+<ul>
+<li>
+<p><strong>UUID</strong>: <code>uuid::Uuid</code> 直接映射为 PostgreSQL 的 <code>uuid</code> 类型。</p>
+</li>
+<li>
+<p><strong>Decimal</strong>: <code>rust_decimal::Decimal</code> 映射为 <code>decimal</code>。在定义时通常需要指定精度：</p>
+</li>
+<li>
+<p><code>#[sea_orm(column_type = "Decimal(Some((16, 4)))")]</code></p>
+</li>
+<li>
+<p><strong>日期时间</strong>:</p>
+</li>
+<li>
+<p><code>chrono::NaiveDateTime</code> -&gt; <code>timestamp</code> (不带时区)。</p>
+</li>
+<li>
+<p><code>chrono::DateTime&lt;FixedOffset&gt;</code> -&gt; <code>timestamp with time zone</code> (带时区)。</p>
+</li>
+</ul>
+<h3 id="3-json-与自定义结构-jsonb"><a class="header" href="#3-json-与自定义结构-jsonb">3. JSON 与自定义结构 (JSONB)</a></h3>
+<p>PostgreSQL 的 <code>JSONB</code> 是其最强大的特性之一。SeaORM 提供了非常优雅的处理方式。</p>
+<h4 id="文字说明"><a class="header" href="#文字说明">文字说明</a></h4>
+<ol>
+<li><strong>基础 JSON</strong>: 使用 <code>serde_json::Value</code> 处理动态格式。</li>
+<li><strong>强类型 JSON</strong>: 如果你希望 JSON 字段直接映射到 Rust 的 <code>struct</code>，只需让该结构体派生 <code>FromJsonQueryResult</code>。</li>
+<li><strong>JSONB 优化</strong>: 使用 <code>#[sea_orm(column_type = "JsonBinary")]</code> 强制使用 PG 的二进制 JSON 格式，这样查询性能更高。</li>
+</ol>
+<h4 id="代码演示"><a class="header" href="#代码演示">代码演示</a></h4>
+<pre><code class="language-rust ignore">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
+pub struct UserMeta {
+    pub login_count: i32,
+    pub last_ip: String,
+}
+
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
+#[sea_orm(table_name = "profiles")]
+pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    // 自动序列化/反序列化为 JSONB
+    #[sea_orm(column_type = "JsonBinary")]
+    pub meta: UserMeta, 
+}
+</code></pre>
+<h3 id="4-postgresql-专有功能-array--vector--ip"><a class="header" href="#4-postgresql-专有功能-array--vector--ip">4. PostgreSQL 专有功能 (Array / Vector / IP)</a></h3>
+<p>这是你选择 PostgreSQL 的“红利”，SeaORM 提供了原生支持：</p>
+<ul>
+<li><strong>数组 (Array)</strong>: 直接使用 <code>Vec&lt;T&gt;</code>。例如 <code>Vec&lt;String&gt;</code> 会自动映射为 PG 的 <code>text[]</code>。</li>
+<li><strong>向量 (Vector)</strong>: 需要开启 <code>postgres-vector</code> 模式。用于 AI 向量数据库（如 pgvector 扩展），对应 <code>PgVector</code> 类型。</li>
+<li><strong>IP 地址</strong>: 需要开启 <code>with-ipnetwork</code>。<code>IpNetwork</code> 类型对应 PG 的 <code>inet</code> 或 <code>cidr</code>。</li>
+</ul>
+<h3 id="5-unix-时间戳包装器-new-in-200"><a class="header" href="#5-unix-时间戳包装器-new-in-200">5. Unix 时间戳包装器 (New in 2.0.0)</a></h3>
+<p>有时候我们不希望在数据库存 <code>Timestamp</code> 类型，而是存一个 <code>i64</code> 的数字（秒数）。SeaORM 2.0 引入了包装器：</p>
+<ul>
+<li><strong><code>ChronoUnixTimestamp</code></strong>: 在 Rust 里它是日期时间对象，但存入数据库时会自动转成 <code>i64</code> 整数。这对于需要高性能时间比对的场景非常有用。</li>
+</ul>
+<hr>
+<h2 id="activeenum"><a class="header" href="#activeenum">ActiveEnum</a></h2>
+<p><strong>ActiveEnum</strong> 是一个非常强大的功能。它允许你直接在 Rust 代码中使用枚举类型，并将其安全地映射到数据库的字段中。</p>
+<p>简单来说，它解决了“数据库存 <code>0/1</code> 或 <code>'active'/'inactive'</code>，而 Rust 代码需要强类型”的需求。</p>
+<p>以下是内容的详细拆解：</p>
+<h3 id="1-三种映射策略"><a class="header" href="#1-三种映射策略">1. 三种映射策略</a></h3>
+<p>根据你希望在 PostgreSQL 里的存储方式，有三种选择：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>映射方式</th><th>数据库存储类型</th><th>特点</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>String (字符串)</strong></td><td><code>VARCHAR</code> 或 <code>TEXT</code></td><td>最通用，易于阅读，但在数据库层没有硬约束。</td></tr>
+<tr><td><strong>Integer (整数)</strong></td><td><code>INTEGER</code></td><td>存储空间最省，但数据库里的数字（如 <code>0</code>, <code>1</code>）不直观。</td></tr>
+<tr><td><strong>Native Enum (原生)</strong></td><td><code>CREATE TYPE ... AS ENUM</code></td><td><strong>PostgreSQL 推荐</strong>。性能好，数据库层面会有严格的类型约束。</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h3 id="2-字符串映射-string-backed"><a class="header" href="#2-字符串映射-string-backed">2. 字符串映射 (String-backed)</a></h3>
+<p>如果你想把 <code>Category::BigTask</code> 存成数据库里的 <code>"bigTask"</code>：</p>
+<ul>
+<li><strong>自动化方式</strong>：使用 <code>rename_all</code> 自动转换大小写（如 <code>camelCase</code>）。</li>
+<li><strong>手动方式</strong>：使用 <code>#[sea_orm(string_value = "xxx")]</code> 精确指定。</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(EnumIter, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "String(StringLen::None)", rename_all = "camelCase")]
+pub enum Category {
+    BigTask,   // 存储为 "bigTask"
+    SmallWork, // 存储为 "smallWork"
+}
+
+<span class="boring">}</span></code></pre>
+<h3 id="3-postgresql-原生枚举-native-enum"><a class="header" href="#3-postgresql-原生枚举-native-enum">3. PostgreSQL 原生枚举 (Native Enum)</a></h3>
+<p>这是 PostgreSQL 的特色功能。你需要先在数据库创建一个 <strong>自定义类型</strong>。</p>
+<h4 id="第一步在迁移文件-migration-中创建类型"><a class="header" href="#第一步在迁移文件-migration-中创建类型">第一步：在迁移文件 (Migration) 中创建类型</a></h4>
+<p>由于 PostgreSQL 要求先有类型再建表，你有两种写法：</p>
+<ul>
+<li><strong>写法 A (手动)</strong>: 直接写明类型名和值。</li>
+<li><strong>写法 B (推荐)</strong>: 直接从 Rust 的枚举类生成定义。</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 在 migration 的 up 函数中
+let schema = Schema::new(DbBackend::Postgres);
+manager.create_type(
+    schema.create_enum_from_active_enum::&lt;Tea&gt;()
+).await?;
+
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="4-在-model-中使用"><a class="header" href="#4-在-model-中使用">4. 在 Model 中使用</a></h3>
+<p>定义好 <code>ActiveEnum</code> 后，你可以像使用普通类型（如 <code>i32</code>）一样在 <code>Model</code> 结构体里使用它。</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[sea_orm(table_name = "tasks")]
+pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    // 直接使用枚举类型
+    pub category: Category, 
+    // 也可以是可选的
+    pub category_opt: Option&lt;Category&gt;, 
+}
+
+<span class="boring">}</span></code></pre>
+<h3 id="5-核心-api-与属性总结"><a class="header" href="#5-核心-api-与属性总结">5. 核心 API 与属性总结</a></h3>
+<ul>
+<li><strong><code>rs_type</code></strong>: 指定在 Rust 中对应的基础类型（通常是 <code>String</code> 或 <code>i32</code>）。</li>
+<li><strong><code>db_type</code></strong>: 指定在数据库中的存储格式（<code>String</code>, <code>Integer</code> 或 <code>Enum</code>）。</li>
+<li><strong><code>enum_name</code></strong>: 仅用于原生枚举，指定 PostgreSQL 中该类型的名称（如 <code>CREATE TYPE "tea"</code>）。</li>
+<li><strong><code>DeriveValueType</code></strong>: 如果你只需要简单的字符串映射且不想写复杂的宏，可以用这个更轻量级的替代方案（需手动实现 <code>to_str</code>）。</li>
+</ul>
+<h2 id="entity-first"><a class="header" href="#entity-first">Entity First</a></h2>
+<p>这是 SeaORM 2.0 引入的重磅功能：<strong>Entity First（实体优先）</strong> 工作流。</p>
+<p>简单来说，以前你需要先写 SQL/Migration 建表，再写 Rust 代码；现在你<strong>只需写 Rust 的 Entity 结构体</strong>，SeaORM 会自动帮你把 PostgreSQL 里的表结构同步好。这非常适合快速迭代。</p>
+<h3 id="1-基础配置开启自动同步"><a class="header" href="#1-基础配置开启自动同步">1. 基础配置：开启自动同步</a></h3>
+<p>要在项目中使用“实体优先”，首先要在 <code>Cargo.toml</code> 中开启功能，并在 <code>main.rs</code> 连接数据库后调用同步指令。</p>
+<ul>
+<li><strong>Cargo.toml 配置</strong>:</li>
+</ul>
+<pre><code class="language-toml">[dependencies]
+sea-orm = { version = "2.0", features = ["schema-sync", "entity-registry", "sqlx-postgres", "runtime-tokio-rustls"] }
+
+</code></pre>
+<ul>
+<li><strong>main.rs 启动逻辑</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">use sea_orm::{Database, EntityTrait};
+
+#[tokio::main]
+async fn main() -&gt; Result&lt;(), sea_orm::DbErr&gt; {
+    let db = Database::connect("postgres://user:pass@localhost/my_db").await?;
+
+    // 核心代码：自动同步。它会扫描当前 crate 的 entity 模块并更新 Postgres
+    // "my_app" 需要替换为你 Cargo.toml 里的 package name
+    db.get_schema_registry("my_app::entity::*").sync(&amp;db).await?;
+
+    println!("数据库结构同步完成！");
+    Ok(())
+}
+</code></pre>
+<hr>
+<h3 id="2-场景一新增一个表添加-entity"><a class="header" href="#2-场景一新增一个表添加-entity">2. 场景一：新增一个表（添加 Entity）</a></h3>
+<p>你只需要在 <code>entity/</code> 目录下新建一个 Rust 文件，下次启动程序时，PostgreSQL 就会自动多出一张表。</p>
+<ul>
+<li><strong>代码示例 (<code>entity/post.rs</code>)</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use sea_orm::entity::prelude::*;
+
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[sea_orm(table_name = "post")] // 只要写了这个，SeaORM 就会去建表
+pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    pub title: String,
+    pub content: String,
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
+pub enum Relation {}
+
+impl ActiveModelBehavior for ActiveModel {}
+
+<span class="boring">}</span></code></pre>
+<p><strong>结果</strong>：启动后，Postgres 会执行 <code>CREATE TABLE "post" (...)</code>。</p>
+<hr>
+<h3 id="3-场景二增加新字段修改-model"><a class="header" href="#3-场景二增加新字段修改-model">3. 场景二：增加新字段（修改 Model）</a></h3>
+<p>如果你想给用户表加一个“出生日期”字段，直接改 Rust 代码即可。</p>
+<ul>
+<li><strong>代码示例</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+    pub name: String,
+    
+    // 新增字段：设为 Option 则在数据库中允许为 NULL
+    pub date_of_birth: Option&lt;DateTimeWithTimeZone&gt;, 
+    
+    // 新增字段：设置默认值，防止旧数据报错
+    #[sea_orm(default_value = 0)]
+    pub login_count: i32,
+}
+
+<span class="boring">}</span></code></pre>
+<p><strong>结果</strong>：启动后，Postgres 会执行 <code>ALTER TABLE "user" ADD COLUMN "date_of_birth" timestamptz;</code>。</p>
+<hr>
+<h3 id="4-场景三重命名列关键属性"><a class="header" href="#4-场景三重命名列关键属性">4. 场景三：重命名列（关键属性）</a></h3>
+<p><strong>注意</strong>：如果你直接改代码里的变量名，SeaORM 会认为你“删了一个旧列，加了一个新列”。要实现真正的“改名”，需要使用 <code>renamed_from</code>。</p>
+<ul>
+<li><strong>代码示例</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+
+    // 将数据库中的 "user_name" 改名为 "login_name"
+    #[sea_orm(renamed_from = "user_name")] 
+    pub login_name: String,
+}
+
+<span class="boring">}</span></code></pre>
+<p><strong>结果</strong>：启动后，Postgres 会执行 <code>ALTER TABLE "user" RENAME COLUMN "user_name" TO "login_name";</code>。</p>
+<h3 id="5-场景四添加删除索引"><a class="header" href="#5-场景四添加删除索引">5. 场景四：添加/删除索引</a></h3>
+<p>通过属性标签控制索引的生命周期。</p>
+<ul>
+<li><strong>代码示例</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub struct Model {
+    #[sea_orm(primary_key)]
+    pub id: i32,
+
+    #[sea_orm(unique)] // 添加这一行
+    pub email: String,
+}
+
+<span class="boring">}</span></code></pre>
+<p><strong>结果</strong>：</p>
+<ul>
+<li><strong>添加时</strong>：执行 <code>CREATE UNIQUE INDEX "idx-user-email" ON "user" ("email");</code>。</li>
+<li><strong>删除 <code>#[sea_orm(unique)]</code> 时</strong>：执行 <code>DROP INDEX "idx-user-email";</code>。</li>
+</ul>
+<h3 id="6-进阶在迁移脚本中使用-schemabuilder"><a class="header" href="#6-进阶在迁移脚本中使用-schemabuilder">6. 进阶：在迁移脚本中使用 SchemaBuilder</a></h3>
+<p>如果你不想在 <code>main.rs</code> 里全自动同步，而是在特定的 Migration 里使用这个功能，可以这样做：</p>
+<ul>
+<li><strong>代码示例</strong>:</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[async_trait]
+impl MigrationTrait for Migration {
+    async fn up(&amp;self, manager: &amp;SchemaManager) -&gt; Result&lt;(), DbErr&gt; {
+        let db = manager.get_connection();
+
+        // 注册并直接应用，不需要手动写一长串 ColumnDef
+        db.get_schema_builder()
+            .register(entity::user::Entity)
+            .register(entity::post::Entity)
+            .apply(db) // apply 是强制执行创建，sync 是智能对比
+            .await
+    }
+}
+
+<span class="boring">}</span></code></pre>
+<hr>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../../Rust学习/三方库/SeaORM/初始化数据.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../../../Rust学习/三方库/SeaORM/CURD.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../../Rust学习/三方库/SeaORM/初始化数据.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../../../Rust学习/三方库/SeaORM/CURD.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../../ace-2a3cd908.js"></script>
+        <script src="../../../mode-rust-2c9d5c9a.js"></script>
+        <script src="../../../editor-16ca416c.js"></script>
+        <script src="../../../theme-dawn-4493f9c8.js"></script>
+        <script src="../../../theme-tomorrow_night-9dbe62a9.js"></script>
+
+        <script src="../../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../../mark-09e88c2c.min.js"></script>
+        <script src="../../../searcher-c2a407aa.js"></script>
+
+        <script src="../../../clipboard-1626706a.min.js"></script>
+        <script src="../../../highlight-abc7f01d.js"></script>
+        <script src="../../../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
