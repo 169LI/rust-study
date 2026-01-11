@@ -42,6 +42,7 @@
       - [运行迁移](./Rust学习/三方库/SeaORM/运行迁移.md)
       - [初始化数据](./Rust学习/三方库/SeaORM/初始化数据.md)
       - [生成实体](./Rust学习/三方库/SeaORM/生成实体.md)
+      - [CURD](./Rust学习/三方库/SeaORM/CURD.md)
 
 ---
 
