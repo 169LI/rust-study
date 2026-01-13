@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-c6ea17ee.js";
+            window.path_to_searchindex_js = "../../searchindex-ba3b86ab.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-0a04486d.js"></script>
@@ -182,7 +182,993 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="迭代器"><a class="header" href="#迭代器">迭代器</a></h1>
+<p>Rust 的迭代器（<code>iterators</code>）是处理序列数据的强大工具，允许你以懒惰（lazy）方式遍历集合，而不立即计算所有元素。这提高了效率，尤其在链式操作中。迭代器实现了 <code>Iterator trait</code>，提供 next() 方法返回 <code>Option&lt;Item&gt;</code>。Rust 标准库中的许多类型如 <code>Vec、HashMap、Range</code> 等都支持迭代器。迭代器是零成本抽象，编译时优化。</p>
+<h2 id="一-核心概念"><a class="header" href="#一-核心概念">一、 核心概念</a></h2>
+<h3 id="1-迭代器的本质延迟计算lazy-evaluation"><a class="header" href="#1-迭代器的本质延迟计算lazy-evaluation">1. 迭代器的本质：延迟计算（Lazy Evaluation）</a></h3>
+<p>在 Rust 中，创建一个迭代器并<strong>不会</strong>立刻执行任何计算。它更像是一个“处方”或“计划书”。只有当你真正开始向迭代器“要东西”时，它才会开始工作。</p>
+<h4 id="为什么我的代码没运行"><a class="header" href="#为什么我的代码没运行">为什么我的代码没运行？</a></h4>
+<p>很多初学者写了 <code>map</code> 却发现没有任何输出，这就是因为没有触发“消费”。这就是 <code>Lazy</code>：先建管道，后执行。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // 这一行代码几乎不消耗时间，也不会打印任何东西
+    // 它只是创建了一个“计划”：把每个元素加 1
+    let v_iter = v.iter().map(|x| {
+        println!("正在计算: {}", x);
+        x + 1
+    });
+    println!("迭代器已创建，准备开始...");
+    // 只有到了这一步，或者使用 for 循环，计算才会真正发生
+    let result: Vec&lt;_&gt; = v_iter.collect(); 
+    println!("最终结果: {:?}", result);
+}</code></pre>
+<h3 id="2-迭代器与-for-循环的关系"><a class="header" href="#2-迭代器与-for-循环的关系">2. 迭代器与 <code>for</code> 循环的关系</a></h3>
+<p><strong>核心逻辑</strong>：Rust 的 <code>for</code> 循环其实是<strong>语法糖</strong>。当你写 <code>for x in items</code> 时，编译器在底层会自动将其转换为迭代器调用。</p>
+<h4 id="编译器做了什么"><a class="header" href="#编译器做了什么">编译器做了什么？</a></h4>
+<p>当你写下这段代码：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>for x in vec![1, 2, 3] {
+    println!("{}", x);
+}
+<span class="boring">}</span></code></pre>
+<p>编译器实际上将其“展开”为类似这样的逻辑：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut iter = vec![1, 2, 3].into_iter(); // 转换为迭代器
+while let Some(x) = iter.next() {         // 不断调用 next()
+    println!("{}", x);
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><strong>注意</strong>：迭代器内部维护了一个状态（通常是一个指针或索引），每次调用 <code>next()</code>，状态就会向后移动。</li>
+</ul>
+<h3 id="3-消费端consumers与适配器adapters"><a class="header" href="#3-消费端consumers与适配器adapters">3. 消费端（Consumers）与适配器（Adapters）</a></h3>
+<p>迭代器的操作可以分为两类，理解它们的区别是掌握数据流的关键。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类别</th><th>作用</th><th>特点</th><th>例子</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>适配器 (Adapters)</strong></td><td>将一个迭代器转变为另一个迭代器</td><td><strong>惰性</strong>。不触发计算，只定义变换逻辑。</td><td><code>map</code>, <code>filter</code>, <code>zip</code>, <code>take</code></td></tr>
+<tr><td><strong>消费端 (Consumers)</strong></td><td>启动迭代过程，产生最终结果</td><td><strong>主动</strong>。会调用 <code>next()</code>，触发整个链条的运行。</td><td><code>collect</code>, <code>sum</code>, <code>fold</code>, <code>count</code></td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="组合的威力"><a class="header" href="#组合的威力">组合的威力</a></h4>
+<p>你可以通过适配器构建一条复杂的“流水线”，最后用一个消费端收尾。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let numbers = vec![1, 2, 3, 4, 5, 6];
+    // 流水线设计：
+    let sum: i32 = numbers.iter()
+        .filter(|&amp;&amp;x| x % 2 == 0) // 适配器：只要偶数
+        .map(|&amp;x| x * x)          // 适配器：平方
+        .take(2)                  // 适配器：只要前两个
+        .sum();                   // 消费端：触发所有计算并求和
+    println!("前两个偶数的平方和: {}", sum); // (2*2) + (4*4) = 20
+}</code></pre>
+<hr>
+<h2 id="二三大核心-trait"><a class="header" href="#二三大核心-trait">二、三大核心 Trait</a></h2>
+<ul>
+<li><code>Iterator Trait</code>：核心接口，理解 <code>next()</code> 方法与 <code>Item</code> 关联类型</li>
+<li><code>IntoIterator Trait</code>：如何将集合（如 <code>Vec, HashMap</code>）转换为迭代器</li>
+<li><code>FromIterator Trait：collect()</code> 方法背后的原理（如何将迭代器转回集合）</li>
+</ul>
+<p>在 Rust 中，迭代器不是某种特殊的语言构造，而是通过三个核心 Trait 构建的体系。理解了这三个 Trait，你就理解了数据如何在“集合”与“流水线”之间流转。
+这一部分你只要抓住一条主线就够了：</p>
+<blockquote>
+<p>for 负责把东西变成迭代器（IntoIterator） →
+迭代器用 next() 吐元素（Iterator） →
+collect() 把元素“装回去”（FromIterator）</p>
+</blockquote>
+<p>可以把它想成一条流水线：</p>
+<p>集合/自定义类型 ──(<code>IntoIterator</code>)──&gt; 迭代器 ──(<code>Iterator::next</code>)──&gt; 元素序列 ──(<code>FromIterator/collect</code>)──&gt; 新集合</p>
+<h3 id="1-iterator-trait迭代器的基石"><a class="header" href="#1-iterator-trait迭代器的基石">1. <code>Iterator</code> Trait：迭代器的基石</a></h3>
+<p>这是最核心的 Trait。只要一个类型实现了它，它就是一个迭代器。</p>
+<h4 id="最核心的两个东西item--next"><a class="header" href="#最核心的两个东西item--next">最核心的两个东西：Item + next()</a></h4>
+<p>Iterator 的本质就是一个状态机：每次调用 next()，迭代器推进内部状态并尝试产出一个元素。</p>
+<blockquote>
+<p>next() 的签名必须是 <code>&amp;mut self</code>：因为每次迭代都会改变“我迭到哪了”的内部状态。</p>
+</blockquote>
+<p>典型形态（要记住结构）：</p>
+<pre><code class="language-rust ignore">trait Iterator {
+    type Item;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;;
+}</code></pre>
+<ul>
+<li><strong><code>type Item</code></strong>：关联类型，定义了迭代器每次产出什么。</li>
+<li><strong><code>fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt;</code></strong>：这是唯一需要手动实现的方法。</li>
+</ul>
+<h5 id="手动实现一个步进器"><a class="header" href="#手动实现一个步进器">手动实现一个“步进器”</a></h5>
+<p>通过手动实现，你会发现迭代器只是一个<strong>记录了当前状态</strong>的结构体。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct Counter {
+    count: u32,
+    max: u32,
+}
+impl Counter {
+    fn new(max: u32) -&gt; Counter {
+        Counter { count: 0, max }
+    }
+}
+// 手动实现 Iterator
+impl Iterator for Counter {
+    type Item = u32; // 告诉编译器，我们产出的是 u32
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        if self.count &lt; self.max {
+            self.count += 1;
+            Some(self.count)
+        } else {
+            None // 返回 None 代表迭代结束
+        }
+    }
+}
+fn main() {
+    let mut counter = Counter::new(3);
+    // 我们可以手动调用 next
+    assert_eq!(counter.next(), Some(1));
+    assert_eq!(counter.next(), Some(2));
+    assert_eq!(counter.next(), Some(3));
+    assert_eq!(counter.next(), None);
+}</code></pre>
+<h5 id="手动调用-next最直观理解迭代器"><a class="header" href="#手动调用-next最直观理解迭代器">手动调用 next()：最直观理解迭代器</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![10, 20, 30];
+    // Vec&lt;T&gt; 的 into_iter() 生成一个“拿走所有权”的迭代器
+    let mut it = v.into_iter();
+    println!("{:?}", it.next()); // Some(10)
+    println!("{:?}", it.next()); // Some(20)
+    println!("{:?}", it.next()); // Some(30)
+    println!("{:?}", it.next()); // None
+    println!("{:?}", it.next()); // 依然 None（很多迭代器是 fused 的，但不是 trait 强制）
+}</code></pre>
+<p>你看到的就是：<strong>迭代器每次吐一个元素，吐完就 None</strong>。</p>
+<h4 id="iterator-的很多方法从哪来的"><a class="header" href="#iterator-的很多方法从哪来的">Iterator 的“很多方法”从哪来的？</a></h4>
+<p>map/filter/take/fold/sum/… 这些几乎都是 Iterator trait 上的默认方法，基于 next() 组合出来的。你只要实现 next()，Rust 标准库就送你一整套“函数式管道工具”。</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let sum: i32 = (1..=10)
+        .map(|x| x * 2)      // 适配器：生成新迭代器
+        .filter(|x| x % 3 == 0)
+        .sum();              // 消耗器：触发执行
+    println!("{sum}");
+}</code></pre>
+<h3 id="2-intoiterator-trait集合如何变成迭代器for-循环背后"><a class="header" href="#2-intoiterator-trait集合如何变成迭代器for-循环背后">2. <code>IntoIterator</code> Trait：集合如何变成迭代器（for 循环背后）</a></h3>
+<p><strong>核心逻辑</strong>：这个 Trait 定义了如何将一个非迭代器类型（如 <code>Vec</code>）转换为迭代器。这也是 <code>for</code> 循环能够工作的根本原因。</p>
+<h4 id="for-循环到底做了什么"><a class="header" href="#for-循环到底做了什么">for 循环到底做了什么？</a></h4>
+<p><code>for x in something</code> 做的第一件事是：</p>
+<blockquote>
+<p>调用 <code>something.into_iter()</code>（准确地说是 <code>IntoIterator::into_iter(something)</code>）</p>
+</blockquote>
+<p>然后不断 next()。</p>
+<p>等价理解（伪展开）：</p>
+<pre><code class="language-rust ignore">let mut iter = something.into_iter();
+while let Some(x) = iter.next() {
+    // ...
+}
 
+## `IntoIterator`的定义
+
+```rust,ignore
+trait IntoIterator {
+    type Item;
+    type IntoIter: Iterator&lt;Item = Self::Item&gt;;
+    fn into_iter(self) -&gt; Self::IntoIter;
+}</code></pre>
+<p>这里的关键是：</p>
+<ul>
+<li><code>IntoIterator</code> 负责“怎么生成迭代器”</li>
+<li>生成的迭代器必须实现 <code>Iterator</code></li>
+<li><code>Item</code> 决定了你在 <code>for x in ...</code> 里拿到的 <code>x</code> 是什么类型</li>
+</ul>
+<h4 id="同一个容器有-3-种常见-intoiterator-实现"><a class="header" href="#同一个容器有-3-种常见-intoiterator-实现">同一个容器有 3 种常见 IntoIterator 实现</a></h4>
+<p>以 <code>Vec&lt;T&gt;</code> 为例：</p>
+<ul>
+<li><code>Vec&lt;T&gt;</code>（按值）→ <code>into_iter()</code> 产出 <code>T</code>（<strong>消耗原集合</strong>）</li>
+<li><code>&amp;Vec&lt;T&gt;</code>（共享借用）→ <code>into_iter()</code> 产出 <code>&amp;T</code></li>
+<li><code>&amp;mut Vec&lt;T&gt;</code>（可变借用）→ <code>into_iter()</code> 产出 <code>&amp;mut T</code></li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![String::from("a"), String::from("b")];
+    // 1) 借用遍历：拿到 &amp;String
+    for s in &amp;v {
+        println!("borrowed: {s}");
+    }
+    println!("still have v: {:?}", v);
+    // 2) 所有权遍历：拿到 String（v 被 move 走）
+    for s in v {
+        println!("owned: {s}");
+    }
+    // println!("{:?}", v); // ❌ v 已经被消耗
+}</code></pre>
+<h4 id="自定义类型实现-intoiterator让它能直接-for--in-"><a class="header" href="#自定义类型实现-intoiterator让它能直接-for--in-">自定义类型实现 <code>IntoIterator</code>：让它能直接 <code>for .. in ..</code></a></h4>
+<p>比如自定义一个范围类型：</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct MyRange {
+    start: i32,
+    end: i32,
+}
+struct MyRangeIter {
+    cur: i32,
+    end: i32,
+}
+impl Iterator for MyRangeIter {
+    type Item = i32;
+    fn next(&amp;mut self) -&gt; Option&lt;i32&gt; {
+        if self.cur &gt;= self.end {
+            None
+        } else {
+            let v = self.cur;
+            self.cur += 1;
+            Some(v)
+        }
+    }
+}
+impl IntoIterator for MyRange {
+    type Item = i32;
+    type IntoIter = MyRangeIter;
+    fn into_iter(self) -&gt; MyRangeIter {
+        MyRangeIter { cur: self.start, end: self.end }
+    }
+}
+fn main() {
+    for x in MyRange { start: 0, end: 3 } {
+        println!("{x}");
+    }
+}</code></pre>
+<hr>
+<h3 id="3-fromiterator-trait流水线的终点-collect"><a class="header" href="#3-fromiterator-trait流水线的终点-collect">3. <code>FromIterator</code> Trait：流水线的终点 (<code>collect</code>)</a></h3>
+<p><strong>核心逻辑</strong>：这是 <code>collect()</code> 方法背后的英雄。它定义了如何将迭代器中的元素“收集”回一个新的集合。</p>
+<h4 id="collect-不是魔法它靠-fromiterator"><a class="header" href="#collect-不是魔法它靠-fromiterator"><code>collect()</code> 不是魔法，它靠 <code>FromIterator</code></a></h4>
+<p>你可以把 collect() 理解成：</p>
+<blockquote>
+<p>“请把这个迭代器的元素，按目标类型的规则装起来”</p>
+</blockquote>
+<p>装的规则来自：</p>
+<pre><code class="language-rust ignore">trait FromIterator&lt;A&gt; {
+    fn from_iter&lt;T: IntoIterator&lt;Item = A&gt;&gt;(iter: T) -&gt; Self;
+}</code></pre>
+<p>能 collect 成什么类型，取决于那个类型实现没实现 FromIterator。</p>
+<h4 id="collect-为什么经常需要你标注类型"><a class="header" href="#collect-为什么经常需要你标注类型"><code>collect()</code> 为什么经常需要你标注类型？</a></h4>
+<p>因为光看迭代器元素，编译器不知道你要装进 Vec 还是 HashSet 还是别的。</p>
+<p>两种常见写法：</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // 写法 1：变量类型标注
+    let a: Vec&lt;i32&gt; = v.iter().map(|x| x * 10).collect();
+    println!("{a:?}");
+    // 写法 2：turbofish
+    // let a = v.iter().map(|x| x * 10).collect::&lt;Vec&lt;i32&gt;&gt;();
+    // println!("{a:?}");
+}</code></pre>
+<h4 id="常见-collect-目标vec--hashmap--string"><a class="header" href="#常见-collect-目标vec--hashmap--string">常见 <code>collect</code> 目标：<code>Vec / HashMap / String</code></a></h4>
+<p><strong>collect 到 Vec：</strong></p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let out: Vec&lt;i32&gt; = (0..5).map(|x| x * 2).collect();
+    println!("{out:?}");
+}</code></pre>
+<p><strong>collect 到 HashMap：</strong></p>
+<pre class="playground"><code class="language-rust editable edition2024">use std::collections::HashMap;
+fn main() {
+    let pairs = vec![("a", 1), ("b", 2)];
+    let map: HashMap&lt;&amp;str, i32&gt; = pairs.into_iter().collect();
+    println!("{map:?}");
+}</code></pre>
+<p><strong>collect 到 String（从 char 序列）：</strong></p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let s: String = ['R', 'u', 's', 't'].into_iter().collect();
+    println!("{s}");
+}</code></pre>
+<h4 id="collectresultvec_-_fromiterator-的高级爽点"><a class="header" href="#collectresultvec_-_fromiterator-的高级爽点"><code>collect::&lt;Result&lt;Vec&lt;_&gt;, _&gt;&gt;()</code>：<code>FromIterator</code> 的“高级爽点”</a></h4>
+<p><code>Result</code>（以及 <code>Option</code>）也实现了非常强大的 <code>FromIterator</code>：</p>
+<ul>
+<li>只要所有元素都是 <code>Ok(x)</code>，就 <code>collect</code> 成 <code>Ok(Vec&lt;x&gt;)</code></li>
+<li>只要遇到一个 <code>Err(e)</code>，就立刻返回 <code>Err(e)</code>（短路）</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let inputs = vec!["10", "20", "nope", "40"];
+    let parsed: Result&lt;Vec&lt;i32&gt;, _&gt; = inputs
+        .into_iter()
+        .map(|s| s.parse::&lt;i32&gt;())
+        .collect();
+    println!("{parsed:?}"); // Err(...)
+}</code></pre>
+<p>这在解析、校验、批处理里非常常用：<strong>把错误处理“自动织入” <code>collect</code></strong>。</p>
+<h4 id="自定义-fromiterator让别人能-collect你的类型"><a class="header" href="#自定义-fromiterator让别人能-collect你的类型">自定义 <code>FromIterator</code>：让别人能 <code>collect::&lt;你的类型&gt;()</code></a></h4>
+<p>我们实现一个 EvenVec：只收集偶数（演示“自定义收集规则”）。</p>
+<pre class="playground"><code class="language-rust editable edition2024">#[derive(Debug)]
+struct EvenVec(Vec&lt;i32&gt;);
+impl FromIterator&lt;i32&gt; for EvenVec {
+    fn from_iter&lt;T: IntoIterator&lt;Item = i32&gt;&gt;(iter: T) -&gt; Self {
+        let mut out = Vec::new();
+        for x in iter {
+            if x % 2 == 0 {
+                out.push(x);
+            }
+        }
+        EvenVec(out)
+    }
+}
+fn main() {
+    let evens: EvenVec = (0..10).collect();
+    println!("{evens:?}"); // EvenVec([0,2,4,6,8])
+}</code></pre>
+<hr>
+<h2 id="三迭代器的三种模式"><a class="header" href="#三迭代器的三种模式">三、迭代器的三种模式</a></h2>
+<p><strong>核心逻辑</strong>：在 Rust 中，迭代器不仅决定如何处理数据，还决定了你是<strong>拥有</strong>这些数据，还是仅仅<strong>借用</strong>这些数据。这直接关系到借用检查器（Borrow Checker）是否会报错。</p>
+<p>几乎所有的集合（如 <code>Vec</code>, <code>HashMap</code>, <code>BTreeMap</code>）都提供了这三种方法。</p>
+<p>这三者的核心差异只有一件事：**迭代时“元素的所有权/借用”**到底归谁。</p>
+<ul>
+<li><code>iter()</code>：共享借用（<code>read-only</code>），产出 <code>&amp;T</code></li>
+<li><code>iter_mut()</code>：可变借用（<code>read-write</code>），产出 <code>&amp;mut T</code></li>
+<li><code>into_iter()</code>：拿走所有权（<code>move</code>），产出 T（通常会消耗原集合）</li>
+</ul>
+<blockquote>
+<p>iter 借只读，iter_mut 借可写，into_iter 拿走不还。</p>
+</blockquote>
+<h3 id="1-iter不可变借用模式t"><a class="header" href="#1-iter不可变借用模式t">1. <code>iter()</code>：不可变借用模式（<code>&amp;T</code>）</a></h3>
+<ul>
+<li><strong>产生类型</strong>：产生元素的不可变引用 <code>&amp;T</code>。</li>
+<li><strong>使用场景</strong>：你只想读取集合中的数据，而不改变数据，也不想销毁集合。</li>
+<li><strong>知识点</strong>：不移动集合元素，只是“借来看看”。迭代结果类型：&amp;T。原集合仍可继续使用（只要借用期结束）。</li>
+</ul>
+<h4 id="代码演示读取但不修改"><a class="header" href="#代码演示读取但不修改">代码演示：读取但不修改</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // iter() 产生 &amp;i32
+    let mut v_iter = v.iter();
+    assert_eq!(v_iter.next(), Some(&amp;1));
+    assert_eq!(v_iter.next(), Some(&amp;2));
+    assert_eq!(v_iter.next(), Some(&amp;3));
+    // 重点：集合 v 在迭代后依然可以继续使用
+    println!("v 依然存在: {:?}", v);
+}</code></pre>
+<h4 id="代码演示map-时注意解引用"><a class="header" href="#代码演示map-时注意解引用">代码演示：<code>map</code> 时注意解引用</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // iter() 产生 &amp;i32，因此 map 的参数是 &amp;i32
+    let doubled: Vec&lt;i32&gt; = v.iter().map(|x| x * 2).collect();
+    // 这里 x 是 &amp;i32，但 * 运算符对 &amp;i32 会自动解引用（Deref coercion / Copy）
+    println!("{:?}", doubled);
+}</code></pre>
+<h3 id="2-iter_mut可变借用模式mut-t"><a class="header" href="#2-iter_mut可变借用模式mut-t">2. <code>iter_mut()</code>：可变借用模式（<code>&amp;mut T</code>）</a></h3>
+<ul>
+<li><strong>产生类型</strong>：产生元素的可变引用 <code>&amp;mut T</code>。</li>
+<li><strong>使用场景</strong>：你需要原地修改集合中的每一个元素。</li>
+<li><strong>知识点</strong>:允许修改元素内容，但仍不拿走所有权。迭代结果类型：<code>&amp;mut T</code>。迭代期间，集合被“独占可变借用”，不能同时被其他借用使用。</li>
+</ul>
+<h4 id="代码演示原地修改元素"><a class="header" href="#代码演示原地修改元素">代码演示：原地修改元素</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut v = vec![1, 2, 3];
+    // iter_mut() 产生 &amp;mut i32
+    // 注意：必须要求 v 本身是 mut 的
+    for x in v.iter_mut() {
+        *x *= 2; // 通过解引用修改原始值
+    }
+    println!("v 已被原地修改: {:?}", v); // [2, 4, 6]
+}</code></pre>
+<h4 id="代码演示配合-enumerate-做位置相关修改"><a class="header" href="#代码演示配合-enumerate-做位置相关修改">代码演示：配合 <code>enumerate</code> 做位置相关修改</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut v = vec![5, 5, 5, 5];
+    for (i, x) in v.iter_mut().enumerate() {
+        *x += i as i32;
+    }
+    println!("{:?}", v); // [5, 6, 7, 8]
+}</code></pre>
+<h3 id="3-into_iter所有权模式t"><a class="header" href="#3-into_iter所有权模式t">3. <code>into_iter()</code>：所有权模式（<code>T</code>）</a></h3>
+<ul>
+<li><strong>产生类型</strong>：产生元素本身 <code>T</code>。</li>
+<li><strong>使用场景</strong>：你需要获取元素的所有权（例如移动到另一个线程，或者转换类型），并且<strong>不再需要</strong>原始集合。</li>
+<li><strong>知识点</strong>:
+<ul>
+<li>消耗原集合（通常 move），把元素一个个“搬走”。</li>
+<li>迭代结果类型：T</li>
+<li>原集合之后一般不能再用（已经 moved）。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>重要：into_iter() 的具体行为和返回类型，取决于你对谁调用：</p>
+</blockquote>
+<ul>
+<li>对 <code>Vec&lt;T&gt;</code> 调用：通常产出 T（拿走元素）</li>
+<li>对 <code>&amp;Vec&lt;T&gt;</code> 调用：相当于 iter()，产出 <code>&amp;T</code></li>
+<li>对 <code>&amp;mut Vec&lt;T&gt;</code> 调用：相当于 iter_mut()，产出 <code>&amp;mut T</code></li>
+</ul>
+<h4 id="代码演示消费集合拿到元素所有权"><a class="header" href="#代码演示消费集合拿到元素所有权">代码演示：消费集合，拿到元素所有权</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![String::from("a"), String::from("b")];
+    // into_iter() 产生 String（所有权）
+    let upper: Vec&lt;String&gt; = v.into_iter()
+        .map(|s| s.to_uppercase())
+        .collect();
+    println!("{:?}", upper);
+    // println!("{:?}", v); // ❌ v 已被 move（被 into_iter 消耗）
+}</code></pre>
+<h4 id="代码演示对引用调用-into_iter类型不同"><a class="header" href="#代码演示对引用调用-into_iter类型不同">代码演示：对引用调用 into_iter（类型不同）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    let a: Vec&lt;i32&gt; = (&amp;v).into_iter().copied().collect(); // &amp;Vec -&gt; &amp;i32
+    let b: Vec&lt;i32&gt; = v.into_iter().collect();            // Vec -&gt; i32 (move)
+    println!("{:?}", a);
+    println!("{:?}", b);
+}</code></pre>
+<h3 id="三种模式深度对比表"><a class="header" href="#三种模式深度对比表">三种模式深度对比表</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>方法</th><th>产生的 Item</th><th>背后 Trait 实现</th><th>集合之后是否可用？</th><th>核心性质</th></tr>
+</thead>
+<tbody>
+<tr><td><strong><code>iter()</code></strong></td><td><code>&amp;T</code></td><td><code>impl IntoIterator for &amp;Vec&lt;T&gt;</code></td><td><strong>是</strong></td><td>只读观察</td></tr>
+<tr><td><strong><code>iter_mut()</code></strong></td><td><code>&amp;mut T</code></td><td><code>impl IntoIterator for &amp;mut Vec&lt;T&gt;</code></td><td><strong>是</strong></td><td>原地手术</td></tr>
+<tr><td><strong><code>into_iter()</code></strong></td><td><code>T</code></td><td><code>impl IntoIterator for Vec&lt;T&gt;</code></td><td><strong>否</strong></td><td>彻底消耗</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-rust ignore">fn main() {
+    let mut v = vec![1, 2, 3];
+    let it1 = v.iter();      // Iterator&lt;Item = &amp;i32&gt;
+    let it2 = v.iter_mut();  // Iterator&lt;Item = &amp;mut i32&gt;
+    let it3 = v.into_iter(); // Iterator&lt;Item = i32&gt;  (v 被 move)
+}</code></pre>
+<h3 id="for-循环到底用的是谁"><a class="header" href="#for-循环到底用的是谁">for 循环到底用的是谁?</a></h3>
+<p><code>for x in something {}</code> 本质上会调用 <code>IntoIterator</code></p>
+<ul>
+<li><code>for x in v</code> → <code>v.into_iter()</code>（可能消耗 <code>v</code>）</li>
+<li><code>for x in &amp;v</code> → <code>(&amp;v).into_iter()</code>（等价 <code>iter</code>）</li>
+<li><code>for x in &amp;mut v</code> → <code>(&amp;mut v).into_iter()</code>（等价 <code>iter_mut</code>）</li>
+</ul>
+<h4 id="代码演示三种-for-写法"><a class="header" href="#代码演示三种-for-写法">代码演示：三种 for 写法</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut v = vec![10, 20, 30];
+    for x in &amp;v {
+        // x: &amp;i32
+        println!("read {x}");
+    }
+    for x in &amp;mut v {
+        // x: &amp;mut i32
+        *x += 1;
+    }
+    for x in v {
+        // x: i32，v 被消费
+        println!("owned {x}");
+    }
+    // println!("{:?}", v); // ❌ v 已被消费
+}</code></pre>
+<h3 id="选型建议什么时候用哪个"><a class="header" href="#选型建议什么时候用哪个">选型建议：什么时候用哪个？</a></h3>
+<ul>
+<li>只读遍历：用 <code>iter()</code> / <code>for x in &amp;v</code></li>
+<li>原地改元素：用 <code>iter_mut()</code> / <code>for x in &amp;mut v</code></li>
+<li>需要拿到元素所有权（如 String 拼接/转移/线程传递）：用 <code>into_iter()</code> / <code>for x in v</code></li>
+<li>想保留原集合，但又想得到“拥有的值”：
+<ul>
+<li><code>iter().cloned()</code>（针对 <code>Clone</code>）</li>
+<li><code>iter().copied()</code>（针对 <code>Copy</code>）</li>
+</ul>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    let owned1: Vec&lt;i32&gt; = v.iter().copied().collect(); // 不消耗 v
+    let owned2: Vec&lt;i32&gt; = v.clone().into_iter().collect(); // 通过 clone 再消费
+    println!("{:?}", owned1);
+    println!("{:?}", owned2);
+    println!("{:?}", v);
+}</code></pre>
+<hr>
+<h2 id="四常用迭代器适配器"><a class="header" href="#四常用迭代器适配器">四、常用迭代器适配器</a></h2>
+<p><strong>核心逻辑</strong>：适配器（Adapters）是迭代器的“加工车间”。它们接收一个迭代器，经过某种变换，输出一个新的迭代器。最重要的一点是：<strong>它们是惰性的（Lazy）</strong>，除非最后的“消费端”（如 <code>collect</code>）发出指令，否则这些加工车间根本不会开工。</p>
+<h3 id="1-基础转换map-与-filter"><a class="header" href="#1-基础转换map-与-filter">1. 基础转换：<code>map</code> 与 <code>filter</code></a></h3>
+<p>这是最常用的组合，类似于 SQL 中的 <code>SELECT</code> 和 <code>WHERE</code>。</p>
+<ul>
+<li><strong><code>map</code></strong>：对每个元素执行转换。</li>
+<li><strong><code>filter</code></strong>：根据布尔值决定是否保留元素。</li>
+</ul>
+<h4 id="map逐元素变换"><a class="header" href="#map逐元素变换">map：逐元素变换</a></h4>
+<ul>
+<li>用途：把 Item 变成另一个东西。</li>
+<li>签名直觉：<code>Iterator&lt;Item=A&gt; -&gt; Iterator&lt;Item=B&gt;</code></li>
+</ul>
+<h5 id="示例i32--i32-的差异最常见坑"><a class="header" href="#示例i32--i32-的差异最常见坑">示例：&amp;i32 / i32 的差异（最常见坑）</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // v.iter() 产出 &amp;i32，所以闭包参数是 &amp;i32
+    let a: Vec&lt;i32&gt; = v.iter().map(|&amp;x| x * 10).collect();// 写法 A：参数里解构, 把 &amp;i32 解引用一层，绑定到 x: i32
+    //写法 B：闭包体里解引用:
+    // let b: Vec&lt;i32&gt; = v.iter().map(|x| *x * 10).collect();
+    // 或者：map(|x| x * 10) 也能过（很多运算会自动解引用），但建议显式 |&amp;x| 养成习惯
+    // v.into_iter() 产出 i32，闭包参数是 i32
+    let b: Vec&lt;i32&gt; = v.into_iter().map(|x| x * 10).collect();
+    println!("{a:?} {b:?}");
+}</code></pre>
+<h4 id="filter筛选01-对-1"><a class="header" href="#filter筛选01-对-1">filter：筛选（0/1 对 1）</a></h4>
+<ul>
+<li>用途：按条件保留元素。</li>
+<li>关键点：闭包拿到的是 引用的引用 时要解两次（比如 v.iter()）</li>
+</ul>
+<h5 id="示例过滤偶数注意-x"><a class="header" href="#示例过滤偶数注意-x">示例：过滤偶数（注意 |&amp;&amp;x|）</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3, 4, 5];
+    let evens: Vec&lt;i32&gt; = v.iter()
+        .filter(|&amp;&amp;x| x % 2 == 0) // 这里 x: &amp;&amp;i32
+        .copied()
+        .collect();
+    println!("{evens:?}"); // [2, 4]
+}</code></pre>
+<h5 id="常用替代filter_map过滤--映射一步到位"><a class="header" href="#常用替代filter_map过滤--映射一步到位">常用替代：filter_map（过滤 + 映射，一步到位）</a></h5>
+<p>这在实际项目里非常高频（解析、容错、跳过非法数据）</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec!["1", "oops", "3", "-7"];
+    let nums: Vec&lt;i32&gt; = v.into_iter()
+        .filter_map(|s| s.parse::&lt;i32&gt;().ok())
+        .collect();
+    println!("{nums:?}"); // [1, 3, -7]
+}</code></pre>
+<h3 id="2-结构操作zip-与-chain"><a class="header" href="#2-结构操作zip-与-chain">2. 结构操作：<code>zip</code> 与 <code>chain</code></a></h3>
+<ul>
+<li><strong><code>zip</code></strong>：将两个迭代器“拉”在一起，像拉链一样产生一对对的元组 <code>(a, b)</code>。如果长度不等，以短的为准。</li>
+<li><strong><code>chain</code></strong>：将两个迭代器“接”在一起，一个完了接另一个。</li>
+</ul>
+<h4 id="zip并行配对短的结束就结束"><a class="header" href="#zip并行配对短的结束就结束">zip：并行配对（短的结束就结束）</a></h4>
+<ul>
+<li>用途：将两个迭代器“拉”在一起，并行产出元组 <code>(a, b)</code>。</li>
+<li>输出类型：<code>Iterator&lt;Item=(A, B)&gt;</code></li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let names = vec!["alice", "bob", "cindy"];
+    let ages  = vec![20, 30];
+    // 只会产出 2 组：因为 ages 更短
+    let out: Vec&lt;_&gt; = names.iter()
+        .zip(ages.iter())
+        .map(|(&amp;n, &amp;a)| (n, a))
+        .collect();
+
+    println!("{out:?}"); // [("alice",20), ("bob",30)]
+}</code></pre>
+<h4 id="chain拼接两个迭代器类型要一致"><a class="header" href="#chain拼接两个迭代器类型要一致">chain：拼接两个迭代器（类型要一致）</a></h4>
+<ul>
+<li>用途：将两个迭代器“接”在一起，一个完了接另一个。</li>
+<li>输出类型：<code>Iterator&lt;Item=A&gt;</code>（或 <code>Iterator&lt;Item=B&gt;</code>，取决于输入）</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let a = vec![1, 2];
+    let b = vec![3, 4];
+    let out: Vec&lt;i32&gt; = a.into_iter().chain(b.into_iter()).collect();
+    println!("{out:?}"); // [1,2,3,4]
+}</code></pre>
+<h3 id="3-处理嵌套flatten-与-flat_map"><a class="header" href="#3-处理嵌套flatten-与-flat_map">3. 处理嵌套：<code>flatten</code> 与 <code>flat_map</code></a></h3>
+<p><strong>实践场景</strong>：当你有一个 <code>Vec&lt;Vec&lt;T&gt;&gt;</code> 或者迭代器产生的元素本身又是 <code>Option</code> 或 <code>Result</code> 时。</p>
+<ul>
+<li><strong><code>flatten</code></strong>：把嵌套结构“拍平”一层。</li>
+<li><strong><code>flat_map</code></strong>：先 <code>map</code> 再 <code>flatten</code>。</li>
+</ul>
+<h4 id="flatten拍平一层元素本身是-iterable"><a class="header" href="#flatten拍平一层元素本身是-iterable">flatten：拍平一层（元素本身是 iterable）</a></h4>
+<ul>
+<li>用途：把 <code>Vec&lt;Vec&lt;T&gt;&gt;</code> 拍平成 <code>Vec&lt;T&gt;</code>。</li>
+<li>输出类型：<code>Iterator&lt;Item=T&gt;</code></li>
+</ul>
+<h5 id="典型vecvectvecoptiontiteratoritemresultte配合技巧"><a class="header" href="#典型vecvectvecoptiontiteratoritemresultte配合技巧">典型：<code>Vec&lt;Vec&lt;T&gt;&gt;、Vec&lt;Option&lt;T&gt;&gt;、Iterator&lt;Item=Result&lt;T,E&gt;&gt;</code>（配合技巧）</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![vec![1, 2], vec![3], vec![4, 5]];
+    let out: Vec&lt;i32&gt; = v.into_iter().flatten().collect();
+    println!("{out:?}"); // [1,2,3,4,5]
+}</code></pre>
+<h5 id="经典技巧option-的-flatten--把-some-留下把-none-丢掉"><a class="header" href="#经典技巧option-的-flatten--把-some-留下把-none-丢掉">经典技巧：Option 的 flatten = “把 Some 留下，把 None 丢掉”</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![Some(1), None, Some(3)];
+
+    let out: Vec&lt;i32&gt; = v.into_iter().flatten().collect();
+    println!("{out:?}"); // [1,3]
+}</code></pre>
+<h4 id="flat_mapmap--flatten常用于拆分展开"><a class="header" href="#flat_mapmap--flatten常用于拆分展开">flat_map：map + flatten（常用于拆分/展开）</a></h4>
+<ul>
+<li>用途：先 <code>map</code> 再 <code>flatten</code>，常用于拆分/展开。</li>
+<li>输出类型：<code>Iterator&lt;Item=T&gt;</code></li>
+</ul>
+<h5 id="示例拆分字符串按空格"><a class="header" href="#示例拆分字符串按空格">示例：拆分字符串（按空格）</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let lines = vec!["hello world", "rust iter"];
+    let words: Vec&lt;&amp;str&gt; = lines.into_iter()
+        .flat_map(|line| line.split_whitespace())
+        .collect();
+    println!("{words:?}"); // ["hello","world","rust","iter"]
+}</code></pre>
+<h3 id="4-引用处理cloned-与-copied"><a class="header" href="#4-引用处理cloned-与-copied">4. 引用处理：<code>cloned</code> 与 <code>copied</code></a></h3>
+<p>当你在使用 <code>iter()</code>（产生 <code>&amp;T</code>）但后续操作需要 <code>T</code> 时，这两个适配器非常有用。</p>
+<ul>
+<li>
+<p><strong><code>cloned()</code></strong>：调用 <code>clone()</code> 产生拥有所有权的值（适用于 <code>String</code> 等）。</p>
+</li>
+<li>
+<p><strong><code>copied()</code></strong>：调用按位拷贝（适用于 <code>i32</code> 等实现了 <code>Copy</code> 的类型）。</p>
+</li>
+<li>
+<p>copied()：&amp;T -&gt; T，要求 T: Copy（如 i32、bool、char）</p>
+</li>
+<li>
+<p>cloned()：&amp;T -&gt; T，要求 T: Clone（如 String、Vec、Arc 等）</p>
+</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let a = vec![1, 2, 3];
+    let x: Vec&lt;i32&gt; = a.iter().copied().collect();
+    let b = vec!["hi".to_string(), "rust".to_string()];
+    let y: Vec&lt;String&gt; = b.iter().cloned().collect();
+    println!("{x:?}");
+    println!("{y:?}");
+}</code></pre>
+<h3 id="5-截取与跳过take-skip-take_while-skip_while"><a class="header" href="#5-截取与跳过take-skip-take_while-skip_while">5. 截取与跳过：take, skip, take_while, skip_while</a></h3>
+<ul>
+<li><strong><code>take(n)</code></strong>：只取前 <code>n</code> 个元素。</li>
+<li><strong><code>skip(n)</code></strong>：跳过前 <code>n</code> 个元素。</li>
+<li><strong><code>take_while(pred)</code></strong>：取元素直到 <code>pred</code> 为 <code>false</code>。</li>
+<li><strong><code>skip_while(pred)</code></strong>：跳过元素直到 <code>pred</code> 为 <code>false</code>。</li>
+</ul>
+<h4 id="taken--skipn按数量切"><a class="header" href="#taken--skipn按数量切">take(n) / skip(n)：按数量切</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3, 4, 5];
+    let a: Vec&lt;i32&gt; = v.iter().take(3).copied().collect(); // [1,2,3]
+    let b: Vec&lt;i32&gt; = v.iter().skip(3).copied().collect(); // [4,5]
+    println!("{a:?} {b:?}");
+}</code></pre>
+<h4 id="take_while--skip_while按条件切遇到不满足就停止开始"><a class="header" href="#take_while--skip_while按条件切遇到不满足就停止开始">take_while / skip_while：按条件切（遇到不满足就停止/开始）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3, 4, 3, 2];
+    let a: Vec&lt;i32&gt; = v.iter().take_while(|&amp;&amp;x| x &lt; 4).copied().collect();
+    let b: Vec&lt;i32&gt; = v.iter().skip_while(|&amp;&amp;x| x &lt; 4).copied().collect();
+    println!("{a:?}"); // [1,2,3]
+    println!("{b:?}"); // [4,3,2]  注意：从第一个不满足开始，后面不再检查条件
+}</code></pre>
+<p>skip_while 不是“过滤”，它只在开头连续跳过；一旦开始产出，后续不会再跳。</p>
+<h3 id="6-辅助工具enumerate-与-inspect"><a class="header" href="#6-辅助工具enumerate-与-inspect">6. 辅助工具：<code>enumerate</code> 与 <code>inspect</code></a></h3>
+<ul>
+<li><strong><code>enumerate</code></strong>：在迭代时顺便产出索引 <code>(index, value)</code>。</li>
+<li><strong><code>inspect</code></strong>：不修改元素，只是查看（常用于调试，看看流水线中间的状态）。</li>
+</ul>
+<h4 id="enumerate给元素附上索引"><a class="header" href="#enumerate给元素附上索引">enumerate：给元素附上索引</a></h4>
+<ul>
+<li>用途：做“位置相关”的逻辑（比如给每个元素编号）。</li>
+<li>输出类型：<code>(usize, Item)</code></li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec!["a", "b", "c"];
+    let pairs: Vec&lt;(usize, &amp;str)&gt; = v.iter()
+        .enumerate()
+        .map(|(i, &amp;s)| (i, s))
+        .collect();
+    println!("{pairs:?}"); // [(0,"a"), (1,"b"), (2,"c")]
+}</code></pre>
+<h4 id="调试辅助inspect"><a class="header" href="#调试辅助inspect">调试辅助：inspect</a></h4>
+<ul>
+<li>用途：在链条中间打印/埋点，不改变元素。</li>
+<li>注意：仍然 lazy，只有终结器触发才会打印。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let out: Vec&lt;i32&gt; = (1..=5)
+        .inspect(|x| println!("before map: {x}"))
+        .map(|x| x * 10)
+        .inspect(|x| println!("after  map: {x}"))
+        .filter(|x| x &gt;= &amp;30)
+        .collect();
+    println!("{out:?}");
+}</code></pre>
+<h3 id="适配器选型"><a class="header" href="#适配器选型">适配器选型</a></h3>
+<p>下面是提到的这些**迭代器适配器（中间操作）**的汇总表</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>分类</th><th>适配器</th><th>作用</th></tr>
+</thead>
+<tbody>
+<tr><td>基础转换</td><td><code>map</code></td><td>对每个元素做映射变换（1→1），生成新迭代器</td></tr>
+<tr><td>基础转换</td><td><code>filter</code></td><td>按条件过滤元素（保留满足条件的）</td></tr>
+<tr><td>基础转换</td><td><code>enumerate</code></td><td>给每个元素附带索引 <code>(usize, item)</code></td></tr>
+<tr><td>结构操作</td><td><code>zip</code></td><td>把两个迭代器按位置配对成 <code>(a, b)</code>，以较短者结束</td></tr>
+<tr><td>结构操作</td><td><code>chain</code></td><td>把两个迭代器首尾拼接成一个连续迭代器</td></tr>
+<tr><td>结构操作</td><td><code>flatten</code></td><td>拍平一层：把“元素本身可迭代”的迭代器展开一层</td></tr>
+<tr><td>结构操作</td><td><code>flat_map</code></td><td><code>map</code> 后再 <code>flatten</code>：每个元素映射为迭代器并展开</td></tr>
+<tr><td>截取/跳过</td><td><code>take</code></td><td>只取前 <code>n</code> 个元素</td></tr>
+<tr><td>截取/跳过</td><td><code>skip</code></td><td>跳过前 <code>n</code> 个元素</td></tr>
+<tr><td>截取/跳过</td><td><code>take_while</code></td><td>从头开始取，直到条件首次不满足就停止</td></tr>
+<tr><td>截取/跳过</td><td><code>skip_while</code></td><td>从头开始跳过，直到条件首次不满足就开始产出（之后不再检查条件）</td></tr>
+<tr><td>调试辅助</td><td><code>inspect</code></td><td>在迭代链中插入观察/打印，不改变元素（仍是 lazy）</td></tr>
+<tr><td>引用处理</td><td><code>cloned</code></td><td>把 <code>&amp;T</code> 变成 <code>T</code>（要求 <code>T: Clone</code>）</td></tr>
+<tr><td>引用处理</td><td><code>copied</code></td><td>把 <code>&amp;T</code> 变成 <code>T</code>（要求 <code>T: Copy</code>）</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="五-常用消耗器终结操作"><a class="header" href="#五-常用消耗器终结操作">五、 常用消耗器（终结操作）</a></h2>
+<p><strong>核心逻辑</strong>：消耗器（Consumers）是流水线的“出口”。如果没有消耗器，前面的适配器（如 <code>map</code>, <code>filter</code>）永远不会执行。消耗器会通过循环不断调用迭代器的 <code>next()</code> 方法，直到返回 <code>None</code> 为止。<strong>一旦调用了消耗器，该迭代器就被消耗掉了，不能再次使用。</strong></p>
+<h3 id="终极集合器collect"><a class="header" href="#终极集合器collect">终极集合器：<code>collect</code></a></h3>
+<p>这是最常见的消耗器，我们在前几节已经多次用到。它将迭代器中的元素收集到某种集合中（如 <code>Vec</code>, <code>HashMap</code>, <code>String</code> 等）。</p>
+<ul>
+<li><strong>特点</strong>：高度泛型，通常需要类型暗示。</li>
+<li><strong>技巧</strong>：它可以将 <code>Option&lt;T&gt;</code> 的迭代器收集成 <code>Option&lt;Vec&lt;T&gt;&gt;</code>。</li>
+</ul>
+<h4 id="关键点类型推断"><a class="header" href="#关键点类型推断">关键点：类型推断</a></h4>
+<p>编译器不知道你要收集成什么就会报错，所以常见写法：</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    let a = v.iter().map(|&amp;x| x * 10).collect::&lt;Vec&lt;i32&gt;&gt;();
+    let b: Vec&lt;i32&gt; = v.iter().map(|&amp;x| x * 10).collect();
+    println!("{a:?} {b:?}");
+}</code></pre>
+<h4 id="收集成-hashmap"><a class="header" href="#收集成-hashmap">收集成 HashMap</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    // collect 触发了迭代
+    let doubled: Vec&lt;_&gt; = v.iter().map(|x| x * 2).collect();
+    // 进阶：处理 Option。如果其中有一个 None，最终结果就是 None
+    let maybe_numbers = vec![Some(1), Some(2), None];
+    let result: Option&lt;Vec&lt;i32&gt;&gt; = maybe_numbers.into_iter().collect();
+    println!("{:?}", result); // None
+}</code></pre>
+<h3 id="基础聚合sum-product-count"><a class="header" href="#基础聚合sum-product-count">基础聚合：<code>sum</code>, <code>product</code>, <code>count</code></a></h3>
+<p>这些操作非常直观，用于数值计算或统计数量。</p>
+<h4 id="count-返回元素个数usize"><a class="header" href="#count-返回元素个数usize">count() 返回元素个数（usize）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let c = (1..=10).filter(|x| x % 2 == 0).count();
+    println!("{c}"); // 5
+}</code></pre>
+<h4 id="sum--product--返回元素总和--乘积"><a class="header" href="#sum--product--返回元素总和--乘积">sum() / product() : 返回元素总和 / 乘积</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3, 4];
+    let s: i32 = v.iter().sum();
+    let p: i32 = v.iter().product();
+    println!("{s} {p}"); // 10 24
+}</code></pre>
+<h3 id="查找与匹配-find-position-any-all-nth"><a class="header" href="#查找与匹配-find-position-any-all-nth">查找与匹配: find, position, any, all, nth</a></h3>
+<p><strong>核心优势</strong>：这些方法具有**短路（Short-circuiting）**特性。例如，<code>any</code> 只要找到一个满足条件的元素，就会立即停止迭代，不再处理后续数据。这对于性能优化至关重要。</p>
+<ul>
+<li><strong><code>any</code></strong>：只要有一个符合条件就返回 <code>true</code>。</li>
+<li><strong><code>all</code></strong>：必须全部符合条件才返回 <code>true</code>。</li>
+<li><strong><code>find</code></strong>：返回第一个符合条件的元素的引用（包裹在 <code>Option</code> 中）。</li>
+<li><strong><code>position</code></strong>：返回第一个符合条件的元素的索引（<code>Option&lt;usize&gt;</code>）。</li>
+</ul>
+<h4 id="find-找到第一个满足条件的元素返回-optionitem"><a class="header" href="#find-找到第一个满足条件的元素返回-optionitem">find 找到第一个满足条件的元素（返回 <code>Option&lt;Item&gt;</code>）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![10, 20, 30, 40];
+    let f = v.iter().find(|&amp;&amp;x| x &gt;= 25);
+    println!("{f:?}"); // Some(&amp;30)
+}</code></pre>
+<h4 id="position-找到第一个满足条件的索引返回-optionusize"><a class="header" href="#position-找到第一个满足条件的索引返回-optionusize">position 找到第一个满足条件的索引（返回 <code>Option&lt;usize&gt;</code>）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![10, 20, 30, 40];
+    let p = v.iter().position(|&amp;x| x == 30);
+    println!("{p:?}"); // Some(2)
+}</code></pre>
+<h4 id="any--all"><a class="header" href="#any--all">any / all</a></h4>
+<ul>
+<li><strong><code>any</code></strong>：只要有一个符合条件就返回 <code>true</code>。</li>
+<li><strong><code>all</code></strong>：必须全部符合条件才返回 <code>true</code>。</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![2, 4, 6, 7];
+    println!("{}", v.iter().any(|&amp;x| x % 2 == 1)); // true
+    println!("{}", v.iter().all(|&amp;x| x % 2 == 0)); // false
+}</code></pre>
+<h4 id="nthk-取第-k-个元素但会消耗掉前-k-个不是随机访问"><a class="header" href="#nthk-取第-k-个元素但会消耗掉前-k-个不是随机访问">nth(k): 取第 k 个元素，但会消耗掉前 k 个（不是随机访问）</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let mut it = (10..=20);
+    println!("{:?}", it.nth(3)); // Some(13) 消耗 10,11,12,13
+    println!("{:?}", it.next()); // Some(14) 迭代器状态已经推进
+}</code></pre>
+<h3 id="折叠与归约fold-reduce-scan"><a class="header" href="#折叠与归约fold-reduce-scan">折叠与归约：fold, reduce, scan</a></h3>
+<p>这三个是“最像算法”的消耗器/半消耗器。</p>
+<h4 id="foldinit-f你提供初始值"><a class="header" href="#foldinit-f你提供初始值">fold(init, f)：你提供初始值</a></h4>
+<ul>
+<li>总是返回一个值（不会是 Option）</li>
+<li>适合：累计、构建字符串、构建 map、统计等</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    let r = v.iter().fold(100, |acc, &amp;x| acc + x);
+    println!("{r}"); // 106
+}</code></pre>
+<h5 id="典型fold-拼字符串"><a class="header" href="#典型fold-拼字符串">典型：fold 拼字符串</a></h5>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let words = vec!["hello", "rust", "iter"];
+    let s = words.iter().fold(String::new(), |mut acc, &amp;w| {
+        if !acc.is_empty() { acc.push(' '); }
+        acc.push_str(w);
+        acc
+    });
+    println!("{s}");
+}</code></pre>
+<h4 id="reducef用第一个元素当初始值返回-option"><a class="header" href="#reducef用第一个元素当初始值返回-option">reduce(f)：用第一个元素当初始值（返回 Option）</a></h4>
+<ul>
+<li>空迭代器会返回 None</li>
+<li>适合：最大值、求和等“有自然单位元但不想写 init”的场景</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3];
+    let r = v.into_iter().reduce(|acc, x| acc + x);
+    println!("{r:?}"); // Some(6)
+}</code></pre>
+<h4 id="scanstate-f它是适配器但非常像-fold"><a class="header" href="#scanstate-f它是适配器但非常像-fold">scan(state, f)：它是适配器（但非常像 fold）</a></h4>
+<ul>
+<li>scan 会产生一个新迭代器，把“中间状态”也作为输出</li>
+<li>适合：前缀和、状态机、解析流</li>
+</ul>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![1, 2, 3, 4];
+    // 前缀和：1,3,6,10
+    let prefix: Vec&lt;i32&gt; = v.into_iter()
+        .scan(0, |state, x| {
+            *state += x;
+            Some(*state)
+        })
+        .collect();
+    println!("{prefix:?}");
+}</code></pre>
+<h3 id="极值处理maxminmax_bymin_by"><a class="header" href="#极值处理maxminmax_bymin_by">极值处理：<code>max</code>,<code>min</code>,<code>max_by</code>,<code>min_by</code></a></h3>
+<p>返回迭代器中的最大值或最小值。注意它们返回的是 <code>Option</code>，因为迭代器可能没有元素。</p>
+<ul>
+<li>对于复杂结构，可以使用 <code>max_by</code> 或 <code>max_by_key</code>。</li>
+</ul>
+<h4 id="maxmin"><a class="header" href="#maxmin">max/min</a></h4>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec![3, 10, 7];
+    println!("{:?}", v.iter().max()); // Some(&amp;10)
+    println!("{:?}", v.iter().min()); // Some(&amp;3)
+}</code></pre>
+<h4 id="自定义比较max_by--min_by"><a class="header" href="#自定义比较max_by--min_by">自定义比较：max_by / min_by</a></h4>
+<p>比如按字符串长度找最长：</p>
+<pre class="playground"><code class="language-rust editable edition2024">fn main() {
+    let v = vec!["aa", "bbbb", "ccc"];
+    let best = v.iter().max_by(|a, b| a.len().cmp(&amp;b.len()));
+    println!("{best:?}"); // Some("bbbb")
+}</code></pre>
+<h3 id="本节选择器我到底该用谁"><a class="header" href="#本节选择器我到底该用谁">本节“选择器”：我到底该用谁？</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类别</th><th>名字</th><th>作用</th><th>返回/特点</th></tr>
+</thead>
+<tbody>
+<tr><td>集合转换</td><td><code>collect</code></td><td>把迭代器收集成集合（<code>Vec/HashMap/HashSet/...</code>）</td><td>返回目标集合类型；常需标注 <code>collect::&lt;Vec&lt;_&gt;&gt;()</code></td></tr>
+<tr><td>基础聚合</td><td><code>count</code></td><td>统计元素个数</td><td><code>usize</code></td></tr>
+<tr><td>基础聚合</td><td><code>sum</code></td><td>求和</td><td>返回数值类型（需要可推断）</td></tr>
+<tr><td>基础聚合</td><td><code>product</code></td><td>连乘</td><td>返回数值类型（需要可推断）</td></tr>
+<tr><td>折叠/归约</td><td><code>fold</code></td><td>自定义累计（你提供初始值）</td><td>返回累计结果（不会是 <code>Option</code>）</td></tr>
+<tr><td>折叠/归约</td><td><code>reduce</code></td><td>用第一个元素做初始值的归约</td><td><code>Option&lt;Item&gt;</code>，空迭代器为 <code>None</code></td></tr>
+<tr><td>折叠/归约</td><td><code>scan</code></td><td>带状态地产生“中间结果序列”（前缀和/状态机）</td><td><strong>注意：它是适配器</strong>，返回新迭代器；通常再 <code>collect()</code></td></tr>
+<tr><td>查找/匹配</td><td><code>find</code></td><td>找到第一个满足条件的元素</td><td><code>Option&lt;Item&gt;</code>（借用迭代器通常是 <code>Option&lt;&amp;T&gt;</code>）</td></tr>
+<tr><td>查找/匹配</td><td><code>position</code></td><td>找到第一个满足条件的索引</td><td><code>Option&lt;usize&gt;</code></td></tr>
+<tr><td>查找/匹配</td><td><code>any</code></td><td>是否存在任意元素满足条件（短路）</td><td><code>bool</code></td></tr>
+<tr><td>查找/匹配</td><td><code>all</code></td><td>是否所有元素都满足条件（短路）</td><td><code>bool</code></td></tr>
+<tr><td>查找/匹配</td><td><code>nth</code></td><td>取第 <code>n</code> 个元素（从 0 开始）</td><td><code>Option&lt;Item&gt;</code>；会消耗掉前 <code>n</code> 个</td></tr>
+<tr><td>极值处理</td><td><code>max</code></td><td>取最大元素</td><td><code>Option&lt;Item&gt;</code>（借用迭代器常为 <code>Option&lt;&amp;T&gt;</code>）</td></tr>
+<tr><td>极值处理</td><td><code>min</code></td><td>取最小元素</td><td><code>Option&lt;Item&gt;</code></td></tr>
+<tr><td>极值处理</td><td><code>max_by</code></td><td>自定义比较规则取最大</td><td><code>Option&lt;Item&gt;</code>，比较由闭包决定</td></tr>
+<tr><td>极值处理</td><td><code>min_by</code></td><td>自定义比较规则取最小</td><td><code>Option&lt;Item&gt;</code>，比较由闭包决定</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="六自定义迭代器"><a class="header" href="#六自定义迭代器">六、自定义迭代器</a></h2>
+<p><strong>核心逻辑</strong>：在 Rust 中，要让一个结构体变成迭代器，你不需要继承任何复杂的类，只需要实现 <code>Iterator</code> 这个 Trait。你唯一需要做的，就是告诉编译器<strong>如何产出下一个元素</strong>（<code>next</code> 方法）以及<strong>产出什么</strong>（<code>Item</code> 类型）。</p>
+<h3 id="1-实现-iterator-trait-的两要素"><a class="header" href="#1-实现-iterator-trait-的两要素">1. 实现 <code>Iterator</code> Trait 的两要素</a></h3>
+<p>要实现自定义迭代器，你的结构体必须具备两点：</p>
+<ol>
+<li><strong>状态维护</strong>：结构体里需要有字段记录当前迭代到了哪里。</li>
+<li><strong><code>next</code> 方法</strong>：每次调用时更新状态，并返回 <code>Some(value)</code> 或 <code>None</code>。</li>
+</ol>
+<h4 id="斐波那契数列迭代器"><a class="header" href="#斐波那契数列迭代器">斐波那契数列迭代器</a></h4>
+<p>斐波那契数列是一个完美的自定义迭代器例子，因为它具有清晰的内部状态转移。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct Fibonacci {
+    curr: u32,
+    next: u32,
+}
+impl Fibonacci {
+    fn new() -&gt; Fibonacci {
+        Fibonacci { curr: 0, next: 1 }
+    }
+}
+// 为 Fibonacci 实现 Iterator
+impl Iterator for Fibonacci {
+    type Item = u32; // 产出 u32 类型
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        let current = self.curr;
+        // 计算下一项并更新状态
+        self.curr = self.next;
+        self.next = current + self.next;
+        // 斐波那契数列通常是无限的，但在 Rust 中我们需要设置一个边界
+        // 这里假设超过 1000 就停止
+        if current &gt; 1000 {
+            None
+        } else {
+            Some(current)
+        }
+    }
+}
+fn main() {
+    let fib = Fibonacci::new();
+    // 一旦实现了 Iterator，你就可以使用 map, filter 等所有适配器！
+    for num in fib.take(10) {
+        println!("{}", num);
+    }
+}</code></pre>
+<h3 id="2-为集合实现-intoiterator"><a class="header" href="#2-为集合实现-intoiterator">2. 为集合实现 <code>IntoIterator</code></a></h3>
+<p>如果你创建了一个自定义集合（比如 <code>MyList</code>），你可能希望直接写 <code>for x in my_list</code>。这时你需要实现 <code>IntoIterator</code>。</p>
+<p><strong>核心逻辑</strong>：<code>IntoIterator</code> 的作用是定义“如何从你的集合产生一个迭代器”。</p>
+<pre class="playground"><code class="language-rust editable edition2024">struct MyCollection {
+    items: Vec&lt;i32&gt;,
+}
+impl IntoIterator for MyCollection {
+    type Item = i32;
+    type IntoIter = std::vec::IntoIter&lt;i32&gt;; // 直接复用 Vec 的迭代器类型
+    fn into_iter(self) -&gt; Self::IntoIter {
+        self.items.into_iter()
+    }
+}
+fn main() {
+    let coll = MyCollection { items: vec![1, 2, 3] };
+    // 现在可以直接在 for 循环中使用
+    for x in coll {
+        println!("{}", x);
+    }
+}</code></pre>
+<h3 id="3-自定义迭代器的优势节省内存"><a class="header" href="#3-自定义迭代器的优势节省内存">3. 自定义迭代器的优势：节省内存</a></h3>
+<p>自定义迭代器最大的魅力在于：<strong>它是按需生成的。</strong></p>
+<p>想象一下你需要处理 100 万个数据，如果你先把它们全部存在 <code>Vec</code> 里，会占用大量内存。但如果你写一个自定义迭代器，它只需要记录“当前在哪”，内存占用几乎为零，无论你要处理多少数据。</p>
+<h4 id="-进阶带状态的过滤迭代器"><a class="header" href="#-进阶带状态的过滤迭代器">🛠️ 进阶：带状态的过滤迭代器</a></h4>
+<p>你可以创建一个包装另一个迭代器的自定义迭代器。</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct SkipNone&lt;I&gt; {
+    inner: I,
+}
+impl&lt;I, T&gt; Iterator for SkipNone&lt;I&gt;
+where
+    I: Iterator&lt;Item = Option&lt;T&gt;&gt;, // 要求内部迭代器产出 Option
+{
+    type Item = T;
+
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        // 循环调用内部迭代器，直到找到一个 Some 或者结束
+        while let Some(opt) = self.inner.next() {
+            if let Some(val) = opt {
+                return Some(val);
+            }
+        }
+        None
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="核心总结自定义三部曲"><a class="header" href="#核心总结自定义三部曲">核心总结：自定义三部曲</a></h3>
+<ol>
+<li><strong>定义结构体</strong>：确定你需要哪些字段来记住迭代进度（比如索引、当前数值等）。</li>
+<li><strong>声明 <code>Item</code> 类型</strong>：告诉 Rust 迭代器产出什么（引用 <code>&amp;T</code> 还是值 <code>T</code>）。</li>
+<li><strong>编写 <code>next</code> 逻辑</strong></li>
+</ol>
+<ul>
+<li>如果有数据：更新状态，返回 <code>Some(value)</code>。</li>
+<li>如果没数据：返回 <code>None</code>。</li>
+</ul>
+<hr>
+<h2 id="七-高级与特殊迭代器"><a class="header" href="#七-高级与特殊迭代器">七、 高级与特殊迭代器</a></h2>
+<ul>
+<li>DoubleEndedIterator：双端迭代器，支持从后往前迭代（rev()）</li>
+<li>ExactSizeIterator：已知精确长度的迭代器（len()）</li>
+<li>FusedIterator：融合迭代器，保证 None 之后永远返回 None</li>
+<li>Peekable：支持“预览”下一个元素而不消耗它</li>
+</ul>
+<hr>
+<h2 id="八-性能与底层原理"><a class="header" href="#八-性能与底层原理">八、 性能与底层原理</a></h2>
+<ul>
+<li>迭代器的内部迭代 vs 外部迭代</li>
+<li>编译器优化：循环展开（Loop Unrolling）与内联</li>
+<li>迭代器在内存安全上的保障：避免索引越界</li>
+<li>itertools 库：了解社区标准扩展包</li>
+</ul>
+<hr>
+<h2 id="九-迭代器与生命周期的交集"><a class="header" href="#九-迭代器与生命周期的交集">九、 迭代器与生命周期的交集</a></h2>
+<ul>
+<li>迭代器产生的引用寿命约束</li>
+<li>在结构体中存储迭代器（涉及生命周期参数）</li>
+<li>闭包捕获环境对迭代器生命周期的影响</li>
+</ul>
+<hr>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
