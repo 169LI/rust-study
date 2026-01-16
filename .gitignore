@@ -2,3 +2,7 @@ book
 .vscode/
 markdownlint.json
 rusttest/
+
+# Added by cargo
+
+/target
