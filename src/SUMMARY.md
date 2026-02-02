@@ -43,6 +43,11 @@
       - [初始化数据](./Rust学习/三方库/SeaORM/初始化数据.md)
       - [生成实体](./Rust学习/三方库/SeaORM/生成实体.md)
       - [CURD](./Rust学习/三方库/SeaORM/CURD.md)
+    - [anyhow](./Rust学习/三方库/anyhow/anyhow.md)
+      - [介绍](./Rust学习/三方库/anyhow/介绍.md)
+      - [上下文管理](./Rust学习/三方库/anyhow/上下文管理.md)
+      - [核心宏](./Rust学习/三方库/anyhow/核心宏.md)
+      - [错误处理库](./Rust学习/三方库/anyhow/错误处理库.md)
 
 ---
 
