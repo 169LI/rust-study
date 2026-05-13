@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-0ceca35c.js";
+            window.path_to_searchindex_js = "../../searchindex-7dad87a9.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-8e1b011e.js"></script>
+        <script src="../../toc-5c4ffa27.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,8 +181,563 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h1>
+                        <p>Rust 项目结构、模块系统与包管理</p>
+<hr>
+<h2 id="1-rust-项目结构"><a class="header" href="#1-rust-项目结构">1️⃣ Rust 项目结构</a></h2>
+<p>Rust 项目通常由 <strong>Cargo</strong> 管理，Cargo 是 Rust 的官方包管理和构建工具。</p>
+<p>更多cargo命令见<a href="../Cargo/Cargo命令.html">Cargo命令参考</a>，本节不在介绍cargo 如何创建项目等操作。</p>
+<p><img src="image/项目结构/1778656428679.png" alt="1778656428679"></p>
+<h3 id="项目根目录文件"><a class="header" href="#项目根目录文件">项目根目录文件</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>文件 / 目录</th><th>作用</th><th>结构概览</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Cargo.toml</code></td><td><strong>项目配置文件</strong>，管理 crate 信息、依赖、版本、特性等</td><td>TOML 格式，包含 <code>[package]</code>、<code>[dependencies]</code>、<code>[dev-dependencies]</code>、<code>[workspace]</code> 等</td></tr>
+<tr><td><code>Cargo.lock</code></td><td><strong>依赖锁定文件</strong>，记录精确依赖版本，保证跨环境一致性</td><td>自动生成，列出每个 crate 的精确版本和来源</td></tr>
+<tr><td><code>toolchain.toml</code></td><td><strong>可选手动添加</strong>，指定 Rust toolchain 版本和 channel</td><td>TOML 格式，如 <code>[toolchain] channel = "stable"</code></td></tr>
+<tr><td><code>target/</code></td><td><strong>构建输出目录</strong></td><td>编译生成的二进制文件、依赖 crate 编译产物、doc 文档等</td></tr>
+<tr><td><code>.gitignore</code></td><td>Git 忽略文件配置</td><td>通常忽略 <code>target/</code>、<code>Cargo.lock</code>（库 crate 可选）</td></tr>
+<tr><td><code>README.md</code></td><td>项目说明文档</td><td>Markdown 格式</td></tr>
+<tr><td><code>LICENSE</code></td><td>许可证文件</td><td>如 MIT、Apache 2.0 等</td></tr>
+<tr><td><code>rustfmt.toml</code></td><td><strong>可选</strong>，格式化规则</td><td>配置 rustfmt 行为</td></tr>
+<tr><td><code>clippy.toml</code></td><td><strong>可选</strong>，lint 规则</td><td>配置 clippy 检查规则</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h3 id="src-目录"><a class="header" href="#src-目录"><code>src/</code> 目录</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>文件 / 目录</th><th>作用</th><th>结构概览</th></tr>
+</thead>
+<tbody>
+<tr><td><code>main.rs</code></td><td>二进制 crate 入口</td><td><code>fn main() { ... }</code></td></tr>
+<tr><td><code>lib.rs</code></td><td>库 crate 入口</td><td>公共接口，通常声明模块和导出函数</td></tr>
+<tr><td><code>mod.rs</code></td><td>模块目录入口（可选）</td><td>声明子模块 <code>pub mod xxx;</code></td></tr>
+<tr><td>子模块文件</td><td>实现模块功能</td><td><code>xxx.rs</code> 或 <code>xxx/mod.rs</code>，内部函数和类型</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>示例结构：</strong></p>
+<pre><code class="language-text">src/
+├── main.rs
+├── lib.rs
+├── utils.rs
+└── math/
+    ├── mod.rs
+    └── add.rs
+</code></pre>
+<hr>
+<h3 id="tests-目录"><a class="header" href="#tests-目录"><code>tests/</code> 目录</a></h3>
+<ul>
+<li><strong>集成测试</strong></li>
+<li>每个文件作为一个测试模块，Cargo 会自动识别并执行</li>
+</ul>
+<pre><code class="language-text">tests/
+└── integration_test.rs
+</code></pre>
+<p><strong>示例内容：integration_test.rs</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 引入库 crate
+use my_project::utils;
+use my_project::math::add;
 
+#[test]
+fn test_add_function() {
+    let result = add::add(2, 3);
+    assert_eq!(result, 5);
+}
+
+#[test]
+fn test_utils_uppercase() {
+    let input = "hello";
+    let output = utils::to_uppercase(input);
+    assert_eq!(output, "HELLO");
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="examples-目录可选"><a class="header" href="#examples-目录可选"><code>examples/</code> 目录（可选）</a></h3>
+<ul>
+<li><strong>示例代码</strong></li>
+<li>用于演示库 crate 用法，<code>cargo run --example example_name</code> 执行</li>
+</ul>
+<pre><code class="language-text">examples/
+└── hello.rs
+</code></pre>
+<hr>
+<h3 id="benches-目录可选"><a class="header" href="#benches-目录可选"><code>benches/</code> 目录（可选）</a></h3>
+<ul>
+<li><strong>性能测试</strong></li>
+<li><code>cargo bench</code> 执行</li>
+<li>常用 Criterion 库写基准测试</li>
+</ul>
+<hr>
+<h3 id="target-目录"><a class="header" href="#target-目录"><code>target/</code> 目录</a></h3>
+<ul>
+<li>
+<p><strong>编译输出目录</strong></p>
+</li>
+<li>
+<p>包含：</p>
+<ul>
+<li><code>debug/</code> 和 <code>release/</code> 构建产物</li>
+<li>编译依赖的 crate（cargo build 缓存）</li>
+<li><code>doc/</code> 自动生成文档</li>
+</ul>
+</li>
+</ul>
+<p><strong>说明：</strong> 不需要手动管理，由 Cargo 生成。</p>
+<hr>
+<h3 id="cargo-自动生成与手动添加文件总结"><a class="header" href="#cargo-自动生成与手动添加文件总结">Cargo 自动生成与手动添加文件总结</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>文件</th><th>类型</th><th>是否自动生成</th><th>作用</th></tr>
+</thead>
+<tbody>
+<tr><td>Cargo.toml</td><td>配置</td><td>自动</td><td>项目信息、依赖、features</td></tr>
+<tr><td>Cargo.lock</td><td>锁定</td><td>自动</td><td>精确依赖版本</td></tr>
+<tr><td>toolchain.toml</td><td>配置</td><td>手动/可选</td><td>指定 Rust toolchain 版本</td></tr>
+<tr><td>target/</td><td>输出</td><td>自动</td><td>编译产物、文档、缓存</td></tr>
+<tr><td>main.rs / lib.rs</td><td>代码</td><td>自动（cargo new）</td><td>入口文件 / 库接口</td></tr>
+<tr><td>mod.rs / 子模块</td><td>代码</td><td>手动</td><td>模块组织</td></tr>
+<tr><td>tests/ / examples/ / benches/</td><td>代码</td><td>手动可选</td><td>测试、示例、基准</td></tr>
+<tr><td>README.md / LICENSE</td><td>文档</td><td>手动可选</td><td>项目说明 / 许可证</td></tr>
+<tr><td>rustfmt.toml / clippy.toml</td><td>配置</td><td>手动可选</td><td>格式化 / Lint</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="2-rust-模块系统"><a class="header" href="#2-rust-模块系统">2️⃣ Rust 模块系统</a></h2>
+<p>模块系统管理 <strong>作用域和可见性</strong>，允许将代码组织成清晰层次。</p>
+<hr>
+<h3 id="21-mod-声明"><a class="header" href="#21-mod-声明">2.1 <code>mod</code> 声明</a></h3>
+<ul>
+<li>声明模块</li>
+<li>可以在同文件或单独文件定义</li>
+</ul>
+<p><strong>示例：单文件模块</strong></p>
+<pre class="playground"><code class="language-rust edition2024">mod utils {
+    pub fn add(a: i32, b: i32) -&gt; i32 {
+        a + b
+    }
+}
+
+fn main() {
+    let sum = utils::add(2, 3);
+    println!("{}", sum);
+}</code></pre>
+<p><strong>示例：多文件模块</strong></p>
+<p>项目结构：</p>
+<pre><code>src/
+├── main.rs
+└── utils.rs
+</code></pre>
+<p><code>main.rs</code>：</p>
+<pre class="playground"><code class="language-rust edition2024">mod utils;   // 引入 utils.rs 文件
+
+fn main() {
+    let sum = utils::add(2, 3);
+    println!("{}", sum);
+}</code></pre>
+<p><code>utils.rs</code>：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="22-子模块"><a class="header" href="#22-子模块">2.2 子模块</a></h3>
+<ul>
+<li>使用 <code>mod xxx;</code> 声明子模块</li>
+<li>可以在 <code>mod.rs</code> 或目录下 <code>xxx.rs</code> 文件定义</li>
+</ul>
+<p>示例项目结构：</p>
+<pre><code>src/
+├── main.rs
+└── math/
+    ├── mod.rs
+    └── add.rs
+</code></pre>
+<p><code>math/mod.rs</code>：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub mod add;    // 引入 add.rs
+<span class="boring">}</span></code></pre>
+<p><code>math/add.rs</code>：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+<span class="boring">}</span></code></pre>
+<p><code>main.rs</code>：</p>
+<pre class="playground"><code class="language-rust edition2024">mod math;
+
+fn main() {
+    let sum = math::add::add(2, 3);
+    println!("{}", sum);
+}</code></pre>
+<hr>
+<h3 id="23-可见性控制"><a class="header" href="#23-可见性控制">2.3 可见性控制</a></h3>
+<p>Rust 的默认模块 <strong>是私有的</strong>，意味着模块内部的函数、结构体、常量等默认 <strong>只能在当前模块内访问</strong>。</p>
+<p>要让其他模块或 crate 能访问，就需要使用 <strong><code>pub</code> 及其变体</strong> 来控制可见性。</p>
+<h4 id="可见性关键字"><a class="header" href="#可见性关键字">可见性关键字</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>可见性</th><th>作用</th><th>访问范围</th></tr>
+</thead>
+<tbody>
+<tr><td><code>pub</code></td><td>公开</td><td>对<strong>整个 crate</strong> 或外部 crate 可见</td></tr>
+<tr><td><code>pub(crate)</code></td><td>crate 内部可见</td><td>同一个 crate 内都可以访问，外部 crate 不可见</td></tr>
+<tr><td><code>pub(super)</code></td><td>父模块可见</td><td>仅对父模块和父模块的兄弟模块可见</td></tr>
+<tr><td><code>pub(in path)</code></td><td>指定模块可见</td><td>只能在指定模块或其子模块访问</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h4 id="示例解析"><a class="header" href="#示例解析">示例解析</a></h4>
+<p>假设项目结构如下：</p>
+<pre><code class="language-text">src/
+├── main.rs
+└── a/
+    ├── mod.rs
+    └── sub.rs
+</code></pre>
+<h4 id="示例代码"><a class="header" href="#示例代码">示例代码</a></h4>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod a {
+    fn private_fn() {
+        println!("只能在 a 模块内部访问");
+    }
+
+    pub fn public_fn() {
+        println!("对外公开，可被 main.rs 调用");
+    }
+
+    pub(crate) fn crate_fn() {
+        println!("在当前 crate 内可见，但外部 crate 不可访问");
+    }
+
+    pub(super) fn parent_fn() {
+        println!("对父模块可见（main.rs 或兄弟模块）");
+    }
+
+    pub(in crate::a) fn in_module_fn() {
+        println!("只在 a 模块或子模块可见");
+    }
+}
+<span class="boring">}</span></code></pre>
+<h4 id="mainrs-调用规则"><a class="header" href="#mainrs-调用规则">main.rs 调用规则</a></h4>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    a::public_fn();      // ✅ 可访问
+    a::crate_fn();       // ✅ 可访问（同 crate）
+    a::parent_fn();      // ✅ 可访问（main.rs 是父模块）
+    // a::private_fn();  // ❌ 编译报错，私有
+    // a::in_module_fn(); // ❌ 编译报错，不在指定模块范围
+}</code></pre>
+<hr>
+<h4 id="可见性理解图文字版"><a class="header" href="#可见性理解图文字版">可见性理解图（文字版）</a></h4>
+<pre><code class="language-text">my_crate
+│
+├─ main.rs           &lt;- 父模块
+└─ a/ mod.rs         &lt;- 子模块 a
+      ├─ private_fn()        // 只在 a 内部
+      ├─ public_fn()         // crate 内 + 外部 crate
+      ├─ crate_fn()          // crate 内
+      ├─ parent_fn()         // 父模块可见（main.rs）
+      └─ in_module_fn()      // 仅在 a 模块或子模块
+</code></pre>
+<h4 id="mod-默认行为"><a class="header" href="#mod-默认行为">mod 默认行为</a></h4>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>mod a { ... }
+<span class="boring">}</span></code></pre>
+<p>前面需不需要加 <code>pub</code>，这取决于 <strong>你希望这个模块是否对外可见</strong>:</p>
+<hr>
+<h5 id="mod-默认行为-1"><a class="header" href="#mod-默认行为-1"><code>mod</code> 默认行为</a></h5>
+<ul>
+<li>
+<p><code>mod a { ... }</code></p>
+<ul>
+<li><strong>默认是私有的</strong></li>
+<li>只在 <strong>父模块</strong> 内可见</li>
+<li>外部模块或 crate <strong>不能直接访问</strong></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h5 id="pub-mod-的作用"><a class="header" href="#pub-mod-的作用"><code>pub mod</code> 的作用</a></h5>
+<ul>
+<li>
+<p>写成 <code>pub mod a { ... }</code></p>
+<ul>
+<li>模块变成 <strong>公共模块</strong></li>
+<li><strong>父模块外部</strong>可以访问</li>
+<li>在库 crate 中，外部 crate 可以用 <code>my_crate::a::foo()</code> 调用</li>
+</ul>
+</li>
+</ul>
+<p><strong>示例：库 crate</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// lib.rs
+pub mod a {
+    pub fn public_fn() {
+        println!("外部 crate 可访问");
+    }
+
+    fn private_fn() {
+        println!("仅 a 模块内部可访问");
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>在外部 crate 调用：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// main.rs in other crate
+my_crate::a::public_fn(); // ✅ 可访问
+// my_crate::a::private_fn(); // ❌ 编译报错
+<span class="boring">}</span></code></pre>
+<hr>
+<h5 id="模块层级总结"><a class="header" href="#模块层级总结">模块层级总结</a></h5>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>声明</th><th>模块可见性</th><th>访问范围</th></tr>
+</thead>
+<tbody>
+<tr><td><code>mod a</code></td><td>私有</td><td>父模块内可访问</td></tr>
+<tr><td><code>pub mod a</code></td><td>公共</td><td>父模块 + 父模块外可访问</td></tr>
+<tr><td>子模块内部函数默认私有</td><td>私有</td><td>仅在该模块内部可访问</td></tr>
+<tr><td>子模块内部函数 <code>pub</code></td><td>公共</td><td>父模块可访问，如果父模块 <code>pub mod</code>，外部 crate 也可访问</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h5 id="小结"><a class="header" href="#小结">小结</a></h5>
+<ul>
+<li><strong>库 crate</strong>：如果希望外部 crate 使用模块，<code>pub mod a</code> 必须加 <code>pub</code></li>
+<li><strong>二进制 crate / 内部模块</strong>：通常不用 <code>pub</code>，默认私有即可</li>
+<li><strong>模块内部的函数、类型</strong>：再用 <code>pub</code> 或可见性修饰符控制访问范围</li>
+</ul>
+<hr>
+<h3 id="24-导入使用函数"><a class="header" href="#24-导入使用函数">2.4 导入、使用函数</a></h3>
+<p>分为两种情况: 有lib.rs 无lib.rs</p>
+<h4 id="没有-librs纯二进制-crate"><a class="header" href="#没有-librs纯二进制-crate">没有 lib.rs（纯二进制 crate）</a></h4>
+<p>假设项目：</p>
+<pre><code class="language-text">src/
+├── main.rs            //main.rs 是根模块,并声明了 math 模块和 utils 模块 mod utils; mod math;
+├── utils.rs
+└── math/
+    ├── mod.rs
+    └── add.rs
+</code></pre>
+<p>编译器查找顺序：</p>
+<p>mod utils; → 查找 src/utils.rs 或 src/utils/mod.rs （两者按照道理不会同时存在）
+mod math; → 查找 src/math.rs 或 src/math/mod.rs （两者按照道理不会同时存在）</p>
+<p>总结：根模块（main.rs）是入口 → 模块声明 → 模块路径解析 → use 按模块层级查找。</p>
+<h5 id="有-librs库-crate"><a class="header" href="#有-librs库-crate">有 lib.rs（库 crate）</a></h5>
+<p>假设项目：</p>
+<pre><code class="language-text">src/
+├── main.rs
+├── lib.rs          //lib.rs 声明模块 pub mod utils;  pub mod math;
+├── utils.rs
+└── math/
+    ├── mod.rs
+    └── add.rs
+</code></pre>
+<p>编译器查找顺序：</p>
+<p>crate 根是 lib.rs
+按 pub mod 声明顺序查找模块文件
+utils → <code>src/utils.rs</code> 或者 <code>src/utils/mod.rs</code>
+math → <code>src/math.rs</code> 或者 <code>src/math/mod.rs</code></p>
+<p>注意：外部 crate 调用你的库总是从 lib.rs 根开始（用 <code>crate::</code> 或 <code>my_crate::</code> 路径）</p>
+<h4 id="如果项目有-librsmainrs-想使用-mathaddrs-中的函数有哪些导入方式"><a class="header" href="#如果项目有-librsmainrs-想使用-mathaddrs-中的函数有哪些导入方式">如果项目有 lib.rs，main.rs 想使用 math/add.rs 中的函数，有哪些导入方式</a></h4>
+<p>以有 lib.rs（库 crate）为例，导入 <code>math/add.rs</code> 中的函数，有哪些导入方式</p>
+<p>1.通过 lib.rs 中重新导出函数（lib.rs中声明了 pub mod math; ）</p>
+<pre class="playground"><code class="language-rust edition2024">use my_project::add;   // 直接使用重新导出的函数
+
+fn main() {
+    let result = add(5, 6);
+    println!("5 + 6 = {}", result);
+}</code></pre>
+<p>2.通过 mod math 直接导入</p>
+<pre class="playground"><code class="language-rust edition2024">mod math;
+use math::add::add;  
+
+fn main() {
+    let result = add(2, 3);
+    println!("2 + 3 = {}", result);
+}</code></pre>
+<h4 id="rust-模块文件查找原则"><a class="header" href="#rust-模块文件查找原则">Rust 模块文件查找原则</a></h4>
+<p>1、默认情况下，Rust 只会在 crate 根（src/）及其子目录 查找模块。
+2、mod xxx; 会去以下路径查找：
+xxx.rs
+xxx/mod.rs
+3、如果模块不在 <code>src/</code> 内部，编译器不会自动找到，除非通过 路径引入或 workspaces。</p>
+<pre><code class="language-text">my_project/
+├── Cargo.toml
+├── src/
+│   └── main.rs
+└── math/
+    └── add.rs
+</code></pre>
+<p>这里 math/ 不在 src/ 内，所以：</p>
+<p>直接写 mod math; 会报错，编译器找不到 <code>src/math.rs</code> 或 <code>src/math/mod.rs</code>
+需要告诉 Rust 显式路径 或 把 math 变成 crate（workspace）的一部分）</p>
+<p>把 math 作为子 crate,通过 <code>path</code> 依赖进行声明（ 或者构建workspace，math 下新创建 Cargo.toml）</p>
+<h3 id="25-rust-导入路径crate-vs-my_crate"><a class="header" href="#25-rust-导入路径crate-vs-my_crate">2.5 Rust 导入路径：<code>crate::</code> vs <code>my_crate::</code></a></h3>
+<p>1、 <code>crate::</code>
+- 表示当前 crate 根
+- 只在同一个 crate 内部使用
+- 可以从根模块（lib.rs 或 main.rs）开始相对引用模块和函数
+- 常用于库内部模块之间调用
+- <code>crate::</code> 只能在 同一个 crate 内使用，外部 crate 不可用。
+2、<code>my_crate::</code>
+- 表示外部 crate 的名称
+- 外部 crate 调用你的库时使用
+- crate 名就是你在 Cargo.toml中[package] name = “my_crate” 中定义的名称
+- 外部 crate 必须通过 crate 名来访问，你不能用 <code>crate::</code>，因为 <code>crate::</code> 指的是调用者自己的根模块。</p>
+<h2 id="3-crate-与包管理"><a class="header" href="#3-crate-与包管理">3️⃣ Crate 与包管理</a></h2>
+<h3 id="31-crate-类型"><a class="header" href="#31-crate-类型">3.1 crate 类型</a></h3>
+<ul>
+<li><strong>二进制 crate</strong>：生成可执行程序，入口 <code>main.rs</code></li>
+<li><strong>库 crate</strong>：提供可复用代码，入口 <code>lib.rs</code></li>
+<li>一个 Cargo 项目可以同时包含二进制 crate 和库 crate。</li>
+</ul>
+<hr>
+<h3 id="32-依赖管理"><a class="header" href="#32-依赖管理">3.2 依赖管理</a></h3>
+<h4 id="依赖类型"><a class="header" href="#依赖类型">依赖类型</a></h4>
+<pre><code class="language-toml">[dependencies]
+regex = "1"                  # 精确版本
+serde = { version = "1.0", features = ["derive"] }  # 启用特性
+
+[dev-dependencies]
+
+[build-dependencies]
+
+</code></pre>
+<p>1、[dependencies]：声明项目运行依赖</p>
+<pre><code class="language-toml">[dependencies]
+rand = "0.8"
+</code></pre>
+<p>Cargo 会下载 crate 并在构建时编译，默认导入到项目中可直接 use rand::Rng;</p>
+<p>2、[dev-dependencies]：开发依赖（测试、示例代码）</p>
+<pre><code class="language-toml">[dev-dependencies]
+criterion = "0.4"
+</code></pre>
+<p>只在测试或基准测试中使用,cargo build 不会编译 dev-dependencies,cargo test 或 cargo bench 会编译</p>
+<p>3、[build-dependencies]：构建脚本依赖</p>
+<pre><code class="language-toml">[build-dependencies]
+cc = "1.0"
+</code></pre>
+<p>仅用于构建脚本 build.rs,编译时 Cargo 会使用这些依赖生成文件或处理构建任务</p>
+<p>4、可选依赖 / features</p>
+<p>4.1 可选依赖（optional dependency）
+- 一个依赖 <strong>不一定总被编译</strong>
+- 只有在需要时才启用，节省编译时间和二进制大小
+- 常用于库 crate，允许用户选择功能模块</p>
+<pre><code class="language-toml">[dependencies]
+serde = { version = "1.0", optional = true ,features = ["derive"]}  # optional = true 表示可选 ,依赖不默认编译
+</code></pre>
+<p>4.2 Features
+- 用来 <strong>组合可选依赖或控制功能</strong>
+- 可以在 Cargo.toml 中声明，默认启用或手动启用
+- 控制是否启用 optional 依赖或功能</p>
+<pre><code class="language-toml">[features]
+default = []                  # 默认启用的依赖有[]中的内容，此处为空，默认没有任何 feature 启用
+json_support = ["serde_json"] # json_support feature 启用 serde/json
+</code></pre>
+<p>4.3 main.rs 或库代码中使用可选依赖</p>
+<pre><code class="language-rust ignore">#[cfg(feature = "json_support")]   // 仅在 feature 启用时编译
+pub fn parse_json(s: &amp;str) -&gt; serde_json::Value {
+    serde_json::from_str(s).unwrap()
+}</code></pre>
+<p><code>#[cfg(feature = "xxx")] </code>宏控制 编译条件,如果用户没启用 json_support，这段代码不会编译.</p>
+<p>4.4 如何启用 Features</p>
+<pre><code class="language-toml">[dependencies]
+serde_json = { version = "1.0", optional = true }
+
+[features]
+default = []
+json = ["serde_json"]
+</code></pre>
+<p>可选依赖只有在指定 feature 时才会编译,通过 –features json 激活,<code>cargo build --features json_support</code>。默认构建 <code>cargo build </code>（不启用任何 feature） 启用多个 feature（假设有多个）<code>cargo build --features "json_support other_feature"</code></p>
+<hr>
+<h4 id="版本管理规则"><a class="header" href="#版本管理规则">版本管理规则</a></h4>
+<p>Cargo 遵循 语义化版本（SemVer）：</p>
+<p><code>MAJOR.MINOR.PATCH</code></p>
+<p>1、<code>^</code> 号（Caret）：默认依赖策略</p>
+<p><code>serde = "^1.0"  # &gt;=1.0.0, &lt;2.0.0</code></p>
+<p>2、<code>~</code> 号（Tilde）：仅允许小版本更新</p>
+<p><code>serde = "~1.0.115"  # &gt;=1.0.115, &lt;1.1.0</code></p>
+<p>3、<code>=</code> 号（Equal）：指定精确版本：</p>
+<p><code>serde = "=1.0.115"  # 仅 1.0.115</code></p>
+<p>4、<code>*</code> 号（Star）：指定通配符：</p>
+<p><code>serde = "1.*"  # &gt;=1.0.0, &lt;2.0.0</code></p>
+<h3 id="33-rust-workspace工作区结构"><a class="header" href="#33-rust-workspace工作区结构">3.3 Rust Workspace（工作区）结构</a></h3>
+<p>Workspace 概念
+- Workspace 是 多个 crate 的组合
+- 共享同一个 Cargo.lock
+- 可以统一构建、测试和管理依赖
+- 常用于大型项目或多个相关 crate 的组织</p>
+<p>Workspace 根目录
+- 根目录 必须有 Cargo.toml，声明 workspace 成员
+- 根目录下通常不放源码，源码在各个子 crate 中</p>
+<p><strong>示例：</strong></p>
+<pre><code class="language-text">my_workspace/
+├── Cargo.toml         # workspace 根配置
+├── crate_a/           # 第一个 crate
+│   ├── Cargo.toml
+│   └── src/
+│       └── lib.rs
+├── crate_b/           # 第二个 crate
+│   ├── Cargo.toml
+│   └── src/
+│       └── main.rs
+└── target/            # 构建输出，workspace 共享
+</code></pre>
+<p>根 Cargo.toml 配置:</p>
+<pre><code class="language-toml">[workspace]
+members = [
+    "crate_a",
+    "crate_b",
+]
+
+[workspace.dependencies]
+//内部依赖
+crate_a = { path = "../crate_a" }
+crate_b = { path = "../crate_b" }
+//外部依赖
+serde = { version = "1.0" ,features = ["derive"]}
+
+</code></pre>
+<p>members 列出 workspace 内的所有 crate, 可以是相对路径，也可以是子目录</p>
+<p>1 子 crate 相互依赖</p>
+<p>假设 crate_b 依赖 crate_a：</p>
+<pre><code class="language-toml">[dependencies]
+crate_a = { workspace = true }  # 路径依赖
+</code></pre>
+<p>main.rs 中调用：</p>
+<pre><code class="language-rust ignore">use crate_a::some_function;
+
+fn main() {
+    some_function();
+}</code></pre>
+<p>2 Workspace 优点
+- 统一管理依赖，避免重复下载
+- 多 crate 构建和测试统一
+- 子 crate 相互依赖方便（用 path）
+- 适合大型项目和库 + 可执行程序组合</p>
+<hr>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
