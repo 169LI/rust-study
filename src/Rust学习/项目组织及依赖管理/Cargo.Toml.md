@@ -2,6 +2,8 @@
 
 涵盖常用字段、依赖声明、版本规则、features、workspace 和结构化书写方法，便于规范化项目管理。
 
+本节是大致的介绍，详细内容可参考[Cargo.toml](https://mp.weixin.qq.com/s/HdiBqU56QukVfXBMYUPCkg)
+
 ---
 
 ## 1️⃣ 基本结构
