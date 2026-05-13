@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-358ffb70.js";
+            window.path_to_searchindex_js = "searchindex-fbdd15e6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-8e1b011e.js"></script>
@@ -741,7 +741,7 @@ fn main() {
 fn add(a: i32, b: i32) -&gt; i32 {
     a + b
 }</code></pre>
-<p>在<a href="#文档">文档</a>章节会详细介绍文档注释的使用方法和注意事项。</p>
+<p>在<a href="#rust-文档注释-documentation-comments">文档</a>章节会详细介绍文档注释的使用方法和注意事项。</p>
 <hr>
 <h2 id="二-打印-printing"><a class="header" href="#二-打印-printing">二、 打印 (Printing)</a></h2>
 <p>Rust 的打印是通过一组<strong>宏 (Macros)</strong> 来实现的。宏的显著特征是名称末尾带有感叹号 <code>!</code>。</p>
@@ -5767,7 +5767,224 @@ where
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cargotoml"><a class="header" href="#cargotoml">Cargo.Toml</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="文档"><a class="header" href="#文档">文档</a></h1>
+<h1 id="rust-文档注释-documentation-comments"><a class="header" href="#rust-文档注释-documentation-comments">Rust 文档注释 (Documentation Comments)</a></h1>
+<h2 id="1-文档注释概述"><a class="header" href="#1-文档注释概述">1. 文档注释概述</a></h2>
+<p>Rust 的文档注释用于为 <strong>函数、结构体、枚举、trait、模块、crate</strong> 等生成官方 API 文档。</p>
+<p><strong>特点：</strong></p>
+<ul>
+<li>可通过 <code>cargo doc</code> 生成 HTML 文档。</li>
+<li>支持 Markdown 格式。</li>
+<li>文档中的代码可以被编译器测试（Doc Test）。</li>
+<li>与普通注释 (<code>//</code>, <code>/* */</code>) 不同，专门用于生成可读文档。</li>
+</ul>
+<hr>
+<h2 id="2-注释类型"><a class="header" href="#2-注释类型">2. 注释类型</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类型</th><th>语法</th><th>位置</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>外层文档注释</strong></td><td><code>///</code></td><td>函数、结构体、枚举、trait</td><td>为单个项生成文档</td></tr>
+<tr><td><strong>模块/文件注释</strong></td><td><code>//!</code></td><td>模块或文件顶部</td><td>为整个模块或 crate 生成文档</td></tr>
+<tr><td><strong>普通注释</strong></td><td><code>//</code> 或 <code>/* */</code></td><td>任意位置</td><td>仅供代码阅读，不生成文档</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>示例：函数文档注释</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// 计算两个整数的和
+///
+/// # 示例
+///
+/// ```
+/// let result = my_crate::add(2, 3);
+/// assert_eq!(result, 5);
+/// ```
+pub fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+<span class="boring">}</span></code></pre>
+<p><strong>示例：模块文档注释</strong></p>
+<pre><code class="language-rust ignore">//! utils 模块
+//!
+//! 提供通用工具函数，例如加减乘除、格式转换等</code></pre>
+<hr>
+<h2 id="3-常用标签section-headers"><a class="header" href="#3-常用标签section-headers">3. 常用标签（Section Headers）</a></h2>
+<p>Rust 文档注释中经常使用 <strong>Markdown 风格的标题</strong> 来说明函数特性：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>标签</th><th>用途</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code># Examples</code></td><td>展示函数/方法使用方法</td><td><code>rust let r = add(1, 2); assert_eq!(r, 3);</code></td></tr>
+<tr><td><code># Panics</code></td><td>说明函数可能 panic 的情况</td><td>当除数为 0 时 panic</td></tr>
+<tr><td><code># Errors</code></td><td>说明函数可能返回的错误</td><td>返回 <code>Result::Err</code> 时说明原因</td></tr>
+<tr><td><code># Safety</code></td><td>对 <code>unsafe</code> 函数，说明安全要求</td><td>调用前必须保证指针有效</td></tr>
+<tr><td><code># Arguments</code></td><td>说明函数参数</td><td><code>x: i32 - 输入值</code></td></tr>
+<tr><td><code># Returns</code></td><td>说明函数返回值</td><td><code>i32 - 返回和</code></td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>示例：带多个标签</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// 除法函数
+///
+/// # Arguments
+///
+/// * `numerator` - 被除数
+/// * `denominator` - 除数
+///
+/// # Panics
+///
+/// 当 `denominator` 为 0 时会 panic
+///
+/// # Examples
+///
+/// ```
+/// let result = my_crate::divide(10, 2);
+/// assert_eq!(result, 5);
+/// ```
+pub fn divide(numerator: i32, denominator: i32) -&gt; i32 {
+    assert!(denominator != 0);
+    numerator / denominator
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="4-doc-test文档测试"><a class="header" href="#4-doc-test文档测试">4. Doc Test（文档测试）</a></h2>
+<ul>
+<li>文档中的 Rust 代码可以直接被 Rust 编译器测试。</li>
+<li>代码必须在 <code>rust ... </code> 块中。</li>
+<li>编译器会检查示例代码的正确性，保证文档与实际行为一致。</li>
+</ul>
+<p><strong>示例：带 Doc Test 的函数</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// 计算向量元素平方和
+///
+/// # Examples
+///
+/// ```rust
+/// let v = vec![1, 2, 3];
+/// assert_eq!(my_crate::sum_of_squares(&amp;v), 14);
+/// ```
+pub fn sum_of_squares(v: &amp;Vec&lt;i32&gt;) -&gt; i32 {
+    v.iter().map(|x| x*x).sum()
+}
+<span class="boring">}</span></code></pre>
+<p>运行文档测试：</p>
+<pre><code class="language-bash">cargo test --doc
+</code></pre>
+<hr>
+<h2 id="5-模块crate-文档"><a class="header" href="#5-模块crate-文档">5. 模块/Crate 文档</a></h2>
+<ul>
+<li>
+<p>模块顶部用 <code>//!</code> 注释：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//! utils 模块
+//! 提供常用工具函数
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p>Crate 顶部（<code>lib.rs</code> 或 <code>main.rs</code>）用 <code>//!</code> 生成 crate 级别文档：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>//! My Crate
+//! 提供计算和字符串处理工具
+<span class="boring">}</span></code></pre>
+</li>
+<li>
+<p>支持 Markdown，可以嵌入图片、链接、表格等。</p>
+</li>
+</ul>
+<hr>
+<h2 id="6-markdown-支持"><a class="header" href="#6-markdown-支持">6. Markdown 支持</a></h2>
+<p>Rust 文档注释支持：</p>
+<ul>
+<li><strong>标题</strong>：<code># 一级</code>, <code>## 二级</code></li>
+<li><strong>列表</strong>：<code>-</code> 或 <code>*</code></li>
+<li><strong>代码块</strong>：<code>rust ... </code></li>
+<li><strong>内联代码</strong>：<code>`code`</code></li>
+<li><strong>链接</strong>： <code>[文本](URL)</code></li>
+<li><strong>表格</strong>：标准 Markdown 表格</li>
+</ul>
+<p><strong>示例：带表格的文档</strong></p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// 颜色类型
+///
+/// | 名称 | RGB |
+/// |------|-----|
+/// | Red  | (255,0,0) |
+/// | Green| (0,255,0) |
+/// | Blue | (0,0,255) |
+pub enum Color {
+    Red,
+    Green,
+    Blue,
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="7-高级示例结构体和方法"><a class="header" href="#7-高级示例结构体和方法">7. 高级示例：结构体和方法</a></h2>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// 表示二维点
+///
+/// # Examples
+///
+/// ```
+/// let p = my_crate::Point::new(3.0, 4.0);
+/// assert_eq!(p.magnitude(), 5.0);
+/// ```
+pub struct Point {
+    pub x: f64,
+    pub y: f64,
+}
+
+impl Point {
+    /// 创建新点
+    pub fn new(x: f64, y: f64) -&gt; Self {
+        Self { x, y }
+    }
+
+    /// 计算点到原点的距离
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let p = my_crate::Point::new(3.0, 4.0);
+    /// assert_eq!(p.magnitude(), 5.0);
+    /// ```
+    pub fn magnitude(&amp;self) -&gt; f64 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="8-自动生成文档"><a class="header" href="#8-自动生成文档">8. 自动生成文档</a></h2>
+<p>生成 HTML 文档：</p>
+<pre><code class="language-bash">cargo doc --open
+</code></pre>
+<p>特点：</p>
+<ul>
+<li>文档生成在 <code>target/doc</code> 目录。</li>
+<li>支持模块导航、搜索、函数参数和示例。</li>
+<li>Doc Test 会自动运行，保证示例可用。</li>
+</ul>
+<hr>
+<h2 id="9-最佳实践"><a class="header" href="#9-最佳实践">9. 最佳实践</a></h2>
+<ol>
+<li><strong>每个公共函数、结构体都写文档</strong>。</li>
+<li><strong>示例代码完整可运行</strong>。</li>
+<li><strong>复杂函数标注 <code># Panics</code>, <code># Safety</code>, <code># Errors</code></strong>。</li>
+<li><strong>模块顶部写模块概述</strong>，crate 顶部写整体概述。</li>
+<li><strong>Markdown 排版清晰</strong>，列表、标题、表格、代码块分明。</li>
+<li><strong>Doc Test 可用性</strong>：在文档中引用真实 API，方便测试。</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cargo"><a class="header" href="#cargo">Cargo</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
