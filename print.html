@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-7dad87a9.js";
+            window.path_to_searchindex_js = "searchindex-9ee965b3.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-5c4ffa27.js"></script>
@@ -6553,7 +6553,176 @@ fn main() {
 - 适合大型项目和库 + 可执行程序组合</p>
 <hr><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cargotoml"><a class="header" href="#cargotoml">Cargo.Toml</a></h1>
-<div style="break-before: page; page-break-before: always;"></div>
+<p>涵盖常用字段、依赖声明、版本规则、features、workspace 和结构化书写方法，便于规范化项目管理。</p>
+<hr>
+<h2 id="1-基本结构"><a class="header" href="#1-基本结构">1️⃣ 基本结构</a></h2>
+<p>Cargo.toml 是 TOML 格式的文件，主要分为几个区块：</p>
+<pre><code class="language-toml">[package]
+name = "my_project"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name &lt;you@example.com&gt;"]
+description = "A short description of the project"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/user/my_project"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.4"
+
+[build-dependencies]
+cc = "1.0"
+
+[features]
+default = []
+json_support = ["serde"]
+
+</code></pre>
+<hr>
+<h2 id="2-package-区块规范"><a class="header" href="#2-package-区块规范">2️⃣ [package] 区块规范</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>字段</th><th>说明</th><th>建议</th></tr>
+</thead>
+<tbody>
+<tr><td>name</td><td>crate 名称</td><td>用小写字母 + 下划线，避免特殊字符</td></tr>
+<tr><td>version</td><td>版本号</td><td>遵循语义化版本号 SemVer（MAJOR.MINOR.PATCH）</td></tr>
+<tr><td>edition</td><td>Rust edition</td><td><code>2015</code>/<code>2018</code>/<code>2021</code>，统一项目</td></tr>
+<tr><td>authors</td><td>作者信息</td><td>方便生成文档、Cargo 发布</td></tr>
+<tr><td>description</td><td>项目描述</td><td>简短，描述功能</td></tr>
+<tr><td>license</td><td>许可证</td><td>MIT / Apache-2.0 / 自定义，格式规范</td></tr>
+<tr><td>repository</td><td>仓库地址</td><td>GitHub 或其他托管地址</td></tr>
+</tbody>
+</table>
+</div>
+<hr>
+<h2 id="3-dependencies-区块规范"><a class="header" href="#3-dependencies-区块规范">3️⃣ [dependencies] 区块规范</a></h2>
+<h3 id="31-基本依赖"><a class="header" href="#31-基本依赖">3.1 基本依赖</a></h3>
+<pre><code class="language-toml">serde = "1.0"   # caret 版本 ^1.0
+regex = "1.5.4" # 精确版本
+</code></pre>
+<ul>
+<li>默认使用 <code>^</code> 号（caret）规则</li>
+<li>避免使用 <code>*</code>（无限制版本）</li>
+</ul>
+<h3 id="32-可选依赖"><a class="header" href="#32-可选依赖">3.2 可选依赖</a></h3>
+<pre><code class="language-toml">serde_json = { version = "1.0", optional = true }
+</code></pre>
+<ul>
+<li>optional = true 表示依赖不默认启用</li>
+<li>必须配合 features 使用</li>
+</ul>
+<h3 id="33-git--path-依赖"><a class="header" href="#33-git--path-依赖">3.3 Git / Path 依赖</a></h3>
+<pre><code class="language-toml">my_crate = { git = "https://github.com/user/my_crate.git", branch = "main" }
+my_local = { path = "../my_local" }
+</code></pre>
+<hr>
+<h2 id="4-dev-dependencies-和-build-dependencies"><a class="header" href="#4-dev-dependencies-和-build-dependencies">4️⃣ [dev-dependencies] 和 [build-dependencies]</a></h2>
+<ul>
+<li>dev-dependencies：只在测试或示例编译</li>
+<li>build-dependencies：只在 build.rs 脚本编译</li>
+</ul>
+<pre><code class="language-toml">[dev-dependencies]
+criterion = "0.4"
+
+[build-dependencies]
+cc = "1.0"
+</code></pre>
+<hr>
+<h2 id="5-features-区块"><a class="header" href="#5-features-区块">5️⃣ [features] 区块</a></h2>
+<ul>
+<li>声明可选功能或可选依赖</li>
+<li>default：默认启用的 feature</li>
+</ul>
+<pre><code class="language-toml">[features]
+default = []
+json_support = ["serde_json"]
+</code></pre>
+<ul>
+<li>编译时启用：</li>
+</ul>
+<pre><code class="language-bash">cargo build --features json_support
+</code></pre>
+<hr>
+<hr>
+<h2 id="6-版本管理规范"><a class="header" href="#6-版本管理规范">6️⃣ 版本管理规范</a></h2>
+<p>1、<strong>SemVer</strong> ：<code>MAJOR.MINOR.PATCH</code>
+2、 <strong>依赖版本约束</strong> ：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>写法</th><th>含义</th></tr>
+</thead>
+<tbody>
+<tr><td><code>"1.0"</code></td><td>^1.0 → &gt;=1.0.0 &lt;2.0.0</td></tr>
+<tr><td><code>"~1.0.115"</code></td><td>&gt;=1.0.115 &lt;1.1.0</td></tr>
+<tr><td><code>"=1.0.115"</code></td><td>仅 1.0.115</td></tr>
+<tr><td><code>"1.*"</code></td><td>&gt;=1.0.0 &lt;2.0.0</td></tr>
+</tbody>
+</table>
+</div>
+<p>3、注意：避免使用 <code>"*"</code>，防止不确定更新</p>
+<hr>
+<h2 id="7-书写规范建议"><a class="header" href="#7-书写规范建议">7️⃣ 书写规范建议</a></h2>
+<p>1、<strong>字段顺序</strong> （推荐）：</p>
+<pre><code class="language-text">[package]
+[dependencies]
+[dev-dependencies]
+[build-dependencies]
+[features]
+[workspace]
+</code></pre>
+<p>2、<strong>依赖统一按内外部依赖、和首字母排序</strong> ，方便查找</p>
+<p>3、<strong>路径依赖、Git 依赖写明版本或分支</strong></p>
+<p>4、<strong>注释清晰</strong> ，说明特殊依赖或 feature 用途</p>
+<pre><code class="language-toml"># serde_json 用于 JSON 解析，可选依赖
+serde_json = { version = "1.0", optional = true }
+</code></pre>
+<p>5、<strong>features 命名简洁、清晰</strong> ，避免与依赖 crate 内 feature 冲突</p>
+<hr>
+<h2 id="8-cargotoml-示例综合规范"><a class="header" href="#8-cargotoml-示例综合规范">8️⃣ Cargo.toml 示例（综合规范）</a></h2>
+<pre><code class="language-toml">[package]
+name = "my_project"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alice &lt;alice@example.com&gt;"]
+description = "示例 Rust 项目"
+license = "MIT"
+repository = "https://github.com/alice/my_project"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+regex = "1.5"
+
+[dev-dependencies]
+criterion = "0.4"
+
+[build-dependencies]
+cc = "1.0"
+
+[features]
+default = []
+json_support = ["serde_json"]
+
+[workspace]
+members = ["crate_a", "crate_b"]
+</code></pre>
+<hr>
+<p>✅ <strong>总结</strong></p>
+<ul>
+<li><code>[package]</code> → 项目信息</li>
+<li><code>[dependencies]</code> → 运行时依赖</li>
+<li><code>[dev-dependencies]</code> → 测试/开发依赖</li>
+<li><code>[build-dependencies]</code> → build.rs 脚本依赖</li>
+<li><code>[features]</code> → 可选功能/可选依赖</li>
+<li><code>[workspace]</code> → 多 crate 项目管理</li>
+<li><strong>版本使用 SemVer，避免使用 “*”</strong></li>
+</ul>
+<hr><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rust-文档注释-documentation-comments"><a class="header" href="#rust-文档注释-documentation-comments">Rust 文档注释 (Documentation Comments)</a></h1>
 <h2 id="1-文档注释概述"><a class="header" href="#1-文档注释概述">1. 文档注释概述</a></h2>
 <p>Rust 的文档注释用于为 <strong>函数、结构体、枚举、trait、模块、crate</strong> 等生成官方 API 文档。</p>
