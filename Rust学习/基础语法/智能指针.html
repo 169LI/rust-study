@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a8758b39.js";
+            window.path_to_searchindex_js = "../../searchindex-358ffb70.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-62ea8a72.js"></script>
+        <script src="../../toc-8e1b011e.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -928,6 +928,15 @@ let r2 = data.borrow_mut(); // 运行时：发现已有不可变借用，直接 
 </tbody>
 </table>
 </div>
+<p>根本区别：复制 (Copy) vs 借用 (Borrow)</p>
+<p><code>Cell&lt;T&gt;：</code></p>
+<p>适用类型：只适用于实现了 Copy 特征的简单类型（如 <code>u32, bool, f64</code> 等）。</p>
+<p>操作方式：它通过值的拷贝来工作。当你调用 .get() 时，它返回数据的一个副本；调用 .set() 时，它直接替换掉内部的值。</p>
+<p>限制：你不能获取 Cell 内部数据的引用（&amp;T）。</p>
+<p><code>RefCell&lt;T&gt;：</code></p>
+<p>适用类型：适用于任何类型，尤其是那些没有实现 Copy 的复杂类型（如 <code>Vec&lt;T&gt;</code>, <code>String</code> 或者自定义结构体）。</p>
+<p>操作方式：它通过运行时借用检查来工作。你可以通过 .borrow() 获取不可变引用，或通过 .borrow_mut() 获取可变引用。</p>
+<p>限制：如果在同一时间违反了借用规则（例如同时存在两个可变引用），程序会在运行时 panic。</p>
 <h4 id="-为什么需要-refcell"><a class="header" href="#-为什么需要-refcell">💡 为什么需要 <code>RefCell</code>？</a></h4>
 <p>最常见的场景是：<strong>你实现了一个 Trait，而该 Trait 的方法签名要求使用不可变引用 <code>&amp;self</code>，但你的具体实现却需要修改内部状态（比如缓存、日志记录等）</strong>。</p>
 <h4 id="总结一句话"><a class="header" href="#总结一句话">总结一句话</a></h4>
