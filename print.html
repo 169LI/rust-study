@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-fbdd15e6.js";
+            window.path_to_searchindex_js = "searchindex-0ceca35c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-8e1b011e.js"></script>
@@ -1690,6 +1690,7 @@ note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose bac
 <li><strong>Option</strong>：表示可能为空的值。<strong>Some(T) 或 None</strong>。</li>
 <li><strong>Result&lt;T, E&gt;</strong>：表示成功或失败。<strong>Ok(T) 或 Err(E)</strong>。</li>
 </ul>
+<p>具体解释笔记见 <a href="#option--result">Option &amp; Result.md</a></p>
 <h3 id="1-optiont值可能不存在"><a class="header" href="#1-optiont值可能不存在">1. <code>Option&lt;T&gt;</code>：值可能不存在</a></h3>
 <p>用于表示一个值要么有（<code>Some(T)</code>），要么没有（<code>None</code>）。</p>
 <pre class="playground"><code class="language-rust editable edition2024">fn find_index(target: i32, list: Vec&lt;i32&gt;) -&gt; Option&lt;usize&gt; {
@@ -2137,6 +2138,211 @@ $$</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="option--result"><a class="header" href="#option--result">Option &amp; Result</a></h1>
+<hr>
+<h2 id="1-概述"><a class="header" href="#1-概述">1. 概述</a></h2>
+<p>Rust 的 <code>Option</code> 和 <code>Result</code> 是 <strong>安全处理可能缺失或失败的值</strong> 的核心类型：</p>
+<ul>
+<li><code>Option&lt;T&gt;</code>：值可能存在 (<code>Some</code>) 或不存在 (<code>None</code>)。</li>
+<li><code>Result&lt;T, E&gt;</code>：操作可能成功 (<code>Ok</code>) 或失败 (<code>Err</code>)。</li>
+</ul>
+<p>特点：</p>
+<ul>
+<li>避免 null 引发的空指针错误。</li>
+<li>结合 <code>match</code>、链式方法和 <code>?</code> 操作符可以优雅处理错误。</li>
+<li>用于函数返回值、文件/网络操作、算法查找等场景。</li>
+</ul>
+<hr>
+<h2 id="2-基本定义"><a class="header" href="#2-基本定义">2. 基本定义</a></h2>
+<h3 id="option"><a class="header" href="#option">Option</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><code>Some(T)</code>：包含值 T</li>
+<li><code>None</code>：没有值</li>
+</ul>
+<h3 id="result"><a class="header" href="#result">Result</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><code>Ok(T)</code>：操作成功返回值 T</li>
+<li><code>Err(E)</code>：操作失败返回错误 E</li>
+</ul>
+<hr>
+<h2 id="3-创建与初始化"><a class="header" href="#3-创建与初始化">3. 创建与初始化</a></h2>
+<h3 id="option-示例"><a class="header" href="#option-示例">Option 示例</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x: Option&lt;i32&gt; = Some(5);
+let y: Option&lt;i32&gt; = None;
+<span class="boring">}</span></code></pre>
+<h3 id="result-示例"><a class="header" href="#result-示例">Result 示例</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let r1: Result&lt;i32, &amp;str&gt; = Ok(10);
+let r2: Result&lt;i32, &amp;str&gt; = Err("something went wrong");
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="4-基本匹配与解构"><a class="header" href="#4-基本匹配与解构">4. 基本匹配与解构</a></h2>
+<h3 id="使用-match"><a class="header" href="#使用-match">使用 <code>match</code></a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let maybe_value = Some(42);
+
+match maybe_value {
+    Some(v) =&gt; println!("Value is {}", v),
+    None =&gt; println!("No value"),
+}
+<span class="boring">}</span></code></pre>
+<h3 id="使用-if-let-简化匹配"><a class="header" href="#使用-if-let-简化匹配">使用 <code>if let</code> 简化匹配</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>if let Some(v) = maybe_value {
+    println!("Value is {}", v);
+}
+<span class="boring">}</span></code></pre>
+<h3 id="result-匹配"><a class="header" href="#result-匹配">Result 匹配</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let result: Result&lt;i32, &amp;str&gt; = divide(10, 2);
+
+match result {
+    Ok(v) =&gt; println!("Result = {}", v),
+    Err(e) =&gt; println!("Error = {}", e),
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="5-常用方法"><a class="header" href="#5-常用方法">5. 常用方法</a></h2>
+<h3 id="51-option-方法"><a class="header" href="#51-option-方法">5.1 Option 方法</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>方法</th><th>功能</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>is_some()</code></td><td>是否为 <code>Some</code></td><td><code>x.is_some()</code></td></tr>
+<tr><td><code>is_none()</code></td><td>是否为 <code>None</code></td><td><code>x.is_none()</code></td></tr>
+<tr><td><code>unwrap()</code></td><td>获取值或 panic</td><td><code>x.unwrap()</code></td></tr>
+<tr><td><code>unwrap_or(default)</code></td><td><code>None</code>时返回默认值</td><td><code>x.unwrap_or(0)</code></td></tr>
+<tr><td><code>unwrap_or_else(f)</code></td><td><code>None</code>时调用闭包</td><td><code>x.unwrap_or_else(|| 0)</code></td></tr>
+<tr><td><code>map(f)</code></td><td>映射值</td><td><code>x.map(|v| v * 2)</code></td></tr>
+<tr><td><code>and_then(f)</code></td><td>链式调用</td><td><code>x.and_then(|v| Some(v * 2))</code></td></tr>
+<tr><td><code>ok_or(err)</code></td><td>转为 <code>Result</code></td><td><code>x.ok_or("not found")</code></td></tr>
+<tr><td><code>as_ref()</code></td><td>转为引用</td><td><code>x.as_ref()</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>示例：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = Some(5);
+let y = x.map(|v| v * 2); // Some(10)
+let z = None::&lt;i32&gt;.unwrap_or(0); // 0
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="52-result-方法"><a class="header" href="#52-result-方法">5.2 Result 方法</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>方法</th><th>功能</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>is_ok()</code></td><td>是否为 Ok</td><td><code>r.is_ok()</code></td></tr>
+<tr><td><code>is_err()</code></td><td>是否为 Err</td><td><code>r.is_err()</code></td></tr>
+<tr><td><code>unwrap()</code></td><td>获取 Ok 或 panic</td><td><code>r.unwrap()</code></td></tr>
+<tr><td><code>unwrap_err()</code></td><td>获取 Err 或 panic</td><td><code>r.unwrap_err()</code></td></tr>
+<tr><td><code>unwrap_or(default)</code></td><td>Err 返回默认值</td><td><code>r.unwrap_or(0)</code></td></tr>
+<tr><td><code>unwrap_or_else(f)</code></td><td>Err 调用闭包</td><td><code>r.unwrap_or_else</code></td></tr>
+<tr><td><code>map(f)</code></td><td>映射 Ok 值</td><td>`r.map(</td></tr>
+<tr><td><code>map_err(f)</code></td><td>映射 Err 值</td><td>`r.map_err(</td></tr>
+<tr><td><code>and_then(f)</code></td><td>链式调用</td><td>`r.and_then(</td></tr>
+<tr><td><code>or_else(f)</code></td><td>Err 时调用闭包返回新 Result</td><td>`r.or_else(</td></tr>
+</tbody>
+</table>
+</div>
+<p>示例：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let r: Result&lt;i32, &amp;str&gt; = Ok(10);
+let r2 = r.map(|v| v * 2); // Ok(20)
+let err: Result&lt;i32, &amp;str&gt; = Err("fail");
+let r3 = err.unwrap_or(0); // 0
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="6-链式调用与组合操作"><a class="header" href="#6-链式调用与组合操作">6. 链式调用与组合操作</a></h2>
+<h3 id="option-链式操作"><a class="header" href="#option-链式操作">Option 链式操作</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x = Some(2)
+    .map(|v| v * 3)       // Some(6)
+    .and_then(|v| Some(v + 1)); // Some(7)
+<span class="boring">}</span></code></pre>
+<h3 id="result-链式操作"><a class="header" href="#result-链式操作">Result 链式操作</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_int(s: &amp;str) -&gt; Result&lt;i32, std::num::ParseIntError&gt; {
+    s.parse()
+}
+
+let result = parse_int("42")
+    .map(|v| v * 2)      // Ok(84)
+    .and_then(|v| Ok(v + 1)); // Ok(85)
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="7--操作符快速返回"><a class="header" href="#7--操作符快速返回">7. <code>?</code> 操作符（快速返回）</a></h2>
+<ul>
+<li>用于函数返回 <code>Option</code> 或 <code>Result</code>。</li>
+<li>遇到 <code>None</code> 或 <code>Err</code> 会立即返回。</li>
+<li>简化嵌套 match 和错误处理。</li>
+</ul>
+<h3 id="在-result-中使用"><a class="header" href="#在-result-中使用">在 Result 中使用</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn read_file_len(path: &amp;str) -&gt; Result&lt;usize, std::io::Error&gt; {
+    let content = std::fs::read_to_string(path)?; // Err 会直接返回
+    Ok(content.len())
+}
+<span class="boring">}</span></code></pre>
+<h3 id="在-option-中使用"><a class="header" href="#在-option-中使用">在 Option 中使用</a></h3>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn first_char(s: &amp;str) -&gt; Option&lt;char&gt; {
+    let c = s.chars().next()?; // None 会直接返回
+    Some(c.to_ascii_uppercase())
+}
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="8-option-与-result-转换"><a class="header" href="#8-option-与-result-转换">8. Option 与 Result 转换</a></h2>
+<ul>
+<li><code>Option&lt;T&gt;</code> → <code>Result&lt;T, E&gt;</code>：<code>ok_or(err)</code> 或 <code>ok_or_else(|| err)</code></li>
+<li><code>Result&lt;T, E&gt;</code> → <code>Option&lt;T&gt;</code>：<code>ok()</code></li>
+</ul>
+<p>示例：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let x: Option&lt;i32&gt; = Some(5);
+let r: Result&lt;i32, &amp;str&gt; = x.ok_or("Value not found"); // Ok(5)
+
+let r2: Result&lt;i32, &amp;str&gt; = Err("fail");
+let o: Option&lt;i32&gt; = r2.ok(); // None
+<span class="boring">}</span></code></pre>
+<hr>
+<h2 id="9-模块化与公共-api-设计"><a class="header" href="#9-模块化与公共-api-设计">9. 模块化与公共 API 设计</a></h2>
+<ul>
+<li>函数返回 <code>Option</code>：值可能缺失，例如查找、解析失败。</li>
+<li>函数返回 <code>Result</code>：操作可能失败，例如文件读取、网络请求。</li>
+<li>避免在公共 API 中使用 <code>panic!</code> 或 <code>unwrap()</code>，而应使用 <code>Result</code> 或 <code>Option</code> 明确返回错误。</li>
+<li>链式操作和 <code>?</code> 可以让错误处理更简洁、安全。</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="切片"><a class="header" href="#切片">切片</a></h1>
 <p>Rust 中的 slice（切片）是一种引用集合中连续元素的视图，而不拥有这些元素。它类似于数组或向量的子视图，使用 <code>&amp;[T]</code> 表示不可变切片，<code>&amp;mut [T]</code> 表示可变切片。Slice 是借用的一部分，遵守借用规则，确保内存安全。Slice 常用于字符串、数组和向量，帮助避免不必要的拷贝，提高效率。</p>
