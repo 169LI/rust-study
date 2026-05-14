@@ -52,6 +52,8 @@
       - [上下文管理](./Rust学习/三方库/anyhow/上下文管理.md)
       - [核心宏](./Rust学习/三方库/anyhow/核心宏.md)
       - [错误处理库](./Rust学习/三方库/anyhow/错误处理库.md)
+    - [syn](./Rust学习/三方库/syn/syn.md)
+      - [介绍](./Rust学习/三方库/syn/介绍.md)
 
 ---
 
