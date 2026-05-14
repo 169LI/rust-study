@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-193f4fc0.js";
+            window.path_to_searchindex_js = "searchindex-b86c791d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-7f0aed74.js"></script>
+        <script src="toc-1120a8fd.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -191,6 +191,7 @@
 <p><a href="https://practice-zh.course.rs/why-exercise.html">练习实践</a></p>
 <p><a href="https://rust-lang.github.io/api-guidelines/about.html">API编程指南</a></p>
 <p><a href="https://rust.sui-book.com/01_basics/01_intro.html">Rust带学</a></p>
+<p><a href="https://github.com/reganzm/hug_rust?sessionid=">三角兽-微信公众号+github源码仓库</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="rust学习"><a class="header" href="#rust学习">Rust学习</a></h1>
 <p>学习笔记中可能由于编译器的更新，一些地方可能与现在不一致。</p>
@@ -6103,7 +6104,7 @@ fn main() {
 </li>
 <li>调试技巧
 <ul>
-<li>用 <code>cargo expand </code>查看宏展开后的真实代码</li>
+<li>用 <code>cargo expand </code> 查看宏展开后的真实代码</li>
 <li>可理解宏行为，定位错误</li>
 </ul>
 </li>
@@ -6111,29 +6112,21 @@ fn main() {
 <hr>
 <h4 id="2过程宏procedural-macros"><a class="header" href="#2过程宏procedural-macros">（2）过程宏（Procedural Macros）</a></h4>
 <ul>
-<li>
-<p>工业级、功能强大</p>
-</li>
-<li>
-<p>能操作 <strong>TokenStream → AST → TokenStream</strong></p>
-</li>
-<li>
-<p>三种类型：</p>
+<li>工业级、功能强大</li>
+<li>能操作 <strong>TokenStream → AST → TokenStream</strong></li>
+<li>三种类型：
 <ol>
-<li>
-<p><strong>自定义派生（Custom Derive）</strong></p>
+<li><strong>自定义派生（Custom Derive）</strong>
 <ul>
 <li><code>#[derive(MyTrait)]</code>，自动为类型生成 Trait 实现</li>
 </ul>
 </li>
-<li>
-<p><strong>属性宏（Attribute Macros）</strong></p>
+<li><strong>属性宏（Attribute Macros）</strong>
 <ul>
 <li><code>#[my_attr]</code>，可以对函数、结构体、模块等添加行为</li>
 </ul>
 </li>
-<li>
-<p><strong>函数宏（Function-like Macros）</strong></p>
+<li><strong>函数宏（Function-like Macros）</strong>
 <ul>
 <li>类似函数调用：<code>my_macro!(...)</code>，可以生成任意 Rust 代码</li>
 </ul>
@@ -6144,7 +6137,7 @@ fn main() {
 <h5 id="1-自定义派生宏custom-derive"><a class="header" href="#1-自定义派生宏custom-derive">1️⃣ 自定义派生宏（Custom Derive）</a></h5>
 <p><strong>作用</strong>：自动为某个类型生成 Trait 实现，例如 Debug、Serialize。</p>
 <p><strong>步骤</strong>：</p>
-<p><strong>新建 <code>proc-macro</code> crate</strong></p>
+<p><strong>新建</strong> <strong><code>proc-macro</code></strong> <strong>crate</strong></p>
 <pre><code class="language-toml"># Cargo.toml
 [package]
 name = "my_proc_macro"
@@ -6159,7 +6152,7 @@ syn = "2.0"
 quote = "1.0"
 </code></pre>
 <p><code>proc-macro = true</code> 这个 crate 是一个 过程宏 crate，用来定义 <code>#[derive]</code>、属性宏或函数宏，而不是普通库</p>
-<p><strong><code>lib.rs</code>：</strong></p>
+<p><strong><code>lib.rs</code></strong></p>
 <pre><code class="language-rust ignore">use proc_macro::TokenStream;
 use quote::quote;
 use syn;
@@ -6195,15 +6188,17 @@ fn main() {
 <li><code>syn</code> 解析输入 AST，<code>quote!</code> 生成 Rust 代码</li>
 <li>用户无需手动写 Debug 实现</li>
 </ul>
-<p>🔑 核心理解：
-- 输入：用户写的结构体 → TokenStream
-- 解析：syn::parse → AST，拿到结构体名字等信息
-- 生成代码：quote! 生成 impl Debug for Struct { … }
-- 返回：TokenStream → 编译器直接展开，用户无需手动写实现</p>
+<p>🔑 核心理解</p>
+<ul>
+<li>输入：用户写的结构体 → TokenStream</li>
+<li>解析：syn::parse → AST，拿到结构体名字等信息</li>
+<li>生成代码：quote! 生成 impl Debug for Struct { … }</li>
+<li>返回：TokenStream → 编译器直接展开，用户无需手动写实现</li>
+</ul>
 <hr>
 <h5 id="2-属性宏attribute-macro"><a class="header" href="#2-属性宏attribute-macro">2️⃣ 属性宏（Attribute Macro）</a></h5>
 <p><strong>作用</strong>：为函数/结构体/模块增加自定义行为。</p>
-<p><strong>lib.rs</strong>：</p>
+<p><strong>lib.rs</strong></p>
 <pre><code class="language-rust ignore">use proc_macro::TokenStream;
 use quote::quote;
 use syn::{ItemFn, parse_macro_input};
@@ -6255,15 +6250,19 @@ Exiting function: greet
 <li>可以在函数调用前后加逻辑</li>
 <li>Attribute 宏可作用于函数、结构体、模块</li>
 </ul>
-<p>🔑 核心理解
-- 输入：编译器把被修饰的函数传给宏（TokenStream）
-- 解析：用 syn 解析为 AST，拿到函数名、参数和函数体
-- 生成：用 quote! 模板生成新的函数，把日志插入
-- 返回：TokenStream 返回给编译器，宏展开完成</p>
-<p>属性宏的特点
-- 可以直接修改函数、结构体、模块行为
-- 可加入编译期逻辑（例如日志、验证、性能计数）
-- 使用方式像装饰器，用户调用方式不变</p>
+<p>🔑核心理解</p>
+<ul>
+<li>输入：编译器把被修饰的函数传给宏（TokenStream）</li>
+<li>解析：用 syn 解析为 AST，拿到函数名、参数和函数体</li>
+<li>生成：用 quote! 模板生成新的函数，把日志插入</li>
+<li>返回：TokenStream 返回给编译器，宏展开完成</li>
+</ul>
+<p>属性宏的特点</p>
+<ul>
+<li>可以直接修改函数、结构体、模块行为</li>
+<li>可加入编译期逻辑（例如日志、验证、性能计数）</li>
+<li>使用方式像装饰器，用户调用方式不变</li>
+</ul>
 <hr>
 <h5 id="3-函数宏function-like-macro"><a class="header" href="#3-函数宏function-like-macro">3️⃣ 函数宏（Function-like Macro）</a></h5>
 <p><strong>作用</strong>：像函数一样调用宏，可以生成任意代码。</p>
@@ -6295,15 +6294,19 @@ fn main() {
 <li>捕获字符串字面量，生成 <code>println!</code> 代码</li>
 <li>函数宏功能最灵活，可生成任意 Rust 代码</li>
 </ul>
-<p>🔑 核心理解
-- 输入：宏调用里的 TokenStream（这里是 “Alice”）
-- 解析：转换为 AST 对象（LitStr）
-- 生成：用 quote! 生成新的 Rust 代码
-- 返回：返回 TokenStream，编译器直接替换宏调用</p>
-<p>函数宏特点：
-- 调用方式像函数：my_macro!(…)
-- 可以生成任意 Rust 代码（不仅限于函数）
-- 比 macro_rules! 更强大、灵活，但实现略复杂</p>
+<p>🔑 核心理解</p>
+<ul>
+<li>输入：宏调用里的 TokenStream（这里是 “Alice”）</li>
+<li>解析：转换为 AST 对象（LitStr）</li>
+<li>生成：用 quote! 生成新的 Rust 代码</li>
+<li>返回：返回 TokenStream，编译器直接替换宏调用</li>
+</ul>
+<p>函数宏特点：</p>
+<ul>
+<li>调用方式像函数：my_macro!(…)</li>
+<li>可以生成任意 Rust 代码（不仅限于函数）</li>
+<li>比 macro_rules! 更强大、灵活，但实现略复杂</li>
+</ul>
 <hr>
 <div class="table-wrapper">
 <table>
@@ -6334,44 +6337,37 @@ fn main() {
 <h4 id="1-宏展开的基本流程"><a class="header" href="#1-宏展开的基本流程">1️⃣ 宏展开的基本流程</a></h4>
 <p>以 <code>macro_rules!</code> 为例：</p>
 <ol>
-<li>
-<p><strong>源代码解析</strong></p>
+<li><strong>源代码解析</strong>
 <ul>
 <li>编译器读取源码，把它分解成 <strong>TokenTree</strong>（语法片段）</li>
 <li>每个标识符、关键字、分隔符、字面量都是一个 Token</li>
 </ul>
 </li>
-<li>
-<p><strong>识别宏调用</strong></p>
+<li><strong>识别宏调用</strong>
 <ul>
 <li>编译器遇到 <code>my_macro!(...)</code> 或 <code>#[derive(...)]</code> 就识别为宏调用</li>
 </ul>
 </li>
-<li>
-<p><strong>参数匹配（Pattern Matching）</strong></p>
+<li><strong>参数匹配（Pattern Matching）</strong>
 <ul>
 <li>对声明宏：编译器把调用的 TokenTree 与宏定义的 <strong>模式</strong> 匹配</li>
 <li>对过程宏：编译器将 TokenStream 传给宏实现函数，由宏解析 <code>TokenStream → AST</code></li>
 </ul>
 </li>
-<li>
-<p><strong>宏展开</strong></p>
+<li><strong>宏展开</strong>
 <ul>
 <li>声明宏：匹配成功后，编译器将模板中的 <code>$var</code> 替换成捕获到的 TokenTree</li>
 <li>函数/属性宏：宏内部用 <code>quote!</code> 或手动生成 TokenStream，返回给编译器</li>
 </ul>
 </li>
-<li>
-<p><strong>插入展开后的代码</strong></p>
+<li><strong>插入展开后的代码</strong>
 <ul>
 <li>编译器把宏展开生成的代码替换到原来的宏调用位置</li>
 </ul>
 </li>
-<li>
-<p><strong>继续编译</strong></p>
+<li><strong>继续编译</strong>
 <ul>
-<li>
-<p>展开的代码进入正常 Rust 编译流程：</p>
+<li>展开的代码进入正常 Rust 编译流程：
 <ol>
 <li>语法检查</li>
 <li>类型检查</li>
@@ -6466,28 +6462,24 @@ create_fn!(foo);</code></pre>
 <hr>
 <h4 id="4-宏展开中的关键概念"><a class="header" href="#4-宏展开中的关键概念">4️⃣ 宏展开中的关键概念</a></h4>
 <ol>
-<li>
-<p><strong>递归展开</strong></p>
+<li><strong>递归展开</strong>
 <ul>
 <li>宏调用内部可以再次调用自己（递归）</li>
 <li>常用于循环生成、TT Muncher 技巧</li>
 </ul>
 </li>
-<li>
-<p><strong>重复匹配展开</strong></p>
+<li><strong>重复匹配展开</strong>
 <ul>
 <li><code>$($x),*</code> → 捕获多个元素并逐一生成代码</li>
 </ul>
 </li>
-<li>
-<p><strong>卫生性（Hygiene）</strong></p>
+<li><strong>卫生性（Hygiene）</strong>
 <ul>
 <li>宏生成的变量名不会污染用户作用域</li>
 <li>局部变量安全，常量/类型可能冲突</li>
 </ul>
 </li>
-<li>
-<p><strong>Span（源码位置信息）</strong></p>
+<li><strong>Span（源码位置信息）</strong>
 <ul>
 <li>宏展开可以保留源文件的行号</li>
 <li>错误提示会指向用户代码而不是宏定义</li>
@@ -7774,13 +7766,482 @@ impl Point {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="cargo-工具链"><a class="header" href="#cargo-工具链">Cargo 工具链</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
+<p>先提问题：什么是设计模式？设计模式是怎么演化来的？软件开发为什么需要设计模式？</p>
+<p>设计模式是软件工程中用来解决特定问题的通用且可重用的方案，它是软件开发过程中通过自下而上总结归纳提炼出来的智慧结晶。</p>
+<p>要回答为什么需要设计模式，需要先回答为什么需要软件工程，软件工程作为一个学科出现，主要源于计算机科学和工业界对软件开发过程中的复杂性和规模性增长的需求。在计算机发展早期，软件开发主要是一些简单的程序，由个别专家编写和维护，这样的工作方式在很大程度上能够满足当时的需求。</p>
+<p>但是随着计算机技术的快速发展，软件系统的规模和复杂性急剧增加，大型软件系统的开发变得日益困难，软件项目的失败率和成本超支成为普遍现象，软件开发过程中出现了很多问题：</p>
+<ul>
+<li>
+<p>成本和时间超支，需要比预期更多的金钱和时间</p>
+</li>
+<li>
+<p>产品质量问题，由于开发过程中缺乏规范和方法论的支持，软件产品的质量难以保证</p>
+</li>
+<li>
+<p>可维护和可扩展性问题，随着规模的增长，软件产品的维护和升级变得越来越困难</p>
+</li>
+<li>
+<p>项目管理困难，缺乏有效的项目管理和协作方法，导致团队间沟通不畅，效率低下</p>
+</li>
+</ul>
+<p>要解决软件开发过程中出现的这些问题，需要以工程化的方式引入方法论和规范化的开发流程，其中设计模式就是软件开发过程中总结出来的方法论，主要解决软件质量、软件可维护可扩展性的问题，此外使用专业词语也有利于团队沟通，提升协作效率。</p>
+<ul>
+<li>
+<p>设计模式有很多，但它们都遵循一些通用的设计原则，包括但不限于：</p>
+</li>
+<li>
+<p>单一职责原则：一个类/结构体只负责一项任务，职责尽可能单一，不要承担过多功能</p>
+</li>
+<li>
+<p>开放/关闭原则：软件实体(类/结构体、模块、函数等)应该对扩展开放，对修改关闭，软件应该设计成容易扩展，防止乱改</p>
+</li>
+<li>
+<p>里氏替换原则：在继承结构中，子类应该能够替换基类中的所有实例，而不引入任何新的行为(不过Rust中没有继承的概念，Rust通过组合和多态性来模拟继承的功能)</p>
+</li>
+<li>
+<p>接口隔离原则：客户端不应该强迫依赖它们不需要的接口</p>
+</li>
+<li>
+<p>依赖倒置原则：高层模块不应该依赖底层模块，二者都应该依赖于抽象。抽象不应依赖细节，细节应依赖抽象</p>
+</li>
+</ul>
+<hr>
+<h1 id="一先不要急着学模式名先补-rust-的设计基础"><a class="header" href="#一先不要急着学模式名先补-rust-的设计基础">一、先不要急着学“模式名”，先补 Rust 的设计基础</a></h1>
+<p>Rust 的设计模式不是独立存在的，它基本都建立在这些语言机制上：</p>
+<pre><code class="language-text">struct：组织数据
+impl：给数据添加行为
+trait：抽象行为
+enum：表达状态和分支
+match：处理不同情况
+泛型：编译期抽象
+dyn Trait：运行时多态
+Iterator：数据流处理
+Option / Result：空值和错误处理
+Rc / Arc / RefCell / Mutex：共享和可变性管理
+</code></pre>
+<p>所以第一阶段，你应该先问自己：</p>
+<blockquote>
+<p>Rust 不靠继承，它靠什么做抽象？
+Rust 不用 null，它怎么表达“可能没有”？
+Rust 不用异常，它怎么处理错误？
+Rust 不鼓励全局可变状态，它怎么共享数据？
+Rust 怎么表达“状态变化”？</p>
+</blockquote>
+<p>这些问题弄懂之后，再看设计模式会轻松很多。</p>
+<hr>
+<h1 id="二按问题场景学习而不是按模式名字学习"><a class="header" href="#二按问题场景学习而不是按模式名字学习">二、按“问题场景”学习，而不是按模式名字学习</a></h1>
+<p>每个设计模式本质上都是在解决一个问题。</p>
+<p>你可以这样学：</p>
+<pre><code class="language-text">我想创建对象
+→ 学工厂模式、构建者模式、原型模式、单例模式
+
+我想把复杂系统封装起来
+→ 学外观模式
+
+我想让两个接口不兼容的东西能一起工作
+→ 学适配器模式
+
+我想给对象额外增加功能
+→ 学装饰器模式、代理模式
+
+我想让不同算法可以切换
+→ 学策略模式
+
+我想把一个操作封装成任务
+→ 学命令模式
+
+我想让多个对象之间通信
+→ 学观察者模式、中介者模式
+
+我想把请求一层一层传下去
+→ 学责任链模式
+
+我想表达对象状态变化
+→ 学状态模式、备忘录模式
+
+我想处理树形结构
+→ 学组合模式
+
+我想解释一种简单语言或表达式
+→ 学解释器模式
+
+我想遍历复杂结构
+→ 学访问者模式、迭代器模式
+</code></pre>
+<p>这样学比死记模式定义更有效。</p>
+<hr>
+<h1 id="三学习每个模式时固定用这-5-个问题"><a class="header" href="#三学习每个模式时固定用这-5-个问题">三、学习每个模式时固定用这 5 个问题</a></h1>
+<p>每学一个设计模式，都按照这 5 个问题来理解。</p>
+<h2 id="1-它解决什么问题"><a class="header" href="#1-它解决什么问题">1. 它解决什么问题？</a></h2>
+<p>不要先背定义，要先想场景。</p>
+<p>例如策略模式不是“定义一系列算法并封装起来”，而是：</p>
+<blockquote>
+<p>我有多个算法，运行时可能要切换，不想在代码里写一堆 if else。</p>
+</blockquote>
+<p>这样你就知道它为什么存在。</p>
+<hr>
+<h2 id="2-在传统面向对象语言里怎么写"><a class="header" href="#2-在传统面向对象语言里怎么写">2. 在传统面向对象语言里怎么写？</a></h2>
+<p>比如 Java 可能用：</p>
+<pre><code class="language-text">接口
+抽象类
+继承
+多态
+对象组合
+</code></pre>
+<p>你不需要深入写 Java 代码，但要知道传统模式原来是为了解决什么结构问题。</p>
+<hr>
+<h2 id="3-在-rust-里应该用什么实现"><a class="header" href="#3-在-rust-里应该用什么实现">3. 在 Rust 里应该用什么实现？</a></h2>
+<p>这是最关键的。</p>
+<p>Rust 里很多模式不是靠“类继承”，而是靠：</p>
+<pre><code class="language-text">trait
+enum
+match
+泛型
+闭包
+智能指针
+所有权转移
+</code></pre>
+<p>比如：</p>
+<pre><code class="language-text">策略模式 → trait / 泛型 / dyn Trait
+状态模式 → enum / match / 类型状态
+原型模式 → Clone
+单例模式 → OnceLock / LazyLock
+迭代器模式 → Iterator
+过滤器模式 → filter
+适配器模式 → From / Into / 包装结构体
+模板方法模式 → trait 默认方法
+</code></pre>
+<p>你要建立这种映射关系。</p>
+<hr>
+<h2 id="4-这个模式在-rust-中有没有更自然的写法"><a class="header" href="#4-这个模式在-rust-中有没有更自然的写法">4. 这个模式在 Rust 中有没有更自然的写法？</a></h2>
+<p>这是 Rust 学设计模式最容易忽略的一点。</p>
+<p>有些模式在 Java 里很有必要，但在 Rust 里可能不用写得那么复杂。</p>
+<p>例如：</p>
+<pre><code class="language-text">访问者模式
+</code></pre>
+<p>在 Java 里常用于处理复杂对象结构，但 Rust 里很多时候用：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>就够了。</p>
+<p>再比如：</p>
+<pre><code class="language-text">原型模式
+</code></pre>
+<p>传统写法可能要定义 prototype 接口，但 Rust 里通常直接用：</p>
+<pre><code class="language-text">Clone
+</code></pre>
+<p>所以你要学的是：</p>
+<blockquote>
+<p>这个模式在 Rust 中是否需要完整实现？
+还是已经被 Rust 的语言机制替代了？</p>
+</blockquote>
+<hr>
+<h2 id="5-它适合什么项目场景"><a class="header" href="#5-它适合什么项目场景">5. 它适合什么项目场景？</a></h2>
+<p>每个模式最后都要落到实际应用上。</p>
+<p>比如：</p>
+<pre><code class="language-text">构建者模式：配置对象、HTTP 请求、数据库连接参数
+观察者模式：事件系统、GUI、消息通知
+责任链模式：Web 中间件、请求校验、日志处理
+命令模式：任务队列、撤销重做、CLI 指令
+状态模式：订单流程、网络连接、下载任务、编译流程
+解释器模式：表达式计算、规则引擎、小型 DSL
+组合模式：文件目录树、UI 组件树、语法树
+代理模式：缓存代理、权限检查、日志代理
+外观模式：对外暴露简单 API，隐藏内部复杂模块
+</code></pre>
+<p>只要能想到真实场景，模式就不会空。</p>
+<hr>
+<h1 id="四推荐的学习顺序"><a class="header" href="#四推荐的学习顺序">四、推荐的学习顺序</a></h1>
+<p>你可以按这个顺序学，不分“重要不重要”，而是按理解难度和知识衔接来排。</p>
+<hr>
+<h2 id="第一阶段rust-基础表达型模式"><a class="header" href="#第一阶段rust-基础表达型模式">第一阶段：Rust 基础表达型模式</a></h2>
+<p>先学这些，因为它们和 Rust 基础语法关系最紧。</p>
+<pre><code class="language-text">迭代器模式
+过滤器模式
+原型模式
+单例模式
+构建者模式
+工厂模式
+</code></pre>
+<p>这一阶段重点理解：</p>
+<pre><code class="language-text">Iterator 怎么组织数据处理流程
+Clone 怎么表达对象复制
+OnceLock 怎么表达全局初始化
+Builder 怎么构造复杂对象
+关联函数 new() 怎么替代一部分工厂类
+</code></pre>
+<hr>
+<h2 id="第二阶段trait-抽象型模式"><a class="header" href="#第二阶段trait-抽象型模式">第二阶段：trait 抽象型模式</a></h2>
+<p>然后学这些，因为它们都依赖 trait。</p>
+<pre><code class="language-text">策略模式
+模板方法模式
+适配器模式
+代理模式
+装饰器模式
+桥接模式
+</code></pre>
+<p>这一阶段重点理解：</p>
+<pre><code class="language-text">trait 是 Rust 中行为抽象的核心
+泛型适合编译期确定类型
+dyn Trait 适合运行时选择对象
+包装结构体可以扩展已有对象功能
+</code></pre>
+<p>你要特别注意 <code>T: Trait</code> 和 <code>Box&lt;dyn Trait&gt;</code> 的区别。</p>
+<p>前者更像“编译期多态”，后者更像“运行时多态”。</p>
+<hr>
+<h2 id="第三阶段结构组织型模式"><a class="header" href="#第三阶段结构组织型模式">第三阶段：结构组织型模式</a></h2>
+<p>接着学对象之间怎么组织。</p>
+<pre><code class="language-text">外观模式
+组合模式
+享元模式
+中介者模式
+</code></pre>
+<p>这一阶段重点理解：</p>
+<pre><code class="language-text">如何把多个模块封装成一个简单接口
+如何表达树形结构
+如何复用共享对象
+如何让对象不直接互相依赖，而是通过中间层通信
+</code></pre>
+<p>这部分会涉及一些 Rust 智能指针，比如：</p>
+<pre><code class="language-text">Box
+Rc
+Arc
+RefCell
+Mutex
+</code></pre>
+<p>但不要一开始就陷入智能指针细节。先理解它们解决的是：</p>
+<pre><code class="language-text">谁拥有数据？
+谁可以共享数据？
+谁可以修改数据？
+这个修改发生在单线程还是多线程？
+</code></pre>
+<hr>
+<h2 id="第四阶段行为协作型模式"><a class="header" href="#第四阶段行为协作型模式">第四阶段：行为协作型模式</a></h2>
+<p>然后学习对象之间的行为流转。</p>
+<pre><code class="language-text">命令模式
+观察者模式
+责任链模式
+备忘录模式
+</code></pre>
+<p>这一阶段重点理解：</p>
+<pre><code class="language-text">命令模式：把行为变成可以保存、传递、执行的对象
+观察者模式：一个事件发生后通知多个订阅者
+责任链模式：请求经过多个处理节点
+备忘录模式：保存某一时刻的状态，之后可以恢复
+</code></pre>
+<p>这部分很适合结合实际项目来理解，比如：</p>
+<pre><code class="language-text">日志系统
+Web 请求中间件
+事件通知系统
+任务调度系统
+撤销重做系统
+</code></pre>
+<hr>
+<h2 id="第五阶段状态与解释型模式"><a class="header" href="#第五阶段状态与解释型模式">第五阶段：状态与解释型模式</a></h2>
+<p>最后学这些，因为它们更抽象。</p>
+<pre><code class="language-text">状态模式
+解释器模式
+访问者模式
+</code></pre>
+<p>这一阶段重点理解：</p>
+<pre><code class="language-text">状态模式：对象在不同状态下行为不同
+解释器模式：定义一套表达式结构并执行它
+访问者模式：在不修改数据结构的情况下添加操作
+</code></pre>
+<p>Rust 里这部分经常和 <code>enum + match</code> 结合。</p>
+<p>尤其是状态模式，在 Rust 里非常适合用：</p>
+<pre><code class="language-text">enum
+match
+类型状态模式
+</code></pre>
+<p>来表达。</p>
+<hr>
+<h1 id="五每个模式都用同一个笔记模板"><a class="header" href="#五每个模式都用同一个笔记模板">五、每个模式都用同一个笔记模板</a></h1>
+<p>建议你建一个固定模板，每学一个模式都这样记录：</p>
+<pre><code class="language-text">模式名称：
+
+它解决的问题：
+
+典型使用场景：
+
+传统 OOP 的实现思路：
+
+Rust 的实现思路：
+
+Rust 中常用到的语法：
+- struct
+- trait
+- enum
+- match
+- 泛型
+- dyn Trait
+- Rc / Arc
+- RefCell / Mutex
+
+它和其他模式的区别：
+
+什么时候不应该用：
+
+一个自己的例子：
+</code></pre>
+<p>这个模板比单纯看文章效果好很多。</p>
+<hr>
+<h1 id="六不要把-rust-设计模式学成-java-设计模式"><a class="header" href="#六不要把-rust-设计模式学成-java-设计模式">六、不要把 Rust 设计模式学成 Java 设计模式</a></h1>
+<p>这是最关键的一点。</p>
+<p>很多人学 Rust 设计模式，会犯一个错误：</p>
+<blockquote>
+<p>先记住 Java 的设计模式，再强行翻译成 Rust。</p>
+</blockquote>
+<p>这样会写出很别扭的 Rust 代码。</p>
+<p>Rust 的思路应该是：</p>
+<pre><code class="language-text">能用 enum，就不要急着用 trait object。
+能用 match，就不要急着搞访问者。
+能用泛型，就不要急着用 dyn Trait。
+能用组合，就不要模拟继承。
+能用所有权表达生命周期，就不要乱用全局状态。
+能用 Result，就不要模拟异常。
+能用 Option，就不要制造空指针。
+</code></pre>
+<p>所以学习时要不断问：</p>
+<blockquote>
+<p>这个模式在 Rust 里是自然写法，还是硬套写法？</p>
+</blockquote>
+<hr>
+<h1 id="七设计模式之间要成组理解"><a class="header" href="#七设计模式之间要成组理解">七、设计模式之间要成组理解</a></h1>
+<p>不要孤立地学每一个模式。很多模式很像，要放在一起比较。</p>
+<p>例如：</p>
+<pre><code class="language-text">策略模式、状态模式、命令模式
+</code></pre>
+<p>它们都和“行为变化”有关。</p>
+<p>区别是：</p>
+<pre><code class="language-text">策略模式：重点是算法可以替换
+状态模式：重点是对象状态变化后行为变化
+命令模式：重点是把一次操作封装起来
+</code></pre>
+<p>再比如：</p>
+<pre><code class="language-text">代理模式、装饰器模式、适配器模式、外观模式
+</code></pre>
+<p>它们都像是在“包一层”。</p>
+<p>区别是：</p>
+<pre><code class="language-text">代理模式：控制访问
+装饰器模式：增加功能
+适配器模式：转换接口
+外观模式：简化复杂系统
+</code></pre>
+<p>再比如：</p>
+<pre><code class="language-text">工厂模式、构建者模式、原型模式、单例模式
+</code></pre>
+<p>它们都和“对象创建”有关。</p>
+<p>区别是：</p>
+<pre><code class="language-text">工厂模式：根据条件创建对象
+构建者模式：一步步构造复杂对象
+原型模式：通过克隆已有对象创建新对象
+单例模式：全局只初始化一个对象
+</code></pre>
+<p>这样成组理解，记忆会清楚很多。</p>
+<hr>
+<h1 id="八最终目标"><a class="header" href="#八最终目标">八、最终目标</a></h1>
+<p>学习 Rust 设计模式的最终目标不是把所有模式名字背下来，而是形成这种判断能力：</p>
+<pre><code class="language-text">看到复杂构造过程，想到 Builder。
+看到算法切换，想到 Strategy。
+看到状态流转，想到 enum State。
+看到事件通知，想到 Observer。
+看到请求层层处理，想到 Chain of Responsibility。
+看到接口不兼容，想到 Adapter。
+看到需要简化复杂模块，想到 Facade。
+看到要保存历史状态，想到 Memento。
+看到要表达树结构，想到 Composite。
+看到要解释表达式，想到 Interpreter。
+</code></pre>
+<p>然后再进一步判断：</p>
+<pre><code class="language-text">这个模式在 Rust 中该用 trait？
+还是 enum？
+还是泛型？
+还是 dyn Trait？
+还是 Iterator？
+还是智能指针？
+</code></pre>
+<p>这才是 Rust 设计模式真正的学习方式。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="介绍-1"><a class="header" href="#介绍-1">介绍</a></h1>
+<p>第 1 组：Rust 自带思想</p>
+<ol>
+<li><a href="Rust学习/设计模式/迭代器模式.html">迭代器模式</a></li>
+<li><a href="Rust学习/设计模式/过滤器模式.html">过滤器模式</a></li>
+<li><a href="Rust学习/设计模式/原型模式.html">原型模式 Clone</a></li>
+<li><a href="Rust学习/设计模式/单例模式.html">单例模式 OnceLock</a></li>
+</ol>
+<p>第 2 组：trait 抽象</p>
+<ol>
+<li><a href="Rust学习/设计模式/策略模式.html">策略模式</a></li>
+<li><a href="Rust学习/设计模式/工厂模式.html">工厂模式</a></li>
+<li><a href="Rust学习/设计模式/适配器模式.html">适配器模式</a></li>
+<li><a href="Rust学习/设计模式/模板方法模式.html">模板方法模式</a></li>
+<li><a href="Rust学习/设计模式/代理模式.html">代理模式</a></li>
+<li><a href="Rust学习/设计模式/装饰器模式.html">装饰器模式</a></li>
+</ol>
+<p>第 3 组：结构组织</p>
+<ol>
+<li><a href="Rust学习/设计模式/外观模式.html">外观模式</a></li>
+<li><a href="Rust学习/设计模式/组合模式.html">组合模式</a></li>
+<li><a href="Rust学习/设计模式/桥接模式.html">桥接模式</a></li>
+<li><a href="Rust学习/设计模式/享元模式.html">享元模式</a></li>
+</ol>
+<p>第 4 组：行为协作</p>
+<ol>
+<li><a href="Rust学习/设计模式/命令模式.html">命令模式</a></li>
+<li><a href="Rust学习/设计模式/观察者模式.html">观察者模式</a></li>
+<li><a href="Rust学习/设计模式/责任链模式.html">责任链模式</a></li>
+<li><a href="Rust学习/设计模式/中介者模式.html">中介者模式</a></li>
+</ol>
+<p>第 5 组：状态与解释</p>
+<ol>
+<li><a href="Rust学习/设计模式/状态模式.html">状态模式</a></li>
+<li><a href="Rust学习/设计模式/备忘录模式.html">备忘录模式</a></li>
+<li><a href="Rust学习/设计模式/解释器模式.html">解释器模式</a></li>
+<li><a href="Rust学习/设计模式/访问者模式.html">访问者模式</a></li>
+</ol>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>模式</th><th>文档中重点回答的问题</th><th>Rust 中重点关注</th></tr>
+</thead>
+<tbody>
+<tr><td>迭代器模式</td><td>如何统一遍历和处理一批数据？</td><td><code>Iterator</code>、<code>map</code>、<code>filter</code>、<code>collect</code></td></tr>
+<tr><td>单例模式</td><td>如何保证某个对象全局只初始化一次？</td><td><code>OnceLock</code>、<code>LazyLock</code>、全局状态风险</td></tr>
+<tr><td>工厂模式</td><td>如何把对象创建过程从业务逻辑中分离？</td><td>关联函数、<code>new()</code>、<code>Box&lt;dyn Trait&gt;</code></td></tr>
+<tr><td>观察者模式</td><td>一个对象变化后，如何通知多个对象？</td><td>回调、事件总线、channel</td></tr>
+<tr><td>适配器模式</td><td>接口不兼容时，如何让它们协同工作？</td><td>包装结构体、<code>From</code>、<code>Into</code>、trait 适配</td></tr>
+<tr><td>策略模式</td><td>多种算法如何灵活切换？</td><td>trait、泛型、<code>dyn Trait</code></td></tr>
+<tr><td>外观模式</td><td>如何给复杂系统提供简单入口？</td><td>模块封装、统一 API</td></tr>
+<tr><td>享元模式</td><td>如何共享大量重复对象，减少内存浪费？</td><td><code>Rc</code>、<code>Arc</code>、缓存池</td></tr>
+<tr><td>代理模式</td><td>如何控制对对象的访问？</td><td>包装结构体、权限、缓存、日志</td></tr>
+<tr><td>命令模式</td><td>如何把操作封装成可传递、可保存的对象？</td><td>enum 命令、trait 命令、闭包</td></tr>
+<tr><td>原型模式</td><td>如何通过复制已有对象创建新对象？</td><td><code>Clone</code>、深拷贝与浅拷贝</td></tr>
+<tr><td>组合模式</td><td>如何统一处理树形结构中的整体和部分？</td><td>enum 树、<code>Box</code>、递归结构</td></tr>
+<tr><td>责任链模式</td><td>请求如何经过多个处理节点？</td><td>处理器链、中间件、pipeline</td></tr>
+<tr><td>桥接模式</td><td>如何把抽象和实现分离，使二者独立变化？</td><td>trait 组合、结构体持有实现对象</td></tr>
+<tr><td>装饰器模式</td><td>如何在不修改原对象的情况下增强功能？</td><td>包装结构体、trait 转发</td></tr>
+<tr><td>构建者模式</td><td>如何一步步构造复杂对象？</td><td>Builder、链式调用、默认值</td></tr>
+<tr><td>过滤器模式</td><td>如何按照条件筛选对象集合？</td><td><code>filter()</code>、谓词函数、组合过滤条件</td></tr>
+<tr><td>备忘录模式</td><td>如何保存和恢复对象历史状态？</td><td><code>Clone</code>、快照、状态历史栈</td></tr>
+<tr><td>解释器模式</td><td>如何定义并执行一套简单语法或表达式？</td><td>enum AST、递归求值、match</td></tr>
+<tr><td>模板方法模式</td><td>如何固定算法骨架，允许部分步骤变化？</td><td>trait 默认方法</td></tr>
+<tr><td>访问者模式</td><td>如何在不修改数据结构的情况下增加操作？</td><td>Visitor trait 或 enum + match</td></tr>
+<tr><td>状态模式</td><td>对象状态变化后，行为如何变化？</td><td>enum 状态机、类型状态模式</td></tr>
+<tr><td>中介者模式</td><td>多个对象之间如何通过中心协调者通信？</td><td>EventBus、channel、协调器结构体</td></tr>
+</tbody>
+</table>
+</div>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="三方库"><a class="header" href="#三方库">三方库</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="serde"><a class="header" href="#serde">serde</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="介绍-2"><a class="header" href="#介绍-2">介绍</a></h1>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="seaorm"><a class="header" href="#seaorm">SeaORM</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="介绍-1"><a class="header" href="#介绍-1">介绍</a></h1>
+<h1 id="介绍-3"><a class="header" href="#介绍-3">介绍</a></h1>
 <h2 id="了解-seaorm-的核心工作流"><a class="header" href="#了解-seaorm-的核心工作流">了解 SeaORM 的核心工作流</a></h2>
 <h3 id="请记住这三个核心角色之间的转换关系"><a class="header" href="#请记住这三个核心角色之间的转换关系">请记住这三个核心角色之间的转换关系</a></h3>
 <ul>
@@ -9449,7 +9910,7 @@ println!("生成的 SQL 为: {}", query_sql);
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="anyhow"><a class="header" href="#anyhow">anyhow</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="介绍-2"><a class="header" href="#介绍-2">介绍</a></h1>
+<h1 id="介绍-4"><a class="header" href="#介绍-4">介绍</a></h1>
 <p>在这一章节中，我们将深入探讨 <code>anyhow</code> 的核心理念：<strong>为什么要用它，以及它是如何简化代码的。</strong></p>
 <h2 id="核心理念应用程序的万能胶水"><a class="header" href="#核心理念应用程序的万能胶水">核心理念：应用程序的“万能胶水”</a></h2>
 <p>在 Rust 中，错误处理通常是“强类型”的。如果你在一个函数中既读文件（<code>io::Error</code>）又解析 JSON（<code>serde_json::Error</code>），标准做法是定义一个庞大的 <code>enum</code> 来包裹它们。</p>
@@ -9728,7 +10189,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="syn"><a class="header" href="#syn">syn</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="介绍-3"><a class="header" href="#介绍-3">介绍</a></h1>
+<h1 id="介绍-5"><a class="header" href="#介绍-5">介绍</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="leetcode"><a class="header" href="#leetcode">LeetCode</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>

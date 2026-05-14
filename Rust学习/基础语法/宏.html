@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-193f4fc0.js";
+            window.path_to_searchindex_js = "../../searchindex-b86c791d.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-7f0aed74.js"></script>
+        <script src="../../toc-1120a8fd.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -311,7 +311,7 @@ fn main() {
 </li>
 <li>调试技巧
 <ul>
-<li>用 <code>cargo expand </code>查看宏展开后的真实代码</li>
+<li>用 <code>cargo expand </code> 查看宏展开后的真实代码</li>
 <li>可理解宏行为，定位错误</li>
 </ul>
 </li>
@@ -319,29 +319,21 @@ fn main() {
 <hr>
 <h4 id="2过程宏procedural-macros"><a class="header" href="#2过程宏procedural-macros">（2）过程宏（Procedural Macros）</a></h4>
 <ul>
-<li>
-<p>工业级、功能强大</p>
-</li>
-<li>
-<p>能操作 <strong>TokenStream → AST → TokenStream</strong></p>
-</li>
-<li>
-<p>三种类型：</p>
+<li>工业级、功能强大</li>
+<li>能操作 <strong>TokenStream → AST → TokenStream</strong></li>
+<li>三种类型：
 <ol>
-<li>
-<p><strong>自定义派生（Custom Derive）</strong></p>
+<li><strong>自定义派生（Custom Derive）</strong>
 <ul>
 <li><code>#[derive(MyTrait)]</code>，自动为类型生成 Trait 实现</li>
 </ul>
 </li>
-<li>
-<p><strong>属性宏（Attribute Macros）</strong></p>
+<li><strong>属性宏（Attribute Macros）</strong>
 <ul>
 <li><code>#[my_attr]</code>，可以对函数、结构体、模块等添加行为</li>
 </ul>
 </li>
-<li>
-<p><strong>函数宏（Function-like Macros）</strong></p>
+<li><strong>函数宏（Function-like Macros）</strong>
 <ul>
 <li>类似函数调用：<code>my_macro!(...)</code>，可以生成任意 Rust 代码</li>
 </ul>
@@ -352,7 +344,7 @@ fn main() {
 <h5 id="1-自定义派生宏custom-derive"><a class="header" href="#1-自定义派生宏custom-derive">1️⃣ 自定义派生宏（Custom Derive）</a></h5>
 <p><strong>作用</strong>：自动为某个类型生成 Trait 实现，例如 Debug、Serialize。</p>
 <p><strong>步骤</strong>：</p>
-<p><strong>新建 <code>proc-macro</code> crate</strong></p>
+<p><strong>新建</strong> <strong><code>proc-macro</code></strong> <strong>crate</strong></p>
 <pre><code class="language-toml"># Cargo.toml
 [package]
 name = "my_proc_macro"
@@ -367,7 +359,7 @@ syn = "2.0"
 quote = "1.0"
 </code></pre>
 <p><code>proc-macro = true</code> 这个 crate 是一个 过程宏 crate，用来定义 <code>#[derive]</code>、属性宏或函数宏，而不是普通库</p>
-<p><strong><code>lib.rs</code>：</strong></p>
+<p><strong><code>lib.rs</code></strong></p>
 <pre><code class="language-rust ignore">use proc_macro::TokenStream;
 use quote::quote;
 use syn;
@@ -403,15 +395,17 @@ fn main() {
 <li><code>syn</code> 解析输入 AST，<code>quote!</code> 生成 Rust 代码</li>
 <li>用户无需手动写 Debug 实现</li>
 </ul>
-<p>🔑 核心理解：
-- 输入：用户写的结构体 → TokenStream
-- 解析：syn::parse → AST，拿到结构体名字等信息
-- 生成代码：quote! 生成 impl Debug for Struct { … }
-- 返回：TokenStream → 编译器直接展开，用户无需手动写实现</p>
+<p>🔑 核心理解</p>
+<ul>
+<li>输入：用户写的结构体 → TokenStream</li>
+<li>解析：syn::parse → AST，拿到结构体名字等信息</li>
+<li>生成代码：quote! 生成 impl Debug for Struct { … }</li>
+<li>返回：TokenStream → 编译器直接展开，用户无需手动写实现</li>
+</ul>
 <hr>
 <h5 id="2-属性宏attribute-macro"><a class="header" href="#2-属性宏attribute-macro">2️⃣ 属性宏（Attribute Macro）</a></h5>
 <p><strong>作用</strong>：为函数/结构体/模块增加自定义行为。</p>
-<p><strong>lib.rs</strong>：</p>
+<p><strong>lib.rs</strong></p>
 <pre><code class="language-rust ignore">use proc_macro::TokenStream;
 use quote::quote;
 use syn::{ItemFn, parse_macro_input};
@@ -463,15 +457,19 @@ Exiting function: greet
 <li>可以在函数调用前后加逻辑</li>
 <li>Attribute 宏可作用于函数、结构体、模块</li>
 </ul>
-<p>🔑 核心理解
-- 输入：编译器把被修饰的函数传给宏（TokenStream）
-- 解析：用 syn 解析为 AST，拿到函数名、参数和函数体
-- 生成：用 quote! 模板生成新的函数，把日志插入
-- 返回：TokenStream 返回给编译器，宏展开完成</p>
-<p>属性宏的特点
-- 可以直接修改函数、结构体、模块行为
-- 可加入编译期逻辑（例如日志、验证、性能计数）
-- 使用方式像装饰器，用户调用方式不变</p>
+<p>🔑核心理解</p>
+<ul>
+<li>输入：编译器把被修饰的函数传给宏（TokenStream）</li>
+<li>解析：用 syn 解析为 AST，拿到函数名、参数和函数体</li>
+<li>生成：用 quote! 模板生成新的函数，把日志插入</li>
+<li>返回：TokenStream 返回给编译器，宏展开完成</li>
+</ul>
+<p>属性宏的特点</p>
+<ul>
+<li>可以直接修改函数、结构体、模块行为</li>
+<li>可加入编译期逻辑（例如日志、验证、性能计数）</li>
+<li>使用方式像装饰器，用户调用方式不变</li>
+</ul>
 <hr>
 <h5 id="3-函数宏function-like-macro"><a class="header" href="#3-函数宏function-like-macro">3️⃣ 函数宏（Function-like Macro）</a></h5>
 <p><strong>作用</strong>：像函数一样调用宏，可以生成任意代码。</p>
@@ -503,15 +501,19 @@ fn main() {
 <li>捕获字符串字面量，生成 <code>println!</code> 代码</li>
 <li>函数宏功能最灵活，可生成任意 Rust 代码</li>
 </ul>
-<p>🔑 核心理解
-- 输入：宏调用里的 TokenStream（这里是 “Alice”）
-- 解析：转换为 AST 对象（LitStr）
-- 生成：用 quote! 生成新的 Rust 代码
-- 返回：返回 TokenStream，编译器直接替换宏调用</p>
-<p>函数宏特点：
-- 调用方式像函数：my_macro!(…)
-- 可以生成任意 Rust 代码（不仅限于函数）
-- 比 macro_rules! 更强大、灵活，但实现略复杂</p>
+<p>🔑 核心理解</p>
+<ul>
+<li>输入：宏调用里的 TokenStream（这里是 “Alice”）</li>
+<li>解析：转换为 AST 对象（LitStr）</li>
+<li>生成：用 quote! 生成新的 Rust 代码</li>
+<li>返回：返回 TokenStream，编译器直接替换宏调用</li>
+</ul>
+<p>函数宏特点：</p>
+<ul>
+<li>调用方式像函数：my_macro!(…)</li>
+<li>可以生成任意 Rust 代码（不仅限于函数）</li>
+<li>比 macro_rules! 更强大、灵活，但实现略复杂</li>
+</ul>
 <hr>
 <div class="table-wrapper">
 <table>
@@ -542,44 +544,37 @@ fn main() {
 <h4 id="1-宏展开的基本流程"><a class="header" href="#1-宏展开的基本流程">1️⃣ 宏展开的基本流程</a></h4>
 <p>以 <code>macro_rules!</code> 为例：</p>
 <ol>
-<li>
-<p><strong>源代码解析</strong></p>
+<li><strong>源代码解析</strong>
 <ul>
 <li>编译器读取源码，把它分解成 <strong>TokenTree</strong>（语法片段）</li>
 <li>每个标识符、关键字、分隔符、字面量都是一个 Token</li>
 </ul>
 </li>
-<li>
-<p><strong>识别宏调用</strong></p>
+<li><strong>识别宏调用</strong>
 <ul>
 <li>编译器遇到 <code>my_macro!(...)</code> 或 <code>#[derive(...)]</code> 就识别为宏调用</li>
 </ul>
 </li>
-<li>
-<p><strong>参数匹配（Pattern Matching）</strong></p>
+<li><strong>参数匹配（Pattern Matching）</strong>
 <ul>
 <li>对声明宏：编译器把调用的 TokenTree 与宏定义的 <strong>模式</strong> 匹配</li>
 <li>对过程宏：编译器将 TokenStream 传给宏实现函数，由宏解析 <code>TokenStream → AST</code></li>
 </ul>
 </li>
-<li>
-<p><strong>宏展开</strong></p>
+<li><strong>宏展开</strong>
 <ul>
 <li>声明宏：匹配成功后，编译器将模板中的 <code>$var</code> 替换成捕获到的 TokenTree</li>
 <li>函数/属性宏：宏内部用 <code>quote!</code> 或手动生成 TokenStream，返回给编译器</li>
 </ul>
 </li>
-<li>
-<p><strong>插入展开后的代码</strong></p>
+<li><strong>插入展开后的代码</strong>
 <ul>
 <li>编译器把宏展开生成的代码替换到原来的宏调用位置</li>
 </ul>
 </li>
-<li>
-<p><strong>继续编译</strong></p>
+<li><strong>继续编译</strong>
 <ul>
-<li>
-<p>展开的代码进入正常 Rust 编译流程：</p>
+<li>展开的代码进入正常 Rust 编译流程：
 <ol>
 <li>语法检查</li>
 <li>类型检查</li>
@@ -674,28 +669,24 @@ create_fn!(foo);</code></pre>
 <hr>
 <h4 id="4-宏展开中的关键概念"><a class="header" href="#4-宏展开中的关键概念">4️⃣ 宏展开中的关键概念</a></h4>
 <ol>
-<li>
-<p><strong>递归展开</strong></p>
+<li><strong>递归展开</strong>
 <ul>
 <li>宏调用内部可以再次调用自己（递归）</li>
 <li>常用于循环生成、TT Muncher 技巧</li>
 </ul>
 </li>
-<li>
-<p><strong>重复匹配展开</strong></p>
+<li><strong>重复匹配展开</strong>
 <ul>
 <li><code>$($x),*</code> → 捕获多个元素并逐一生成代码</li>
 </ul>
 </li>
-<li>
-<p><strong>卫生性（Hygiene）</strong></p>
+<li><strong>卫生性（Hygiene）</strong>
 <ul>
 <li>宏生成的变量名不会污染用户作用域</li>
 <li>局部变量安全，常量/类型可能冲突</li>
 </ul>
 </li>
-<li>
-<p><strong>Span（源码位置信息）</strong></p>
+<li><strong>Span（源码位置信息）</strong>
 <ul>
 <li>宏展开可以保留源文件的行号</li>
 <li>错误提示会指向用户代码而不是宏定义</li>
