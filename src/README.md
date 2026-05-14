@@ -15,3 +15,5 @@
 [API编程指南](https://rust-lang.github.io/api-guidelines/about.html)
 
 [Rust带学](https://rust.sui-book.com/01_basics/01_intro.html)
+
+[三角兽-微信公众号+github源码仓库](https://github.com/reganzm/hug_rust?sessionid=)
