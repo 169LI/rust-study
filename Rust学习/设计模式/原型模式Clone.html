@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-df5c5b28.js";
+            window.path_to_searchindex_js = "../../searchindex-a0a07116.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -183,10 +183,10 @@
                     <main>
                         <h1 id="03_原型模式-prototype-pattern"><a class="header" href="#03_原型模式-prototype-pattern">03_原型模式 Prototype Pattern</a></h1>
 <h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
-<p><strong>中文名称：</strong> 原型模式
-<strong>英文名称：</strong> Prototype Pattern
-<strong>模式类型：</strong> 创建型设计模式
-<strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
+<p><strong>中文名称：</strong> 原型模式</p>
+<p><strong>英文名称：</strong> Prototype Pattern</p>
+<p><strong>模式类型：</strong> 创建型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
 <p>原型模式的核心是：<strong>通过复制已有对象来创建新对象，而不是每次都从零开始构造对象。</strong></p>
 <p>在 Rust 中，原型模式通常和 <code>Clone</code> 机制直接对应。只要一个类型实现了 <code>Clone</code>，就可以基于已有实例创建出一个新的实例。</p>
 <hr>

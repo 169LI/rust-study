@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-df5c5b28.js";
+            window.path_to_searchindex_js = "searchindex-a0a07116.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c3e67eef.js"></script>
@@ -8167,9 +8167,9 @@ Rust 中常用到的语法：
 <ol>
 <li><a href="#01_迭代器模式-iterator-pattern">迭代器模式</a></li>
 <li><a href="#02-_过滤器模式-filter-pattern">过滤器模式</a></li>
-<li><a href="Rust学习/设计模式/原型模式.html">原型模式 Clone</a></li>
-<li><a href="Rust学习/设计模式/单例模式.html">单例模式 OnceLock</a></li>
-<li><a href="#构建者模式">构建者模式</a></li>
+<li><a href="#03_原型模式-prototype-pattern">原型模式 Clone</a></li>
+<li><a href="#04_单例模式-singleton-pattern">单例模式 OnceLock</a></li>
+<li><a href="#05_构建者模式-builder-pattern">构建者模式</a></li>
 </ol>
 <p>第 2 组：trait 抽象</p>
 <ol>
@@ -8501,10 +8501,10 @@ fold()
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="02-_过滤器模式-filter-pattern"><a class="header" href="#02-_过滤器模式-filter-pattern">02 _过滤器模式 Filter Pattern</a></h1>
 <h2 id="1-基本信息-1"><a class="header" href="#1-基本信息-1">1. 基本信息</a></h2>
-<p><strong>中文名称：</strong> 过滤器模式
-<strong>英文名称：</strong> Filter Pattern
-<strong>模式类型：</strong> 行为型设计模式
-<strong>Rust 中常见实现方式：</strong> 迭代器链、<code>filter()</code>、闭包、<code>map()</code>、<code>fold()</code>、<code>collect()</code></p>
+<p><strong>中文名称：</strong> 过滤器模式</p>
+<p><strong>英文名称：</strong> Filter Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> 迭代器链、<code>filter()</code>、闭包、<code>map()</code>、<code>fold()</code>、<code>collect()</code></p>
 <p>过滤器模式的核心是：<strong>对集合中的元素按照某些条件进行筛选或过滤，并可以组合多个条件形成处理管道。</strong>
 在 Rust 中，过滤器模式通常依赖迭代器链和闭包表达筛选逻辑，从而形成声明式的数据处理流程。</p>
 <hr>
@@ -8672,10 +8672,10 @@ OrFilter
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="03_原型模式-prototype-pattern"><a class="header" href="#03_原型模式-prototype-pattern">03_原型模式 Prototype Pattern</a></h1>
 <h2 id="1-基本信息-2"><a class="header" href="#1-基本信息-2">1. 基本信息</a></h2>
-<p><strong>中文名称：</strong> 原型模式
-<strong>英文名称：</strong> Prototype Pattern
-<strong>模式类型：</strong> 创建型设计模式
-<strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
+<p><strong>中文名称：</strong> 原型模式</p>
+<p><strong>英文名称：</strong> Prototype Pattern</p>
+<p><strong>模式类型：</strong> 创建型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
 <p>原型模式的核心是：<strong>通过复制已有对象来创建新对象，而不是每次都从零开始构造对象。</strong></p>
 <p>在 Rust 中，原型模式通常和 <code>Clone</code> 机制直接对应。只要一个类型实现了 <code>Clone</code>，就可以基于已有实例创建出一个新的实例。</p>
 <hr>
@@ -9000,9 +9000,447 @@ String 和 Vec 的 clone 成本
 </code></pre>
 <p>在 Rust 中，原型模式通常不需要单独设计复杂的原型接口，而是直接依赖 <code>Clone</code> trait。使用时要重点区分 <code>Clone</code>、<code>Copy</code>、所有权移动和共享引用，并注意大对象复制可能带来的性能成本。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="单例模式-oncelock"><a class="header" href="#单例模式-oncelock">单例模式 OnceLock</a></h1>
+<h1 id="04_单例模式-singleton-pattern"><a class="header" href="#04_单例模式-singleton-pattern">04_单例模式 Singleton Pattern</a></h1>
+<h2 id="1-基本信息-3"><a class="header" href="#1-基本信息-3">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 单例模式</p>
+<p><strong>英文名称：</strong> Singleton Pattern</p>
+<p><strong>模式类型：</strong> 创建型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>OnceLock</code>、<code>LazyLock</code>、<code>static</code> 结合 <code>Mutex</code> 或 <code>RwLock</code>、<code>Arc</code></p>
+<p>单例模式的核心是：<strong>保证某个类型在整个程序中只有一个实例，并提供全局访问点。</strong>
+在 Rust 中，单例模式通常结合静态初始化和线程安全机制实现，避免全局可变状态带来的安全问题。</p>
+<hr>
+<h2 id="2-模式核心思想-2"><a class="header" href="#2-模式核心思想-2">2. 模式核心思想</a></h2>
+<p>单例模式的核心思想是：</p>
+<blockquote>
+<p><strong>一个类型只有一个实例，全局唯一，通过统一访问接口获取，并确保初始化和访问的线程安全性。</strong></p>
+</blockquote>
+<p>它关注两个核心问题：</p>
+<pre><code class="language-text">如何保证只有一个实例被创建
+如何提供全局可访问的接口
+</code></pre>
+<hr>
+<h2 id="3-这个模式解决什么问题-2"><a class="header" href="#3-这个模式解决什么问题-2">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，可能有一些资源或管理对象需要全局唯一，例如：</p>
+<pre><code class="language-text">配置管理器
+日志系统
+缓存管理器
+数据库连接池管理
+系统唯一 ID 生成器
+</code></pre>
+<p>如果没有单例模式：</p>
+<ul>
+<li>多处代码可能创建多个实例，导致状态不一致</li>
+<li>配置或缓存可能无法统一管理</li>
+<li>对共享资源的竞争和安全问题增加</li>
+</ul>
+<p>单例模式提供了一个统一访问入口，并确保实例唯一。</p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-2"><a class="header" href="#4-不使用这个模式会怎样-2">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用单例模式，可能出现：</p>
+<pre><code class="language-text">多个实例导致全局状态混乱
+配置或缓存对象状态不一致
+初始化顺序不受控
+线程安全问题增加
+调试和维护成本上升
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-2"><a class="header" href="#5-传统面向对象中的实现思路-2">5. 传统面向对象中的实现思路</a></h2>
+<p>在 Java/C++ 中，单例模式通常通过以下方式实现：</p>
+<pre><code class="language-text">私有构造函数，禁止外部 new
+提供静态方法 getInstance() 返回唯一实例
+懒加载或饿汉式初始化
+线程安全措施（双重检查锁、同步关键字、静态初始化）
+</code></pre>
+<p>结构图示：</p>
+<pre><code class="language-text">Singleton
+ ├─ 私有构造函数
+ └─ 静态实例 + getInstance()
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-2"><a class="header" href="#6-rust-中的实现思路-2">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-2"><a class="header" href="#61-rust-中通常怎么实现-2">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，可以使用标准库提供的静态初始化类型：</p>
+<pre><code class="language-text">OnceLock&lt;T&gt;      // 一次性初始化，线程安全
+LazyLock&lt;T&gt;      // 惰性初始化，线程安全
+static + Mutex&lt;T&gt; // 手动管理全局可变实例
+</code></pre>
+<p>示例（使用 OnceLock）：</p>
+<pre class="playground"><code class="language-rust edition2024">use std::sync::OnceLock;
+
+// 定义一个单例类型
+struct Config {
+    field: String,
+}
+
+impl Config {
+    // 提供实例方法
+    fn print(&amp;self) {
+        println!("Config field: {}", self.field);
+    }
+
+    fn update(&amp;mut self, value: &amp;str) {
+        self.field = value.to_string();
+    }
+}
+
+// 创建全局唯一实例
+static CONFIG: OnceLock&lt;Config&gt; = OnceLock::new();
+
+// 获取单例实例的全局访问函数
+fn get_config() -&gt; &amp;'static Config {
+    CONFIG.get_or_init(|| Config {
+        field: "default".to_string(),
+    })
+}
+
+fn main() {
+    // 获取单例实例并调用方法
+    let cfg = get_config();
+    cfg.print(); // 输出: Config field: default
+
+    // 如果需要修改，可以把单例放在 Mutex 中（线程安全可变）
+    use std::sync::Mutex;
+
+    static MUTABLE_CONFIG: OnceLock&lt;Mutex&lt;Config&gt;&gt; = OnceLock::new();
+
+    fn get_mutable_config() -&gt; &amp;'static Mutex&lt;Config&gt; {
+        MUTABLE_CONFIG.get_or_init(|| Mutex::new(Config {
+            field: "default".to_string(),
+        }))
+    }
+
+    // 多线程使用
+    use std::thread;
+
+    let handles: Vec&lt;_&gt; = (0..3)
+        .map(|i| {
+            thread::spawn(move || {
+                let cfg_lock = get_mutable_config();
+                let mut cfg = cfg_lock.lock().unwrap();
+                cfg.update(&amp;format!("value {}", i));
+                println!("Thread {} updated config: {}", i, cfg.field);
+            })
+        })
+        .collect();
+
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    // 最终访问单例实例
+    let cfg_lock = get_mutable_config();
+    let cfg = cfg_lock.lock().unwrap();
+    println!("Final config field: {}", cfg.field);
+}</code></pre>
+<p>说明：</p>
+<ul>
+<li>创建：通过 <code>OnceLock::get_or_init()</code> 初始化单例，只执行一次。</li>
+<li>访问：通过全局函数 <code>get_config()</code> 获取实例。</li>
+<li>方法调用：直接调用实例方法，如 <code> print()</code> 或 <code>update()</code>。</li>
+<li>可变操作：如果需要修改单例对象，放入 <code>Mutex</code> 中以保证线程安全。</li>
+<li>多线程安全：多线程访问时，每个线程通过锁获得可变访问权。</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-2"><a class="header" href="#62-和传统-oop-写法相比有什么不同-2">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>不需要私有构造函数，Rust 通过模块私有性控制外部访问。</li>
+<li>不依赖类静态方法，使用 <code>static</code> 结合 OnceLock/LazyLock 即可。</li>
+<li>线程安全由标准库封装，无需手动加锁或双重检查。</li>
+<li>没有继承体系，单例实例通常是结构体或引用类型。</li>
+</ol>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-2"><a class="header" href="#63-rust-中是否有更自然的替代写法-2">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对只读全局数据，可以使用 <code>const</code> 或 <code>static</code>。</li>
+<li>对可变全局状态，可以结合 <code>Arc&lt;Mutex&lt;T&gt;&gt;</code> 或 <code>LazyLock</code> 管理。</li>
+<li>如果全局状态复杂，可以考虑通过传递引用或依赖注入代替单例。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-2"><a class="header" href="#7-rust-中涉及的语言特性-2">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">static
+OnceLock / LazyLock
+Arc / Mutex / RwLock
+模块私有性
+所有权和借用
+函数返回 'static 引用
+</code></pre>
+<p>这些特性解决了：</p>
+<ul>
+<li>全局实例唯一性</li>
+<li>线程安全</li>
+<li>可共享的全局访问</li>
+</ul>
+<hr>
+<h2 id="8-性能与工程代价-2"><a class="header" href="#8-性能与工程代价-2">8. 性能与工程代价</a></h2>
+<ul>
+<li>初始化只执行一次，惰性加载可避免启动开销</li>
+<li>使用 <code>OnceLock/LazyLock</code> 的读操作几乎没有额外开销</li>
+<li>如果使用 <code>Arc&lt;Mutex&lt;T&gt;&gt;</code>，会有锁开销和堆分配开销</li>
+<li>全局可变状态增加了维护复杂度</li>
+<li>Rust 显式管理所有权，避免了传统 OOP 的隐式同步问题</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-2"><a class="header" href="#9-典型应用场景-2">9. 典型应用场景</a></h2>
+<pre><code class="language-text">配置管理器
+日志系统
+缓存管理器
+数据库连接池
+唯一标识生成器
+</code></pre>
+<p>在 Rust 中，这类模式通常用于全局只读或线程安全的共享资源管理。</p>
+<hr>
+<h2 id="10-和相似模式的区别-2"><a class="header" href="#10-和相似模式的区别-2">10. 和相似模式的区别</a></h2>
+<ul>
+<li>原型模式：关注如何快速创建新对象，通过复制已有对象生成多个相似实例。强调对象创建的效率和模板复用。</li>
+</ul>
+<p>与单例不同：原型模式允许创建任意数量的对象，而单例模式只允许一个实例。</p>
+<ul>
+<li>工厂模式：关注如何根据条件或类型动态创建对象。强调封装创建逻辑、实现解耦。</li>
+</ul>
+<p>与单例不同：工厂模式可以生成多个对象，每次调用可能返回不同类型或不同实例，而单例模式保证全局唯一实例。</p>
+<ul>
+<li>构建者模式：关注如何分步骤构造复杂对象。强调对象的分阶段配置和可读性。</li>
+</ul>
+<p>与单例不同：构建者模式主要解决复杂对象初始化过程，而单例模式关注“实例唯一性”，可以用构建者模式创建唯一实例。</p>
+<ul>
+<li>享元模式：关注大量相似对象的共享，降低内存占用。强调对象状态共享和资源复用。</li>
+</ul>
+<p>与单例不同：享元模式允许多个对象共享内在状态，并不限制实例数量；单例模式只允许一个全局唯一实例，无论状态是否共享。</p>
+<hr>
+<h2 id="11-使用该模式的优点-2"><a class="header" href="#11-使用该模式的优点-2">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">保证全局唯一实例
+提供统一访问点
+管理全局共享资源
+线程安全由标准库封装
+初始化逻辑集中
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-2"><a class="header" href="#12-使用该模式的代价-2">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">全局状态可能增加耦合
+过度依赖单例会影响测试和复用
+可变单例需要关注锁竞争
+可能隐藏对象所有权边界
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-2"><a class="header" href="#13-什么时候不应该使用-2">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">对象不需要全局唯一
+可通过传递引用或依赖注入实现共享
+测试或复用需要独立实例
+全局可变状态可能带来线程竞争
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-2"><a class="header" href="#14-一个简单例子思路-2">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 日志系统</p>
+<ul>
+<li>日志系统在程序中全局唯一</li>
+<li>配置只初始化一次</li>
+<li>多线程同时记录日志</li>
+</ul>
+<p><strong>处理流程：</strong></p>
+<pre><code class="language-text">使用 static + OnceLock 创建日志实例
+提供 get_instance() 获取全局引用
+多线程调用记录日志方法
+确保初始化只执行一次
+</code></pre>
+<p>适合练习 Rust 特性：<code>OnceLock</code>, <code>LazyLock</code>, <code>Arc&lt;Mutex&lt;T&gt;&gt;</code>, 模块私有性, ’static 引用</p>
+<hr>
+<h2 id="15-总结一句话-2"><a class="header" href="#15-总结一句话-2">15. 总结一句话</a></h2>
+<p>单例模式的本质是：</p>
+<blockquote>
+<p><strong>确保全局只有一个实例，并提供统一、线程安全的访问接口。在 Rust 中，通过 OnceLock、LazyLock 或 Arc/Mutex 结合静态变量即可高效实现。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="构建者模式"><a class="header" href="#构建者模式">构建者模式</a></h1>
+<h1 id="05_构建者模式-builder-pattern"><a class="header" href="#05_构建者模式-builder-pattern">05_构建者模式 Builder Pattern</a></h1>
+<h2 id="1-基本信息-4"><a class="header" href="#1-基本信息-4">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 构建者模式</p>
+<p><strong>英文名称：</strong> Builder Pattern</p>
+<p><strong>模式类型：</strong> 创建型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> Builder 链式调用、<code>struct</code> + <code>impl</code>、<code>Option</code> 字段、默认值、方法链、<code>build()</code> 最终生成结构体</p>
+<p>构建者模式的核心是：<strong>将复杂对象的构造过程抽象出来，使对象可以按步骤构造，同时允许灵活组合属性和可选字段。</strong></p>
+<p>在 Rust 中，构建者模式通常结合结构体和方法链实现，使得创建复杂对象既清晰又安全。</p>
+<hr>
+<h2 id="2-模式核心思想-3"><a class="header" href="#2-模式核心思想-3">2. 模式核心思想</a></h2>
+<p>构建者模式的核心思想是：</p>
+<blockquote>
+<p><strong>将对象构造过程和对象本身分离，让调用者可以按步骤设置不同字段，最终生成完整对象。</strong></p>
+</blockquote>
+<p>它关注的核心问题是：</p>
+<pre><code class="language-text">对象属性众多或复杂，直接构造难以管理
+部分字段可选，部分字段必填
+希望代码表达清晰，避免大量重复构造逻辑
+</code></pre>
+<hr>
+<h2 id="3-这个模式解决什么问题-3"><a class="header" href="#3-这个模式解决什么问题-3">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，构建者模式常用于以下场景：</p>
+<pre><code class="language-text">配置对象有很多字段，且部分可选
+HTTP 请求或数据库查询参数对象需要灵活组合
+对象初始化涉及复杂默认值或计算
+对象构造步骤多，需要顺序控制
+API 客户端、任务配置或复杂结构体的初始化
+</code></pre>
+<p>使用构建者模式可以让调用者只关心要设置哪些属性，不必了解完整的初始化细节。</p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-3"><a class="header" href="#4-不使用这个模式会怎样-3">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用构建者模式，可能出现：</p>
+<pre><code class="language-text">调用方必须直接使用长参数列表的构造函数，容易出错
+默认值逻辑散落在各处
+可选字段需要写很多重复的 if/else
+构造复杂对象的代码冗长且难以阅读
+修改对象初始化逻辑时，需要修改多个构造位置
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-3"><a class="header" href="#5-传统面向对象中的实现思路-3">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 语言中，构建者模式通常包含以下角色：</p>
+<pre><code class="language-text">Builder：定义构建步骤接口
+ConcreteBuilder：实现具体构建步骤
+Director：负责调用 Builder 完成构造
+Product：最终生成的复杂对象
+</code></pre>
+<p>调用方通过 Director 或直接使用 Builder 设置各个属性，最后调用 <code>build()</code> 获取完整对象。</p>
+<p>典型结构图示：</p>
+<pre><code class="language-text">Client
+ └─ Builder
+      ├─ set_part_a()
+      ├─ set_part_b()
+      └─ build() -&gt; Product
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-3"><a class="header" href="#6-rust-中的实现思路-3">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-3"><a class="header" href="#61-rust-中通常怎么实现-3">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，构建者模式通常用结构体 + 方法链实现：</p>
+<pre><code class="language-Rust">struct ServerConfig {
+    host: String,
+    port: u16,
+    use_tls: bool,
+    timeout: Option&lt;u64&gt;,
+}
+
+struct ServerConfigBuilder {
+    host: String,
+    port: u16,
+    use_tls: bool,
+    timeout: Option&lt;u64&gt;,
+}
+
+impl ServerConfigBuilder {
+    fn new() -&gt; Self { ... }
+    fn host(mut self, host: &amp;str) -&gt; Self { ... }
+    fn port(mut self, port: u16) -&gt; Self { ... }
+    fn use_tls(mut self, use_tls: bool) -&gt; Self { ... }
+    fn timeout(mut self, timeout: u64) -&gt; Self { ... }
+    fn build(self) -&gt; ServerConfig { ... }
+}
+</code></pre>
+<p>调用：</p>
+<pre><code class="language-Rust">let config = ServerConfigBuilder::new()
+    .host("localhost")
+    .port(8080)
+    .use_tls(true)
+    .timeout(30)
+    .build();
+</code></pre>
+<p>特点：</p>
+<ul>
+<li>方法链清晰表达构造过程</li>
+<li>支持默认值和可选字段</li>
+<li>调用者无需了解完整内部初始化逻辑</li>
+</ul>
+<h3 id="62-和传统-oop-写法相比有什么不同-3"><a class="header" href="#62-和传统-oop-写法相比有什么不同-3">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不依赖类继承体系，也不需要 Director 角色，调用方可以直接链式调用 Builder。</li>
+<li>Rust 方法链通过所有权移动实现，每一步返回 <code>self</code>，保证构造过程安全。</li>
+<li>默认值和可选字段可以用 <code>Option</code> 或 <code>Default</code> trait 实现，不必写多个构造函数重载。</li>
+<li>不依赖接口或虚函数，而是通过静态方法链完成组合。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-3"><a class="header" href="#63-rust-中是否有更自然的替代写法-3">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单对象，可以直接用结构体初始化语法 <code>{ field1, field2, ..Default::default() }</code></li>
+<li>对少量字段组合，也可以用 <code>Option</code> + <code>unwrap_or</code> 或默认值代替 Builder</li>
+<li>对复杂对象或链式构造仍然推荐 Builder，尤其在 API 客户端、配置对象和任务初始化场景</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-3"><a class="header" href="#7-rust-中涉及的语言特性-3">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">1. struct + impl
+2. 方法链（返回 Self）
+3. Option 类型
+4. Default trait
+5. 所有权移动
+6. 类型安全
+</code></pre>
+<p>这些特性分别解决的问题：</p>
+<ul>
+<li>struct + impl：组织数据和行为</li>
+<li>方法链：安全组合构建步骤</li>
+<li>Option + Default：处理可选字段和默认值</li>
+<li>所有权移动：确保 Builder 使用安全</li>
+<li>类型安全：编译期检查必填字段是否初始化</li>
+</ul>
+<hr>
+<h2 id="8-性能与工程代价-3"><a class="header" href="#8-性能与工程代价-3">8. 性能与工程代价</a></h2>
+<ul>
+<li>构建者模式本身开销极小，只是组合 struct 实例和方法链</li>
+<li>对大量临时 Builder 对象，可能会产生栈分配和轻量移动开销</li>
+<li>对复杂对象，方法链可以减少重复初始化代码，提高可读性和可维护性</li>
+<li>Rust 静态分发和优化使得 Builder 通常不会带来额外性能负担</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-3"><a class="header" href="#9-典型应用场景-3">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. 配置对象初始化（如服务器配置、HTTP 请求）  
+2. 数据库查询条件构建  
+3. 任务或流程配置（如批量任务执行器）  
+4. API 客户端初始化（可选参数较多）  
+5. 测试数据构造
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-3"><a class="header" href="#10-和相似模式的区别-3">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>原型模式</strong>：基于已有对象复制 → 构建者模式按步骤构造新对象</li>
+<li><strong>工厂模式</strong>：创建对象 → Builder 强调逐步可配置、链式调用</li>
+<li><strong>单例模式</strong>：保证唯一实例 → Builder 用于灵活构造不同实例</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-3"><a class="header" href="#11-使用该模式的优点-3">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">1. 构造复杂对象的逻辑清晰  
+2. 可组合可选字段，链式表达构造过程  
+3. 减少重复初始化代码  
+4. 提升代码可读性和可维护性  
+5. 静态类型检查保证构造过程安全
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-3"><a class="header" href="#12-使用该模式的代价-3">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">1. 增加 Builder 类型和方法数量  
+2. 对小对象可能显得冗余  
+3. 链式调用过长可能影响可读性  
+4. 临时 Builder 对象存在轻量开销
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-3"><a class="header" href="#13-什么时候不应该使用-3">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">1. 对象很简单，可直接用结构体初始化  
+2. 字段数量少，构造函数足够清晰  
+3. 不需要链式调用或可选字段  
+4. 仅创建少量对象，复杂 Builder 成本大于收益
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-3"><a class="header" href="#14-一个简单例子思路-3">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> HTTP 请求对象构造</p>
+<ul>
+<li>请求对象包含 URL、method、headers、body、timeout、retry 等字段</li>
+<li>大部分字段有默认值，部分可选</li>
+<li>调用方按需设置字段</li>
+</ul>
+<p><strong>处理流程：</strong></p>
+<pre><code class="language-text">1. 创建 RequestBuilder::new()
+2. 链式调用方法设置 URL、method、headers
+3. 可选字段使用默认值或 set 方法
+4. 调用 build() 返回 Request 对象
+</code></pre>
+<p>练习 Rust 特性：<code>struct</code>、<code>impl</code>、方法链、Option、Default</p>
+<hr>
+<h2 id="15-总结一句话-3"><a class="header" href="#15-总结一句话-3">15. 总结一句话</a></h2>
+<p>构建者模式的本质是：</p>
+<blockquote>
+<p><strong>将复杂对象的构造过程抽离出来，通过方法链按步骤设置字段，最终生成完整对象。在 Rust 中，结合 struct、Option、Default 和方法链即可自然实现。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="策略模式"><a class="header" href="#策略模式">策略模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
