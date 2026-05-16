@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a0a07116.js";
+            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,198 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="代理模式"><a class="header" href="#代理模式">代理模式</a></h1>
+                        <h1 id="09_代理模式-proxy-pattern"><a class="header" href="#09_代理模式-proxy-pattern">09_代理模式 Proxy Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 代理模式</p>
+<p><strong>英文名称：</strong> Proxy Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、Box<dyn trait=""></dyn></p>
+<p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
+<p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>代理模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过代理对象替代原对象进行访问，从而控制访问权限、延迟初始化、增加附加逻辑或保护对象。</strong></p>
+</blockquote>
+<p>代理模式强调：调用方通过统一接口操作对象，但具体操作可能经过代理层处理。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>代理模式主要解决以下问题：</p>
+<pre><code class="language-text">控制对对象的访问，例如权限检查或安全保护
+延迟初始化大对象，提高性能或节省资源
+在访问前后增加额外逻辑，例如日志、缓存或网络请求
+对原对象进行防护，避免直接操作导致错误或破坏
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>虚拟代理：延迟加载大型对象（图片、数据库连接）</li>
+<li>远程代理：通过代理对象调用远程服务</li>
+<li>保护代理：增加访问权限控制</li>
+<li>智能引用代理：在访问对象时增加统计、缓存或日志</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用代理模式，可能出现：</p>
+<pre><code class="language-text">调用方直接访问原对象，无法控制访问权限
+对象过早初始化，占用大量资源
+无法在访问过程中增加日志或缓存逻辑
+系统中访问逻辑分散，难以维护
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，代理模式通常有三类角色：</p>
+<pre><code class="language-text">Subject：定义统一接口
+RealSubject：原始对象，实现真实业务逻辑
+Proxy：代理对象，持有 RealSubject，实现 Subject 接口
+</code></pre>
+<p>调用方通过 Proxy 操作对象，Proxy 可以在调用 RealSubject 前后插入逻辑。</p>
+<p>结构示意：</p>
+<pre><code class="language-text">Subject
+ ├── request()
+Proxy
+ ├── real_subject: RealSubject
+ └── request() { pre_action(); real_subject.request(); post_action(); }
+RealSubject
+ └── request() { ...业务逻辑... }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，代理模式通常通过 <strong>trait + 包装结构体</strong> 来实现：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义接口
+trait Subject {
+    fn request(&amp;self);
+}
+
+// 原始对象
+struct RealSubject;
+
+impl Subject for RealSubject {
+    fn request(&amp;self) {
+        println!("RealSubject 执行请求");
+    }
+}
+
+// 代理对象
+struct Proxy {
+    real: RealSubject,
+}
+
+impl Subject for Proxy {
+    fn request(&amp;self) {
+        println!("代理前逻辑: 检查或日志");
+        self.real.request();
+        println!("代理后逻辑: 统计或缓存");
+    }
+}
+
+fn main() {
+    let proxy = Proxy { real: RealSubject };
+    proxy.request();
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>Subject</code> trait</li>
+<li>代理对象在调用前后增加逻辑</li>
+<li>原始对象无需修改</li>
+</ul>
+<p>可以用 <code>Box&lt;dyn Subject&gt;</code> 支持动态分发：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let subject: Box&lt;dyn Subject&gt; = Box::new(Proxy { real: RealSubject });
+subject.request();
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用继承体系，而是 trait + 包装结构体替代接口和代理类。</li>
+<li>静态分发（泛型）可在编译期确定类型，效率高。</li>
+<li>动态分发（Box<dyn subject="">）允许运行时选择代理或真实对象。</dyn></li>
+<li>没有虚函数指针和子类继承复杂性，类型安全。</li>
+</ol>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单访问控制或日志，可以直接使用闭包包装对象方法，无需显式 Proxy 结构体。</li>
+<li>对延迟初始化，可以结合 <code>Option&lt;RealSubject&gt;</code> 或 <code>OnceLock</code> 实现虚拟代理。</li>
+<li>对共享访问，可用 <code>Arc&lt;Mutex&lt;RealSubject&gt;&gt;</code> 管理线程安全的代理。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+包装结构体（struct + 内部对象）
+Box&lt;dyn Trait&gt;（可选）
+所有权和借用
+Option / OnceLock（虚拟代理）
+Arc / Mutex（共享访问或多线程安全）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发代理无虚函数开销，性能接近直接调用。</li>
+<li>动态分发代理（Box<dyn trait="">）有轻微虚函数调用开销。</dyn></li>
+<li>包装层过多可能增加代码层级，但运行时开销低。</li>
+<li>延迟初始化可以节省资源，但首次访问需要初始化成本。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text">虚拟代理：延迟加载大型对象（图片、数据库连接）
+远程代理：调用远程服务
+保护代理：权限检查、访问控制
+智能引用代理：统计、缓存、日志
+多线程共享对象访问控制
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>装饰器模式</strong>：装饰器增加功能但接口不变；代理模式可控制访问并插入逻辑，接口可能保持或调整。</li>
+<li><strong>适配器模式</strong>：适配器修改接口以兼容调用方；代理模式保留接口一致性，关注访问控制和附加逻辑。</li>
+<li><strong>工厂模式</strong>：工厂模式负责对象创建；代理模式关注访问和控制对象。</li>
+<li><strong>策略模式</strong>：策略模式提供可替换算法；代理模式提供对对象访问的中间控制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">调用方不直接访问原对象，增加控制和安全性
+可在调用前后添加逻辑（日志、缓存、权限）
+支持延迟初始化，节省资源
+可与 trait 和动态分发结合实现灵活代理
+原对象无需修改，保持封装
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">代理层增加包装结构，增加代码复杂度
+动态分发有轻微性能开销
+过多代理可能导致维护难度增加
+延迟初始化可能增加首次访问延迟
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">原对象简单，无需额外访问控制
+系统不涉及延迟初始化或附加逻辑
+不需要在访问前后增加额外行为
+代理层可能导致代码过度复杂
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件打印系统</p>
+<ul>
+<li>原始打印机对象 <code>RealPrinter</code> 提供 <code>print(&amp;str)</code> 方法</li>
+<li>Proxy 对象 <code>PrinterProxy</code> 包装 <code>RealPrinter</code></li>
+<li>代理在打印前检查权限，在打印后记录日志</li>
+<li>调用方只依赖 <code>Printer</code> trait</li>
+</ul>
+<p>适合练习 Rust 特性：</p>
+<pre><code class="language-text">trait + impl
+包装结构体
+Box&lt;dyn Trait&gt; 可选动态分发
+所有权和借用
+</code></pre>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
+</blockquote>
 
                     </main>
 

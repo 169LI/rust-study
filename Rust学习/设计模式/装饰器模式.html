@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a0a07116.js";
+            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,192 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="装饰器模式"><a class="header" href="#装饰器模式">装饰器模式</a></h1>
+                        <h1 id="10_装饰器模式-decorator-pattern"><a class="header" href="#10_装饰器模式-decorator-pattern">10_装饰器模式 Decorator Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 装饰器模式</p>
+<p><strong>英文名称：</strong> Decorator Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、Box<dyn trait=""></dyn></p>
+<p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
+<p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>装饰器模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过包装对象动态扩展功能，而不改变原对象接口或结构，实现功能增强和灵活组合。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>原对象保持不变</li>
+<li>装饰器通过 trait 或包装结构体增强行为</li>
+<li>支持多个装饰器组合，实现功能链式叠加</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，装饰器模式主要解决以下问题：</p>
+<pre><code class="language-text">1. 希望在不修改原对象代码的情况下增加新功能。
+2. 对象功能可能存在多种组合方式。
+3. 避免创建大量子类来覆盖不同功能组合。
+4. 支持动态组合功能，而不是静态继承。
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>IO 流处理：BufferedReader → Compression → Encryption</li>
+<li>日志系统：日志记录 + 格式化 + 过滤</li>
+<li>GUI 控件：基本控件 + 滚动条 + 边框 + 背景装饰</li>
+<li>网络请求：请求对象 + 缓存 + 重试 + 日志</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用装饰器模式，可能出现：</p>
+<pre><code class="language-text">1. 为每种功能组合创建大量子类，类爆炸。
+2. 调用方无法灵活组合功能。
+3. 原对象被修改或扩展，违反开闭原则。
+4. 功能增强逻辑分散，维护困难。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，装饰器模式通常有三个角色：</p>
+<pre><code class="language-text">1. Component（抽象组件）：定义对象接口
+2. ConcreteComponent（具体对象）：实现 Component 接口
+3. Decorator（装饰器）：持有 Component 对象，实现 Component 接口，并增强行为
+</code></pre>
+<p>调用方可以把一个对象多次包裹装饰器，实现功能叠加。</p>
+<p>示意结构：</p>
+<pre><code class="language-text">Component
+ └── operation()
+ConcreteComponent
+ └── operation() { ... }
+Decorator
+ ├── component: Box&lt;dyn Component&gt;
+ └── operation() { pre_action(); component.operation(); post_action(); }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong>：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义接口
+trait Printer {
+    fn print(&amp;self, msg: &amp;str);
+}
+
+// 原始对象
+struct RealPrinter;
+
+impl Printer for RealPrinter {
+    fn print(&amp;self, msg: &amp;str) {
+        println!("打印内容: {}", msg);
+    }
+}
+
+// 装饰器
+struct LoggingPrinter {
+    inner: Box&lt;dyn Printer&gt;,
+}
+
+impl Printer for LoggingPrinter {
+    fn print(&amp;self, msg: &amp;str) {
+        println!("[LOG] 即将打印");
+        self.inner.print(msg);
+        println!("[LOG] 打印完成");
+    }
+}
+
+fn main() {
+    let printer = RealPrinter;
+    let logging_printer = LoggingPrinter { inner: Box::new(printer) };
+    logging_printer.print("Hello Rust Decorator!");
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>Printer</code> trait</li>
+<li>装饰器在调用前后增加日志</li>
+<li>可以多层嵌套装饰器，形成功能链</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不依赖类继承体系，使用 trait + 包装结构体替代接口和装饰器类。</li>
+<li>静态分发可用泛型，动态分发用 <code>Box&lt;dyn Trait&gt;</code>。</li>
+<li>无需虚函数指针，类型安全，零成本抽象。</li>
+<li>装饰器组合通过包装链实现，而不是继承多层类。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单功能增强，可以直接用闭包或函数组合替代显式装饰器结构体。</li>
+<li>对组合对象可以使用泛型包装多个 trait 对象，实现链式组合。</li>
+<li>对只读或不可变对象，可用引用或 Rc 包装，减少内存开销。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">1. trait
+2. impl
+3. 包装结构体
+4. Box&lt;dyn Trait&gt;（动态分发）
+5. 泛型（静态分发）
+6. 所有权和借用
+7. 闭包（可选）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发装饰器性能几乎无开销，编译器可内联。</li>
+<li>动态分发装饰器有一次虚函数调用开销。</li>
+<li>多层包装结构可能增加调用链深度，但运行时内存开销低。</li>
+<li>Rust 静态类型和所有权保证安全，不需要额外同步或垃圾回收。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. IO 流处理：加缓冲、加压缩、加加密
+2. 日志系统：日志记录 + 格式化 + 过滤
+3. GUI 控件：控件 + 滚动条 + 边框 + 背景
+4. 网络请求：请求对象 + 缓存 + 重试 + 日志
+5. 测试环境中动态增强对象行为
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>代理模式</strong>：代理关注访问控制或延迟加载；装饰器关注增强功能。</li>
+<li><strong>适配器模式</strong>：适配器修改接口使调用方兼容；装饰器保持接口一致，增强行为。</li>
+<li><strong>工厂模式</strong>：工厂负责创建对象；装饰器负责增强对象功能。</li>
+<li><strong>策略模式</strong>：策略替换整个算法或行为；装饰器增强原对象功能，不改变整体行为骨架。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">1. 可以在不修改原对象的情况下增强功能
+2. 支持多层装饰和功能组合
+3. 调用方无需关心装饰逻辑
+4. 静态或动态分发可灵活选择
+5. 易于扩展新的装饰器
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">1. 包装层增加代码层级
+2. 动态分发有虚函数调用开销
+3. 链式装饰器过多可能增加调试难度
+4. 过度使用可能导致理解成本提高
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">1. 原对象功能简单，不需要增强
+2. 不需要多层组合功能
+3. 功能增强逻辑可以直接在原对象实现
+4. 动态组合不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件打印系统</p>
+<ul>
+<li>原始打印机对象 <code>RealPrinter</code> 提供 <code>print(&amp;str)</code> 方法</li>
+<li>装饰器 <code>LoggingPrinter</code> 增加日志</li>
+<li>可以再包装 <code>EncryptionPrinter</code> 增加加密</li>
+<li>调用方只依赖 <code>Printer</code> trait，通过多层包装实现链式增强</li>
+</ul>
+<p>练习 Rust 特性：trait、包装结构体、Box<dyn trait="">、泛型、闭包、所有权和借用。</dyn></p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
+</blockquote>
 
                     </main>
 

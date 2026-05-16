@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a0a07116.js";
+            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,184 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="模板方法模式"><a class="header" href="#模板方法模式">模板方法模式</a></h1>
+                        <h1 id="08_模板方法模式-template-method-pattern"><a class="header" href="#08_模板方法模式-template-method-pattern">08_模板方法模式 Template Method Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 模板方法模式</p>
+<p><strong>英文名称：</strong> Template Method Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait 默认方法 + trait 方法调用、结构体 + impl</p>
+<p>模板方法模式的核心是：<strong>在父类或 trait 中定义算法骨架，将部分步骤留给子类或实现者完成，从而保证整体流程不变，同时允许部分步骤可定制。</strong></p>
+<p>在 Rust 中，模板方法模式通常通过 trait 默认方法实现算法骨架，具体步骤由具体实现类型重写。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>模板方法模式的核心思想是：</p>
+<blockquote>
+<p><strong>固定算法流程，允许部分步骤延迟实现或由子类/具体类型定制，从而在保持整体流程稳定的情况下灵活扩展。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>算法总体顺序不可变</li>
+<li>某些步骤可以由不同实现重写</li>
+<li>避免重复实现算法流程</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>模板方法模式主要解决以下问题：</p>
+<pre><code class="language-Text">1. 一个算法的整体流程固定，但其中某些步骤可能有多种实现方式。
+2. 避免在每个具体实现中重复编写整体流程。
+3. 保持算法结构一致性，同时允许个性化步骤。
+4. 便于代码扩展和维护。
+</code></pre>
+<p>例如：</p>
+<ul>
+<li>文件处理流程：读取文件 → 解析 → 处理 → 写入</li>
+<li>网络请求流程：建立连接 → 发送请求 → 处理响应 → 关闭连接</li>
+<li>游戏回合流程：开始回合 → 玩家行动 → 敌人行动 → 结束回合</li>
+<li>数据处理流程：预处理 → 转换 → 验证 → 输出</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用模板方法模式，可能出现：</p>
+<pre><code class="language-text">1. 每个具体实现都重复写整个流程。
+2. 算法流程不统一，易出错。
+3. 调整流程顺序需要修改多个实现。
+4. 代码可维护性和扩展性下降。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，模板方法模式通常有两个角色：</p>
+<pre><code class="language-text">1. 抽象类（AbstractClass）：定义算法骨架，模板方法固定流程，并提供可重写的抽象方法。
+2. 具体子类（ConcreteClass）：实现或重写抽象步骤。
+</code></pre>
+<p>示意结构：</p>
+<pre><code class="language-text">AbstractClass
+ ├── template_method()  // 模板方法，调用各步骤
+ ├── step1()            // 可选默认实现
+ ├── step2()            // 抽象方法，由子类实现
+ConcreteClass
+ ├── step2()            // 重写抽象方法
+</code></pre>
+<p>调用方只调用 <code>template_method()</code>，流程固定，步骤可自定义。</p>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 没有类继承体系，模板方法模式通常用 <strong>trait 默认方法</strong> 实现算法骨架：</p>
+<pre class="playground"><code class="language-rust edition2024">trait FileProcessor {
+    // 模板方法，固定流程
+    fn process(&amp;self) {
+        self.read_file();
+        self.parse();
+        self.handle();
+        self.write_file();
+    }
+
+    // 可重写或抽象的方法
+    fn read_file(&amp;self) { println!("读取默认文件"); }
+    fn parse(&amp;self);
+    fn handle(&amp;self);
+    fn write_file(&amp;self) { println!("写入默认文件"); }
+}
+
+// 具体实现
+struct CsvProcessor;
+
+impl FileProcessor for CsvProcessor {
+    fn parse(&amp;self) { println!("解析 CSV 文件"); }
+    fn handle(&amp;self) { println!("处理 CSV 数据"); }
+}
+
+fn main() {
+    let processor = CsvProcessor;
+    processor.process(); // 调用模板方法
+}</code></pre>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用继承体系，而是 trait 默认方法实现算法骨架。</li>
+<li>子类（具体实现类型）通过实现 trait 方法重写部分步骤。</li>
+<li>模板方法本身在 trait 内部定义，调用方直接使用具体对象调用模板方法即可。</li>
+<li>不需要虚函数指针或继承结构，静态分发效率高，类型安全。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单流程，直接组合函数或闭包也可以实现模板方法思想。</li>
+<li>对可复用算法流程，可用 trait 默认方法 + trait object 提供动态分发。</li>
+<li>Rust 的组合优先策略可以在不依赖继承的情况下实现算法骨架。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">1. trait 默认方法
+2. trait 方法重写
+3. impl
+4. 结构体
+5. 所有权和借用
+6. dyn Trait（可选）
+</code></pre>
+<p>这些特性分别解决：</p>
+<ul>
+<li>trait 默认方法 → 定义固定流程</li>
+<li>方法重写 → 定制可变步骤</li>
+<li>impl → 将具体实现与 trait 绑定</li>
+<li>所有权和借用 → 安全管理数据访问</li>
+</ul>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发模板方法无额外开销，调用方法会被编译器内联。</li>
+<li>动态分发（dyn Trait）需要一次虚函数调用，开销轻微。</li>
+<li>模板方法模式结构清晰，便于维护，但 trait 默认方法过多可能增加复杂度。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. 文件处理流程（读取 → 解析 → 处理 → 写入）
+2. 网络请求处理流程
+3. 游戏回合或事件流程
+4. 数据处理或 ETL 流程
+5. 批量任务处理的固定算法骨架
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式将整个算法或行为替换；模板方法模式固定算法骨架，只替换部分步骤。</li>
+<li><strong>工厂模式</strong>：工厂模式负责对象创建；模板方法模式关注算法流程。</li>
+<li><strong>命令模式</strong>：命令模式封装操作、支持延迟执行；模板方法模式关注固定流程执行。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">1. 算法流程统一，保证一致性
+2. 子类或实现者只需重写部分步骤
+3. 减少重复代码，提升可维护性
+4. 可静态或动态分发，类型安全
+5. 易于扩展新步骤或算法变体
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">1. 过度拆分步骤可能导致 trait 方法过多
+2. 动态分发有轻微虚函数开销
+3. 对简单流程使用可能显得冗余
+4. 步骤顺序固定，不适合完全灵活的算法变更
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">1. 算法流程简单，无需固定模板
+2. 流程步骤可自由组合，不需要统一骨架
+3. 调用方不需要多种实现，只需单一实现
+4. 动态扩展步骤成本较高或不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件处理器模板</p>
+<ul>
+<li>固定流程：读取 → 解析 → 处理 → 写入</li>
+<li>默认方法提供通用实现（读取和写入）</li>
+<li>CSVProcessor 或 JsonProcessor 重写 parse 和 handle 步骤</li>
+<li>调用方直接调用 <code>process()</code> 模板方法</li>
+</ul>
+<p>适合练习 Rust 特性：trait 默认方法、方法重写、impl、静态分发、dyn Trait。</p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>模板方法模式的本质是：<strong>定义算法骨架，固定流程，允许部分步骤由具体类型定制，从而在保持整体流程稳定的前提下实现灵活扩展。在 Rust 中，trait 默认方法和方法重写是实现模板方法的核心工具。</strong></p>
+</blockquote>
 
                     </main>
 

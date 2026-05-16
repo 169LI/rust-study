@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-a0a07116.js";
+            window.path_to_searchindex_js = "searchindex-630bcc48.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c3e67eef.js"></script>
@@ -8173,12 +8173,12 @@ Rust 中常用到的语法：
 </ol>
 <p>第 2 组：trait 抽象</p>
 <ol>
-<li><a href="#策略模式">策略模式</a></li>
-<li><a href="#工厂模式">工厂模式</a></li>
-<li><a href="#适配器模式">适配器模式</a></li>
-<li><a href="#模板方法模式">模板方法模式</a></li>
-<li><a href="#代理模式">代理模式</a></li>
-<li><a href="#装饰器模式">装饰器模式</a></li>
+<li><a href="#05_策略模式-strategy-pattern">策略模式</a></li>
+<li><a href="#06_工厂模式-factory-pattern">工厂模式</a></li>
+<li><a href="#07_适配器模式-adapter-pattern">适配器模式</a></li>
+<li><a href="#08_模板方法模式-template-method-pattern">模板方法模式</a></li>
+<li><a href="#09_代理模式-proxy-pattern">代理模式</a></li>
+<li><a href="#10_装饰器模式-decorator-pattern">装饰器模式</a></li>
 </ol>
 <p>第 3 组：结构组织</p>
 <ol>
@@ -9442,17 +9442,1139 @@ impl ServerConfigBuilder {
 <p><strong>将复杂对象的构造过程抽离出来，通过方法链按步骤设置字段，最终生成完整对象。在 Rust 中，结合 struct、Option、Default 和方法链即可自然实现。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="策略模式"><a class="header" href="#策略模式">策略模式</a></h1>
+<h1 id="05_策略模式-strategy-pattern"><a class="header" href="#05_策略模式-strategy-pattern">05_策略模式 Strategy Pattern</a></h1>
+<h2 id="1-基本信息-5"><a class="header" href="#1-基本信息-5">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 策略模式</p>
+<p><strong>英文名称：</strong> Strategy Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait、泛型、dyn Trait、闭包</p>
+<p>策略模式的核心是：<strong>将可变化的算法或行为封装起来，使调用方依赖抽象而不是具体实现，从而可以在运行时或编译期灵活替换算法或策略。</strong></p>
+<hr>
+<h2 id="2-模式核心思想-4"><a class="header" href="#2-模式核心思想-4">2. 模式核心思想</a></h2>
+<p>策略模式的核心思想是：</p>
+<blockquote>
+<p><strong>将算法或行为从调用方分离出来，通过统一接口封装不同实现，调用方无需修改即可选择不同策略。</strong></p>
+</blockquote>
+<p>换句话说，策略模式强调“行为可替换性”和“解耦算法与使用方”。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题-4"><a class="header" href="#3-这个模式解决什么问题-4">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，策略模式主要解决以下问题：</p>
+<pre><code class="language-text">一个功能存在多种实现方式，调用方需要灵活选择。
+避免在调用方写大量 if/else 或 match 判断。
+算法可能经常变化，需要便于扩展。
+保持调用方代码稳定，减少对具体算法的依赖。
+</code></pre>
+<p>例如：</p>
+<ul>
+<li>不同排序算法（冒泡、快速、归并）可替换</li>
+<li>支付方式（微信、支付宝、银行卡）可动态选择</li>
+<li>文件压缩方式（zip、gzip、none）可灵活切换</li>
+<li>验证策略（用户名、邮箱、手机号）可以自由组合</li>
+</ul>
+<p>策略模式让调用方只依赖抽象接口，而不关心具体实现。</p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-4"><a class="header" href="#4-不使用这个模式会怎样-4">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用策略模式，可能出现：</p>
+<pre><code class="language-text">调用方代码中大量 if/else 分支判断算法类型。
+算法逻辑和调用方耦合，修改算法影响调用方。
+代码扩展性差，每增加一种算法都需要修改调用方。
+重复代码多，维护难度增加。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-4"><a class="header" href="#5-传统面向对象中的实现思路-4">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 语言中，策略模式通常有三个角色：</p>
+<pre><code class="language-text"> Strategy 接口：定义算法抽象。
+ ConcreteStrategy：具体算法实现。
+ Context：持有策略对象，调用策略方法。
+</code></pre>
+<p>调用方通过设置不同策略对象来改变行为，而不修改 Context 内部逻辑。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-4"><a class="header" href="#6-rust-中的实现思路-4">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-4"><a class="header" href="#61-rust-中通常怎么实现-4">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中策略模式通常依赖 <strong>trait</strong> 作为策略接口：</p>
+<pre><code class="language-Rust">trait Strategy {
+    fn execute(&amp;self, data: &amp;mut Vec&lt;i32&gt;);
+}
+
+struct BubbleSort;
+struct QuickSort;
+
+impl Strategy for BubbleSort {
+    fn execute(&amp;self, data: &amp;mut Vec&lt;i32&gt;) { data.sort(); }
+}
+
+impl Strategy for QuickSort {
+    fn execute(&amp;self, data: &amp;mut Vec&lt;i32&gt;) { data.sort(); }
+}
+
+fn run_strategy&lt;S: Strategy&gt;(strategy: S, data: &amp;mut Vec&lt;i32&gt;) {
+    strategy.execute(data);
+}
+</code></pre>
+<p>调用方可以选择不同的策略：</p>
+<pre><code class="language-Rust">let mut nums = vec![3, 1, 2];
+run_strategy(BubbleSort, &amp;mut nums);
+</code></pre>
+<p>动态分发也可以通过 <code>dyn Strategy</code>：</p>
+<pre><code class="language-Rust">let strategy: Box&lt;dyn Strategy&gt; = Box::new(QuickSort);
+strategy.execute(&amp;mut nums);
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-4"><a class="header" href="#62-和传统-oop-写法相比有什么不同-4">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不依赖类和继承，策略由 trait + impl 实现。</li>
+<li>静态分发（泛型）可在编译期确定策略，性能接近内联函数。</li>
+<li>动态分发（dyn Trait）允许运行时选择策略，但有轻微开销。</li>
+<li>不需要上下文类强耦合，Context 可以是简单函数或结构体。</li>
+</ol>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-4"><a class="header" href="#63-rust-中是否有更自然的替代写法-4">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单逻辑，可直接使用闭包替代 trait：</li>
+</ul>
+<pre><code class="language-Rust">let bubble_sort = |data: &amp;mut Vec&lt;i32&gt;| data.sort();
+bubble_sort(&amp;mut nums);
+</code></pre>
+<ul>
+<li>对可组合的策略，闭包或迭代器链可以简化实现。</li>
+<li>Rust 强调编译期安全和零成本抽象，静态分发泛型策略是最自然写法。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-4"><a class="header" href="#7-rust-中涉及的语言特性-4">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+泛型
+dyn Trait
+impl
+闭包（Function-like Strategy）
+所有权和借用
+结构体作为 Context 可选
+</code></pre>
+<p>这些特性分别解决的问题：</p>
+<ul>
+<li>trait：行为抽象</li>
+<li>泛型：静态分发策略</li>
+<li>dyn Trait：动态策略选择</li>
+<li>所有权和借用：安全管理数据访问</li>
+</ul>
+<hr>
+<h2 id="8-性能与工程代价-4"><a class="header" href="#8-性能与工程代价-4">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发策略几乎零成本，编译器会内联执行。</li>
+<li>动态分发策略需要一次虚函数调用，开销略高。</li>
+<li>如果策略链复杂，可能导致闭包嵌套较深，需要注意类型复杂性。</li>
+<li>Rust 的 trait object 和泛型组合让策略模式既安全又高效。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-4"><a class="header" href="#9-典型应用场景-4">9. 典型应用场景</a></h2>
+<pre><code class="language-text">排序算法选择
+支付方式动态选择
+文件压缩方式选择
+验证或规则策略
+数据处理策略（过滤、转换、聚合）
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-4"><a class="header" href="#10-和相似模式的区别-4">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>状态模式</strong>：状态模式关注对象状态变化后的行为不同；策略模式关注算法或行为本身可替换。</li>
+<li><strong>命令模式</strong>：命令模式把操作封装成对象，可以延迟执行；策略模式只提供可替换算法接口。</li>
+<li><strong>模板方法模式</strong>：模板方法固定流程，部分步骤可变；策略模式整个算法可替换。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-4"><a class="header" href="#11-使用该模式的优点-4">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">避免大量 if/else 分支判断
+算法可以独立扩展和修改
+调用方与具体算法解耦
+可组合或动态切换策略
+静态分发策略性能高
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-4"><a class="header" href="#12-使用该模式的代价-4">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">动态策略需要虚函数调用开销
+策略数量过多，可能增加类型复杂性
+对简单算法使用可能显得冗余
+调试闭包组合策略可能稍复杂
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-4"><a class="header" href="#13-什么时候不应该使用-4">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">算法只有一种，没必要抽象
+调用方和算法耦合变化不频繁
+对性能要求极端，需要避免虚函数
+对象行为高度依赖内部状态，可能更适合状态模式
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-4"><a class="header" href="#14-一个简单例子思路-4">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件压缩工具</p>
+<ul>
+<li>支持 zip、gzip、none 三种压缩方式</li>
+<li>调用方只选择策略，无需关心具体实现</li>
+</ul>
+<p><strong>处理流程：</strong></p>
+<pre><code class="language-text">定义 Strategy trait
+为每种压缩算法实现 trait
+调用方持有 trait 对象（泛型或 Box&lt;dyn Strategy&gt;）
+执行压缩操作
+可以动态替换策略
+</code></pre>
+<p>适合练习 Rust 特性：trait、泛型、dyn Trait、闭包、所有权与借用。</p>
+<hr>
+<h2 id="15-总结一句话-4"><a class="header" href="#15-总结一句话-4">15. 总结一句话</a></h2>
+<p>策略模式的本质是：</p>
+<blockquote>
+<p><strong>将可变算法或行为封装起来，调用方依赖抽象而不是具体实现，从而可以在运行时或编译期灵活切换策略。在 Rust 中，trait、泛型和闭包是实现策略模式的核心工具。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="工厂模式"><a class="header" href="#工厂模式">工厂模式</a></h1>
+<h1 id="06_工厂模式-factory-pattern"><a class="header" href="#06_工厂模式-factory-pattern">06_工厂模式 Factory Pattern</a></h1>
+<h2 id="1-基本信息-6"><a class="header" href="#1-基本信息-6">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 工厂模式</p>
+<p><strong>英文名称：</strong> Factory Pattern</p>
+<p><strong>模式类型：</strong> 创建型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + Box<dyn trait="">、泛型、枚举</dyn></p>
+<p>工厂模式的核心是：<strong>将对象创建逻辑封装在独立的“工厂”里，调用方无需知道具体构造过程即可获取对象。</strong></p>
+<p>在 Rust 中，工厂模式不依赖类继承，而是通过 trait、关联函数和泛型实现创建解耦和动态选择。</p>
+<hr>
+<h2 id="2-模式核心思想-5"><a class="header" href="#2-模式核心思想-5">2. 模式核心思想</a></h2>
+<p>工厂模式的核心思想是：</p>
+<blockquote>
+<p><strong>将对象的创建过程封装起来，让调用方通过统一接口获得对象，而不直接依赖对象具体构造。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方只关心“我要一个对象”，不关心“对象怎么生成”。</li>
+<li>工厂负责根据条件创建不同类型的对象或配置对象。</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-5"><a class="header" href="#3-这个模式解决什么问题-5">3. 这个模式解决什么问题</a></h2>
+<p>工厂模式主要解决以下问题：</p>
+<pre><code class="language-text">对象构造逻辑复杂，调用方不想直接 new。
+系统需要生成不同类型对象，但调用方只依赖统一接口。
+对象类型可能变化，调用方不想频繁修改代码。
+对象初始化需要集中管理（配置、缓存、预处理）。
+</code></pre>
+<p>例如：</p>
+<ul>
+<li>日志对象：控制台、文件、远程</li>
+<li>数据库连接：MySQL、PostgreSQL</li>
+<li>网络请求客户端：HTTP、HTTPS、WebSocket</li>
+<li>GUI 控件：不同平台控件实现</li>
+</ul>
+<p>工厂模式让创建逻辑和使用逻辑解耦，便于扩展和维护。</p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-5"><a class="header" href="#4-不使用这个模式会怎样-5">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用工厂模式，可能出现：</p>
+<pre><code class="language-text">调用方直接调用构造函数，耦合具体类型。
+修改对象类型或增加新类型时，需要修改调用方代码。
+构造逻辑散落在多个地方，维护困难。
+多处重复构造类似对象，导致冗余代码。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-5"><a class="header" href="#5-传统面向对象中的实现思路-5">5. 传统面向对象中的实现思路</a></h2>
+<p>在 Java/C++ 等传统 OOP 语言中，工厂模式通常有以下角色：</p>
+<pre><code class="language-text">工厂接口（Factory）：声明创建方法。
+具体工厂类（ConcreteFactory）：实现创建方法。
+产品接口（Product）：声明对象抽象。
+具体产品类（ConcreteProduct）：实现具体对象。
+</code></pre>
+<p>调用方通过工厂接口获取产品对象，而不直接依赖具体构造。</p>
+<p>例如：</p>
+<pre><code class="language-text">Factory
+ ├── createProduct() -&gt; Product
+ConcreteFactory
+ └── createProduct() -&gt; ConcreteProduct
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-5"><a class="header" href="#6-rust-中的实现思路-5">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-5"><a class="header" href="#61-rust-中通常怎么实现-5">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 没有类继承体系，因此工厂模式通常通过以下方式实现：</p>
+<ul>
+<li><strong>关联函数</strong>（new / with_*）创建对象</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct MySqlConnection { url: String }
+
+impl MySqlConnection {
+    fn new(url: &amp;str) -&gt; Self {
+        Self { url: url.to_string() }
+    }
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><strong>trait + Box<dyn trait=""></dyn></strong> 动态工厂</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Database {
+    fn connect(&amp;self);
+}
+
+struct MySql;
+struct Postgres;
+
+impl Database for MySql {
+    fn connect(&amp;self) { println!("MySQL 连接"); }
+}
+
+impl Database for Postgres {
+    fn connect(&amp;self) { println!("Postgres 连接"); }
+}
+
+fn create_database(db_type: &amp;str) -&gt; Box&lt;dyn Database&gt; {
+    match db_type {
+        "mysql" =&gt; Box::new(MySql),
+        "postgres" =&gt; Box::new(Postgres),
+        _ =&gt; panic!("未知数据库类型"),
+    }
+}
+<span class="boring">}</span></code></pre>
+<ul>
+<li><strong>枚举 + match</strong> 创建对象（小型工厂）</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum DatabaseType { MySql, Postgres }
+
+fn create_database2(db_type: DatabaseType) -&gt; Box&lt;dyn Database&gt; {
+    match db_type {
+        DatabaseType::MySql =&gt; Box::new(MySql),
+        DatabaseType::Postgres =&gt; Box::new(Postgres),
+    }
+}
+<span class="boring">}</span></code></pre>
+<h3 id="62-和传统-oop-写法相比有什么不同-5"><a class="header" href="#62-和传统-oop-写法相比有什么不同-5">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>不依赖类继承和接口，trait 和关联函数替代 OOP 工厂接口。</li>
+<li>动态分发使用 <code>Box&lt;dyn Trait&gt;</code> 代替虚函数指针。</li>
+<li>静态分发可以直接使用泛型，性能几乎零开销。</li>
+<li>构造逻辑集中在函数或模块中，不需要创建独立工厂类。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-5"><a class="header" href="#63-rust-中是否有更自然的替代写法-5">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对于简单对象，直接用 <code>struct::new()</code> 或 <code>struct { .. }</code> 即可，无需专门工厂函数。</li>
+<li>对于配置复杂的对象，可用 <strong>构建者模式</strong>（Builder）结合工厂函数生成对象。</li>
+<li>对于需要动态选择类型的对象，使用 trait + Box<dyn trait=""> 是最自然方式。</dyn></li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-5"><a class="header" href="#7-rust-中涉及的语言特性-5">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">struct / impl
+trait
+Box&lt;dyn Trait&gt;
+泛型
+match / enum
+所有权与借用
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-5"><a class="header" href="#8-性能与工程代价-5">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态工厂（泛型 + new）几乎无开销。</li>
+<li>动态工厂（Box<dyn trait="">）需要一次虚函数调用，轻微性能开销。</dyn></li>
+<li>使用枚举 + match 创建对象性能接近静态工厂，且类型安全。</li>
+<li>Rust 不需要手动管理内存或构造对象，避免了 OOP 中可能出现的对象泄漏问题。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-5"><a class="header" href="#9-典型应用场景-5">9. 典型应用场景</a></h2>
+<pre><code class="language-text">数据库客户端创建（MySQL / PostgreSQL / SQLite）
+网络客户端创建（HTTP / HTTPS / WebSocket）
+日志系统创建（Console / File / Remote）
+GUI 控件工厂（不同平台实现）
+游戏角色或道具实例化
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-5"><a class="header" href="#10-和相似模式的区别-5">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>单例模式</strong>：关注全局唯一实例，而工厂模式可以创建任意数量对象。</li>
+<li><strong>原型模式</strong>：通过复制已有对象创建新对象，而工厂模式是通过封装构造逻辑创建对象。</li>
+<li><strong>构建者模式</strong>：分步骤创建复杂对象，工厂模式通常一次性创建。</li>
+<li><strong>享元模式</strong>：共享对象以节省内存，而工厂模式关注对象构造解耦，数量不限。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-5"><a class="header" href="#11-使用该模式的优点-5">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">调用方无需关心对象构造细节
+对象创建逻辑集中，便于维护
+可以灵活选择对象类型
+扩展性好，增加新类型无需修改调用方
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-5"><a class="header" href="#12-使用该模式的代价-5">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">动态分发可能带来轻微性能开销
+工厂函数或模块过多可能增加代码复杂度
+对简单对象可能显得冗余
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-5"><a class="header" href="#13-什么时候不应该使用-5">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">对象创建逻辑简单，直接 new 即可
+不需要动态选择对象类型
+工厂模式可能增加不必要抽象
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-5"><a class="header" href="#14-一个简单例子思路-5">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 创建不同类型的数据库连接</p>
+<ul>
+<li>定义 <code>Database</code> trait</li>
+<li>实现 <code>MySql</code> 和 <code>Postgres</code></li>
+<li>调用方只传入类型字符串或枚举，工厂函数返回对应实例</li>
+<li>可用泛型或 Box<dyn trait=""> 管理返回对象</dyn></li>
+</ul>
+<hr>
+<h2 id="15-总结一句话-5"><a class="header" href="#15-总结一句话-5">15. 总结一句话</a></h2>
+<blockquote>
+<p>工厂模式的本质是：<strong>封装对象创建逻辑，让调用方无需关心具体构造方式，从而实现类型解耦和灵活扩展。在 Rust 中，关联函数、trait + Box<dyn trait=""></dyn></strong> <strong>或枚举 match 是最常用实现方式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="适配器模式"><a class="header" href="#适配器模式">适配器模式</a></h1>
+<h1 id="07_适配器模式-adapter-pattern"><a class="header" href="#07_适配器模式-adapter-pattern">07_适配器模式 Adapter Pattern</a></h1>
+<h2 id="1-基本信息-7"><a class="header" href="#1-基本信息-7">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 适配器模式</p>
+<p><strong>英文名称：</strong> Adapter Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait 实现适配、包装结构体（wrapper）、From/Into trait、Deref trait</p>
+<p>适配器模式的核心是：<strong>将一个接口转换成调用方期望的接口，使原本不兼容的接口能够协同工作。</strong></p>
+<p>在 Rust 中，适配器模式通常通过 <strong>包装结构体 + trait</strong> 实现，或者直接利用标准库的 <code>From/Into</code> trait 做类型转换。</p>
+<hr>
+<h2 id="2-模式核心思想-6"><a class="header" href="#2-模式核心思想-6">2. 模式核心思想</a></h2>
+<p>适配器模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过包装或转换，把不兼容的接口变成调用方可以使用的接口，而无需修改原始类型。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方使用统一接口</li>
+<li>被适配对象不需要修改</li>
+<li>适配器负责转换或适配行为</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-6"><a class="header" href="#3-这个模式解决什么问题-6">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，适配器模式解决以下问题：</p>
+<pre><code class="language-text">系统中存在老旧接口或第三方库接口，与当前调用方接口不兼容。
+新增的模块接口与现有接口不同，需要兼容旧系统。
+调用方无法修改被适配对象的代码。
+希望统一调用接口，减少条件判断或重复包装代码。
+</code></pre>
+<p>例如：</p>
+<ul>
+<li>文件读写接口兼容不同库</li>
+<li>网络客户端统一接口</li>
+<li>外部 API 返回类型不符合内部业务接口</li>
+<li>第三方 crate 提供不同函数签名</li>
+</ul>
+<p>适配器模式可以隐藏接口差异，使系统内部调用一致。</p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-6"><a class="header" href="#4-不使用这个模式会怎样-6">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用适配器模式，可能出现：</p>
+<pre><code class="language-text">调用方需要直接修改或特殊处理老接口。
+系统中出现大量 if/else 判断接口类型。
+逻辑散落，维护成本高。
+添加新类型或库时，调用方需要修改多处代码。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-6"><a class="header" href="#5-传统面向对象中的实现思路-6">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，适配器模式通常有两种形式：</p>
+<ol>
+<li><strong>类适配器</strong>（通过继承）
+<ul>
+<li>Adapter 继承自被适配类，同时实现目标接口。</li>
+</ul>
+</li>
+<li><strong>对象适配器</strong>（通过组合）
+<ul>
+<li>Adapter 包含一个被适配对象，并实现目标接口，调用内部对象的方法并做转换。</li>
+</ul>
+</li>
+</ol>
+<p>结构示意：</p>
+<pre><code class="language-text">Target (调用方期望接口)
+Adapter (实现 Target 接口, 包含 Adaptee)
+Adaptee (原始接口)
+</code></pre>
+<p>调用方只依赖 Target 接口，Adapter 做转换。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-6"><a class="header" href="#6-rust-中的实现思路-6">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-6"><a class="header" href="#61-rust-中通常怎么实现-6">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，适配器模式通常用 <strong>包装结构体 + trait</strong> 来实现。</p>
+<pre class="playground"><code class="language-rust edition2024">// 被适配对象
+struct OldPrinter;
+
+impl OldPrinter {
+    fn print_old(&amp;self, msg: &amp;str) {
+        println!("旧打印机: {}", msg);
+    }
+}
+
+// 目标接口
+trait Printer {
+    fn print(&amp;self, msg: &amp;str);
+}
+
+// 适配器
+struct PrinterAdapter {
+    adaptee: OldPrinter,
+}
+
+impl Printer for PrinterAdapter {
+    fn print(&amp;self, msg: &amp;str) {
+        // 调用旧接口并适配参数
+        self.adaptee.print_old(msg);
+    }
+}
+
+fn main() {
+    let old_printer = OldPrinter;
+    let adapter = PrinterAdapter { adaptee: old_printer };
+    adapter.print("Hello Rust Adapter!");
+}</code></pre>
+<p>另一种方式是利用 <strong>From/Into trait</strong> 做类型转换：</p>
+<pre class="playground"><code class="language-rust edition2024">struct Celsius(f64);
+struct Fahrenheit(f64);
+
+impl From&lt;Fahrenheit&gt; for Celsius {
+    fn from(f: Fahrenheit) -&gt; Self {
+        Celsius((f.0 - 32.0) * 5.0 / 9.0)
+    }
+}
+
+fn main() {
+    let f = Fahrenheit(212.0);
+    let c: Celsius = f.into();
+    println!("212°F = {:.2}°C", c.0);
+}</code></pre>
+<h3 id="62-和传统-oop-写法相比有什么不同-6"><a class="header" href="#62-和传统-oop-写法相比有什么不同-6">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不依赖类继承体系，适配器通过 <strong>组合 + trait</strong> 实现接口适配，而不是继承。</li>
+<li>类型转换可以利用标准库的 <code>From/Into</code> trait，无需显式 Adapter 类。</li>
+<li>Rust 静态类型检查保证调用方接口和适配器接口一致，减少运行时错误。</li>
+<li>不需要虚函数或多态指针，静态分发即可实现零成本适配。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-6"><a class="header" href="#63-rust-中是否有更自然的替代写法-6">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单参数或类型适配，可以直接用 <strong>From/Into</strong> 或结构体更新语法。</li>
+<li>对复杂行为适配，推荐包装结构体 + trait 实现。</li>
+<li>对闭包场景，可以直接传递闭包实现行为替换，减少显式 Adapter 结构体。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-6"><a class="header" href="#7-rust-中涉及的语言特性-6">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+包装结构体（struct + 内部对象）
+From / Into trait
+泛型（可选）
+所有权与借用
+闭包（可选）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-6"><a class="header" href="#8-性能与工程代价-6">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态适配器（包装 + trait）几乎零成本，编译器可内联。</li>
+<li>使用 <code>Box&lt;dyn Trait&gt;</code> 动态分发时会有一次虚函数调用开销。</li>
+<li>From/Into 转换非常轻量，适合类型转换场景。</li>
+<li>包装结构体过多可能增加代码层级，但不会增加运行时开销。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-6"><a class="header" href="#9-典型应用场景-6">9. 典型应用场景</a></h2>
+<pre><code class="language-text">老旧接口与新系统接口不兼容，需要适配
+第三方库返回类型与内部类型不一致
+不同平台或模块的实现差异封装
+类型或参数需要转换以统一接口
+行为或方法调用需要中间适配处理
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-6"><a class="header" href="#10-和相似模式的区别-6">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>装饰器模式</strong>：装饰器模式在原对象上增加功能，不改变接口；适配器模式改变接口使调用方能使用。</li>
+<li><strong>代理模式</strong>：代理模式控制访问或增加逻辑；适配器模式关注接口兼容。</li>
+<li><strong>工厂模式</strong>：工厂模式负责对象创建；适配器模式不创建对象，而是转换已有对象接口。</li>
+<li><strong>策略模式</strong>：策略模式关注可替换算法或行为；适配器模式关注接口兼容和适配。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-6"><a class="header" href="#11-使用该模式的优点-6">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">调用方无需修改即可使用不兼容接口
+可复用现有代码，无需修改老接口
+与 trait 结合可保持类型安全
+支持静态或动态适配
+易于扩展新适配器
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-6"><a class="header" href="#12-使用该模式的代价-6">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">包装层增加代码层级
+动态适配（Box&lt;dyn Trait&gt;）有轻微虚函数开销
+复杂适配逻辑可能增加维护成本
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-6"><a class="header" href="#13-什么时候不应该使用-6">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">原接口已经兼容调用方，无需适配
+适配逻辑过于简单，直接转换即可
+不需要复用现有对象或接口
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-6"><a class="header" href="#14-一个简单例子思路-6">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 老打印机接口与新打印系统不兼容</p>
+<ul>
+<li>老打印机提供 <code>print_old(&amp;str)</code> 方法</li>
+<li>新系统需要 <code>Printer::print(&amp;str)</code> trait 接口</li>
+<li>创建 Adapter 包装老打印机，impl Printer trait</li>
+<li>调用方通过 Adapter 调用统一接口</li>
+</ul>
+<hr>
+<h2 id="15-总结一句话-6"><a class="header" href="#15-总结一句话-6">15. 总结一句话</a></h2>
+<blockquote>
+<p>适配器模式的本质是：<strong>将不兼容的接口转换成调用方期望的接口，使系统可以复用现有对象而无需修改，同时保持类型安全。在 Rust 中，包装结构体 + trait 或 From/Into 是最常用实现方式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="模板方法模式"><a class="header" href="#模板方法模式">模板方法模式</a></h1>
+<h1 id="08_模板方法模式-template-method-pattern"><a class="header" href="#08_模板方法模式-template-method-pattern">08_模板方法模式 Template Method Pattern</a></h1>
+<h2 id="1-基本信息-8"><a class="header" href="#1-基本信息-8">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 模板方法模式</p>
+<p><strong>英文名称：</strong> Template Method Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait 默认方法 + trait 方法调用、结构体 + impl</p>
+<p>模板方法模式的核心是：<strong>在父类或 trait 中定义算法骨架，将部分步骤留给子类或实现者完成，从而保证整体流程不变，同时允许部分步骤可定制。</strong></p>
+<p>在 Rust 中，模板方法模式通常通过 trait 默认方法实现算法骨架，具体步骤由具体实现类型重写。</p>
+<hr>
+<h2 id="2-模式核心思想-7"><a class="header" href="#2-模式核心思想-7">2. 模式核心思想</a></h2>
+<p>模板方法模式的核心思想是：</p>
+<blockquote>
+<p><strong>固定算法流程，允许部分步骤延迟实现或由子类/具体类型定制，从而在保持整体流程稳定的情况下灵活扩展。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>算法总体顺序不可变</li>
+<li>某些步骤可以由不同实现重写</li>
+<li>避免重复实现算法流程</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-7"><a class="header" href="#3-这个模式解决什么问题-7">3. 这个模式解决什么问题</a></h2>
+<p>模板方法模式主要解决以下问题：</p>
+<pre><code class="language-Text">1. 一个算法的整体流程固定，但其中某些步骤可能有多种实现方式。
+2. 避免在每个具体实现中重复编写整体流程。
+3. 保持算法结构一致性，同时允许个性化步骤。
+4. 便于代码扩展和维护。
+</code></pre>
+<p>例如：</p>
+<ul>
+<li>文件处理流程：读取文件 → 解析 → 处理 → 写入</li>
+<li>网络请求流程：建立连接 → 发送请求 → 处理响应 → 关闭连接</li>
+<li>游戏回合流程：开始回合 → 玩家行动 → 敌人行动 → 结束回合</li>
+<li>数据处理流程：预处理 → 转换 → 验证 → 输出</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-7"><a class="header" href="#4-不使用这个模式会怎样-7">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用模板方法模式，可能出现：</p>
+<pre><code class="language-text">1. 每个具体实现都重复写整个流程。
+2. 算法流程不统一，易出错。
+3. 调整流程顺序需要修改多个实现。
+4. 代码可维护性和扩展性下降。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-7"><a class="header" href="#5-传统面向对象中的实现思路-7">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，模板方法模式通常有两个角色：</p>
+<pre><code class="language-text">1. 抽象类（AbstractClass）：定义算法骨架，模板方法固定流程，并提供可重写的抽象方法。
+2. 具体子类（ConcreteClass）：实现或重写抽象步骤。
+</code></pre>
+<p>示意结构：</p>
+<pre><code class="language-text">AbstractClass
+ ├── template_method()  // 模板方法，调用各步骤
+ ├── step1()            // 可选默认实现
+ ├── step2()            // 抽象方法，由子类实现
+ConcreteClass
+ ├── step2()            // 重写抽象方法
+</code></pre>
+<p>调用方只调用 <code>template_method()</code>，流程固定，步骤可自定义。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-7"><a class="header" href="#6-rust-中的实现思路-7">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-7"><a class="header" href="#61-rust-中通常怎么实现-7">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 没有类继承体系，模板方法模式通常用 <strong>trait 默认方法</strong> 实现算法骨架：</p>
+<pre class="playground"><code class="language-rust edition2024">trait FileProcessor {
+    // 模板方法，固定流程
+    fn process(&amp;self) {
+        self.read_file();
+        self.parse();
+        self.handle();
+        self.write_file();
+    }
+
+    // 可重写或抽象的方法
+    fn read_file(&amp;self) { println!("读取默认文件"); }
+    fn parse(&amp;self);
+    fn handle(&amp;self);
+    fn write_file(&amp;self) { println!("写入默认文件"); }
+}
+
+// 具体实现
+struct CsvProcessor;
+
+impl FileProcessor for CsvProcessor {
+    fn parse(&amp;self) { println!("解析 CSV 文件"); }
+    fn handle(&amp;self) { println!("处理 CSV 数据"); }
+}
+
+fn main() {
+    let processor = CsvProcessor;
+    processor.process(); // 调用模板方法
+}</code></pre>
+<h3 id="62-和传统-oop-写法相比有什么不同-7"><a class="header" href="#62-和传统-oop-写法相比有什么不同-7">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用继承体系，而是 trait 默认方法实现算法骨架。</li>
+<li>子类（具体实现类型）通过实现 trait 方法重写部分步骤。</li>
+<li>模板方法本身在 trait 内部定义，调用方直接使用具体对象调用模板方法即可。</li>
+<li>不需要虚函数指针或继承结构，静态分发效率高，类型安全。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-7"><a class="header" href="#63-rust-中是否有更自然的替代写法-7">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单流程，直接组合函数或闭包也可以实现模板方法思想。</li>
+<li>对可复用算法流程，可用 trait 默认方法 + trait object 提供动态分发。</li>
+<li>Rust 的组合优先策略可以在不依赖继承的情况下实现算法骨架。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-7"><a class="header" href="#7-rust-中涉及的语言特性-7">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">1. trait 默认方法
+2. trait 方法重写
+3. impl
+4. 结构体
+5. 所有权和借用
+6. dyn Trait（可选）
+</code></pre>
+<p>这些特性分别解决：</p>
+<ul>
+<li>trait 默认方法 → 定义固定流程</li>
+<li>方法重写 → 定制可变步骤</li>
+<li>impl → 将具体实现与 trait 绑定</li>
+<li>所有权和借用 → 安全管理数据访问</li>
+</ul>
+<hr>
+<h2 id="8-性能与工程代价-7"><a class="header" href="#8-性能与工程代价-7">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发模板方法无额外开销，调用方法会被编译器内联。</li>
+<li>动态分发（dyn Trait）需要一次虚函数调用，开销轻微。</li>
+<li>模板方法模式结构清晰，便于维护，但 trait 默认方法过多可能增加复杂度。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-7"><a class="header" href="#9-典型应用场景-7">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. 文件处理流程（读取 → 解析 → 处理 → 写入）
+2. 网络请求处理流程
+3. 游戏回合或事件流程
+4. 数据处理或 ETL 流程
+5. 批量任务处理的固定算法骨架
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-7"><a class="header" href="#10-和相似模式的区别-7">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式将整个算法或行为替换；模板方法模式固定算法骨架，只替换部分步骤。</li>
+<li><strong>工厂模式</strong>：工厂模式负责对象创建；模板方法模式关注算法流程。</li>
+<li><strong>命令模式</strong>：命令模式封装操作、支持延迟执行；模板方法模式关注固定流程执行。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-7"><a class="header" href="#11-使用该模式的优点-7">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">1. 算法流程统一，保证一致性
+2. 子类或实现者只需重写部分步骤
+3. 减少重复代码，提升可维护性
+4. 可静态或动态分发，类型安全
+5. 易于扩展新步骤或算法变体
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-7"><a class="header" href="#12-使用该模式的代价-7">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">1. 过度拆分步骤可能导致 trait 方法过多
+2. 动态分发有轻微虚函数开销
+3. 对简单流程使用可能显得冗余
+4. 步骤顺序固定，不适合完全灵活的算法变更
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-7"><a class="header" href="#13-什么时候不应该使用-7">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">1. 算法流程简单，无需固定模板
+2. 流程步骤可自由组合，不需要统一骨架
+3. 调用方不需要多种实现，只需单一实现
+4. 动态扩展步骤成本较高或不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-7"><a class="header" href="#14-一个简单例子思路-7">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件处理器模板</p>
+<ul>
+<li>固定流程：读取 → 解析 → 处理 → 写入</li>
+<li>默认方法提供通用实现（读取和写入）</li>
+<li>CSVProcessor 或 JsonProcessor 重写 parse 和 handle 步骤</li>
+<li>调用方直接调用 <code>process()</code> 模板方法</li>
+</ul>
+<p>适合练习 Rust 特性：trait 默认方法、方法重写、impl、静态分发、dyn Trait。</p>
+<hr>
+<h2 id="15-总结一句话-7"><a class="header" href="#15-总结一句话-7">15. 总结一句话</a></h2>
+<blockquote>
+<p>模板方法模式的本质是：<strong>定义算法骨架，固定流程，允许部分步骤由具体类型定制，从而在保持整体流程稳定的前提下实现灵活扩展。在 Rust 中，trait 默认方法和方法重写是实现模板方法的核心工具。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="代理模式"><a class="header" href="#代理模式">代理模式</a></h1>
+<h1 id="09_代理模式-proxy-pattern"><a class="header" href="#09_代理模式-proxy-pattern">09_代理模式 Proxy Pattern</a></h1>
+<h2 id="1-基本信息-9"><a class="header" href="#1-基本信息-9">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 代理模式</p>
+<p><strong>英文名称：</strong> Proxy Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、Box<dyn trait=""></dyn></p>
+<p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
+<p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
+<hr>
+<h2 id="2-模式核心思想-8"><a class="header" href="#2-模式核心思想-8">2. 模式核心思想</a></h2>
+<p>代理模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过代理对象替代原对象进行访问，从而控制访问权限、延迟初始化、增加附加逻辑或保护对象。</strong></p>
+</blockquote>
+<p>代理模式强调：调用方通过统一接口操作对象，但具体操作可能经过代理层处理。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题-8"><a class="header" href="#3-这个模式解决什么问题-8">3. 这个模式解决什么问题</a></h2>
+<p>代理模式主要解决以下问题：</p>
+<pre><code class="language-text">控制对对象的访问，例如权限检查或安全保护
+延迟初始化大对象，提高性能或节省资源
+在访问前后增加额外逻辑，例如日志、缓存或网络请求
+对原对象进行防护，避免直接操作导致错误或破坏
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>虚拟代理：延迟加载大型对象（图片、数据库连接）</li>
+<li>远程代理：通过代理对象调用远程服务</li>
+<li>保护代理：增加访问权限控制</li>
+<li>智能引用代理：在访问对象时增加统计、缓存或日志</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-8"><a class="header" href="#4-不使用这个模式会怎样-8">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用代理模式，可能出现：</p>
+<pre><code class="language-text">调用方直接访问原对象，无法控制访问权限
+对象过早初始化，占用大量资源
+无法在访问过程中增加日志或缓存逻辑
+系统中访问逻辑分散，难以维护
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-8"><a class="header" href="#5-传统面向对象中的实现思路-8">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，代理模式通常有三类角色：</p>
+<pre><code class="language-text">Subject：定义统一接口
+RealSubject：原始对象，实现真实业务逻辑
+Proxy：代理对象，持有 RealSubject，实现 Subject 接口
+</code></pre>
+<p>调用方通过 Proxy 操作对象，Proxy 可以在调用 RealSubject 前后插入逻辑。</p>
+<p>结构示意：</p>
+<pre><code class="language-text">Subject
+ ├── request()
+Proxy
+ ├── real_subject: RealSubject
+ └── request() { pre_action(); real_subject.request(); post_action(); }
+RealSubject
+ └── request() { ...业务逻辑... }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-8"><a class="header" href="#6-rust-中的实现思路-8">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-8"><a class="header" href="#61-rust-中通常怎么实现-8">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，代理模式通常通过 <strong>trait + 包装结构体</strong> 来实现：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义接口
+trait Subject {
+    fn request(&amp;self);
+}
+
+// 原始对象
+struct RealSubject;
+
+impl Subject for RealSubject {
+    fn request(&amp;self) {
+        println!("RealSubject 执行请求");
+    }
+}
+
+// 代理对象
+struct Proxy {
+    real: RealSubject,
+}
+
+impl Subject for Proxy {
+    fn request(&amp;self) {
+        println!("代理前逻辑: 检查或日志");
+        self.real.request();
+        println!("代理后逻辑: 统计或缓存");
+    }
+}
+
+fn main() {
+    let proxy = Proxy { real: RealSubject };
+    proxy.request();
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>Subject</code> trait</li>
+<li>代理对象在调用前后增加逻辑</li>
+<li>原始对象无需修改</li>
+</ul>
+<p>可以用 <code>Box&lt;dyn Subject&gt;</code> 支持动态分发：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let subject: Box&lt;dyn Subject&gt; = Box::new(Proxy { real: RealSubject });
+subject.request();
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-8"><a class="header" href="#62-和传统-oop-写法相比有什么不同-8">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用继承体系，而是 trait + 包装结构体替代接口和代理类。</li>
+<li>静态分发（泛型）可在编译期确定类型，效率高。</li>
+<li>动态分发（Box<dyn subject="">）允许运行时选择代理或真实对象。</dyn></li>
+<li>没有虚函数指针和子类继承复杂性，类型安全。</li>
+</ol>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-8"><a class="header" href="#63-rust-中是否有更自然的替代写法-8">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单访问控制或日志，可以直接使用闭包包装对象方法，无需显式 Proxy 结构体。</li>
+<li>对延迟初始化，可以结合 <code>Option&lt;RealSubject&gt;</code> 或 <code>OnceLock</code> 实现虚拟代理。</li>
+<li>对共享访问，可用 <code>Arc&lt;Mutex&lt;RealSubject&gt;&gt;</code> 管理线程安全的代理。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-8"><a class="header" href="#7-rust-中涉及的语言特性-8">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+包装结构体（struct + 内部对象）
+Box&lt;dyn Trait&gt;（可选）
+所有权和借用
+Option / OnceLock（虚拟代理）
+Arc / Mutex（共享访问或多线程安全）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-8"><a class="header" href="#8-性能与工程代价-8">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发代理无虚函数开销，性能接近直接调用。</li>
+<li>动态分发代理（Box<dyn trait="">）有轻微虚函数调用开销。</dyn></li>
+<li>包装层过多可能增加代码层级，但运行时开销低。</li>
+<li>延迟初始化可以节省资源，但首次访问需要初始化成本。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-8"><a class="header" href="#9-典型应用场景-8">9. 典型应用场景</a></h2>
+<pre><code class="language-text">虚拟代理：延迟加载大型对象（图片、数据库连接）
+远程代理：调用远程服务
+保护代理：权限检查、访问控制
+智能引用代理：统计、缓存、日志
+多线程共享对象访问控制
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-8"><a class="header" href="#10-和相似模式的区别-8">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>装饰器模式</strong>：装饰器增加功能但接口不变；代理模式可控制访问并插入逻辑，接口可能保持或调整。</li>
+<li><strong>适配器模式</strong>：适配器修改接口以兼容调用方；代理模式保留接口一致性，关注访问控制和附加逻辑。</li>
+<li><strong>工厂模式</strong>：工厂模式负责对象创建；代理模式关注访问和控制对象。</li>
+<li><strong>策略模式</strong>：策略模式提供可替换算法；代理模式提供对对象访问的中间控制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-8"><a class="header" href="#11-使用该模式的优点-8">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">调用方不直接访问原对象，增加控制和安全性
+可在调用前后添加逻辑（日志、缓存、权限）
+支持延迟初始化，节省资源
+可与 trait 和动态分发结合实现灵活代理
+原对象无需修改，保持封装
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-8"><a class="header" href="#12-使用该模式的代价-8">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">代理层增加包装结构，增加代码复杂度
+动态分发有轻微性能开销
+过多代理可能导致维护难度增加
+延迟初始化可能增加首次访问延迟
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-8"><a class="header" href="#13-什么时候不应该使用-8">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">原对象简单，无需额外访问控制
+系统不涉及延迟初始化或附加逻辑
+不需要在访问前后增加额外行为
+代理层可能导致代码过度复杂
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-8"><a class="header" href="#14-一个简单例子思路-8">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件打印系统</p>
+<ul>
+<li>原始打印机对象 <code>RealPrinter</code> 提供 <code>print(&amp;str)</code> 方法</li>
+<li>Proxy 对象 <code>PrinterProxy</code> 包装 <code>RealPrinter</code></li>
+<li>代理在打印前检查权限，在打印后记录日志</li>
+<li>调用方只依赖 <code>Printer</code> trait</li>
+</ul>
+<p>适合练习 Rust 特性：</p>
+<pre><code class="language-text">trait + impl
+包装结构体
+Box&lt;dyn Trait&gt; 可选动态分发
+所有权和借用
+</code></pre>
+<hr>
+<h2 id="15-总结一句话-8"><a class="header" href="#15-总结一句话-8">15. 总结一句话</a></h2>
+<blockquote>
+<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="装饰器模式"><a class="header" href="#装饰器模式">装饰器模式</a></h1>
+<h1 id="10_装饰器模式-decorator-pattern"><a class="header" href="#10_装饰器模式-decorator-pattern">10_装饰器模式 Decorator Pattern</a></h1>
+<h2 id="1-基本信息-10"><a class="header" href="#1-基本信息-10">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 装饰器模式</p>
+<p><strong>英文名称：</strong> Decorator Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、Box<dyn trait=""></dyn></p>
+<p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
+<p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
+<hr>
+<h2 id="2-模式核心思想-9"><a class="header" href="#2-模式核心思想-9">2. 模式核心思想</a></h2>
+<p>装饰器模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过包装对象动态扩展功能，而不改变原对象接口或结构，实现功能增强和灵活组合。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>原对象保持不变</li>
+<li>装饰器通过 trait 或包装结构体增强行为</li>
+<li>支持多个装饰器组合，实现功能链式叠加</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-9"><a class="header" href="#3-这个模式解决什么问题-9">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，装饰器模式主要解决以下问题：</p>
+<pre><code class="language-text">1. 希望在不修改原对象代码的情况下增加新功能。
+2. 对象功能可能存在多种组合方式。
+3. 避免创建大量子类来覆盖不同功能组合。
+4. 支持动态组合功能，而不是静态继承。
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>IO 流处理：BufferedReader → Compression → Encryption</li>
+<li>日志系统：日志记录 + 格式化 + 过滤</li>
+<li>GUI 控件：基本控件 + 滚动条 + 边框 + 背景装饰</li>
+<li>网络请求：请求对象 + 缓存 + 重试 + 日志</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-9"><a class="header" href="#4-不使用这个模式会怎样-9">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用装饰器模式，可能出现：</p>
+<pre><code class="language-text">1. 为每种功能组合创建大量子类，类爆炸。
+2. 调用方无法灵活组合功能。
+3. 原对象被修改或扩展，违反开闭原则。
+4. 功能增强逻辑分散，维护困难。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-9"><a class="header" href="#5-传统面向对象中的实现思路-9">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，装饰器模式通常有三个角色：</p>
+<pre><code class="language-text">1. Component（抽象组件）：定义对象接口
+2. ConcreteComponent（具体对象）：实现 Component 接口
+3. Decorator（装饰器）：持有 Component 对象，实现 Component 接口，并增强行为
+</code></pre>
+<p>调用方可以把一个对象多次包裹装饰器，实现功能叠加。</p>
+<p>示意结构：</p>
+<pre><code class="language-text">Component
+ └── operation()
+ConcreteComponent
+ └── operation() { ... }
+Decorator
+ ├── component: Box&lt;dyn Component&gt;
+ └── operation() { pre_action(); component.operation(); post_action(); }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-9"><a class="header" href="#6-rust-中的实现思路-9">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-9"><a class="header" href="#61-rust-中通常怎么实现-9">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong>：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义接口
+trait Printer {
+    fn print(&amp;self, msg: &amp;str);
+}
+
+// 原始对象
+struct RealPrinter;
+
+impl Printer for RealPrinter {
+    fn print(&amp;self, msg: &amp;str) {
+        println!("打印内容: {}", msg);
+    }
+}
+
+// 装饰器
+struct LoggingPrinter {
+    inner: Box&lt;dyn Printer&gt;,
+}
+
+impl Printer for LoggingPrinter {
+    fn print(&amp;self, msg: &amp;str) {
+        println!("[LOG] 即将打印");
+        self.inner.print(msg);
+        println!("[LOG] 打印完成");
+    }
+}
+
+fn main() {
+    let printer = RealPrinter;
+    let logging_printer = LoggingPrinter { inner: Box::new(printer) };
+    logging_printer.print("Hello Rust Decorator!");
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>Printer</code> trait</li>
+<li>装饰器在调用前后增加日志</li>
+<li>可以多层嵌套装饰器，形成功能链</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-9"><a class="header" href="#62-和传统-oop-写法相比有什么不同-9">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不依赖类继承体系，使用 trait + 包装结构体替代接口和装饰器类。</li>
+<li>静态分发可用泛型，动态分发用 <code>Box&lt;dyn Trait&gt;</code>。</li>
+<li>无需虚函数指针，类型安全，零成本抽象。</li>
+<li>装饰器组合通过包装链实现，而不是继承多层类。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-9"><a class="header" href="#63-rust-中是否有更自然的替代写法-9">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单功能增强，可以直接用闭包或函数组合替代显式装饰器结构体。</li>
+<li>对组合对象可以使用泛型包装多个 trait 对象，实现链式组合。</li>
+<li>对只读或不可变对象，可用引用或 Rc 包装，减少内存开销。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-9"><a class="header" href="#7-rust-中涉及的语言特性-9">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">1. trait
+2. impl
+3. 包装结构体
+4. Box&lt;dyn Trait&gt;（动态分发）
+5. 泛型（静态分发）
+6. 所有权和借用
+7. 闭包（可选）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-9"><a class="header" href="#8-性能与工程代价-9">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发装饰器性能几乎无开销，编译器可内联。</li>
+<li>动态分发装饰器有一次虚函数调用开销。</li>
+<li>多层包装结构可能增加调用链深度，但运行时内存开销低。</li>
+<li>Rust 静态类型和所有权保证安全，不需要额外同步或垃圾回收。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-9"><a class="header" href="#9-典型应用场景-9">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. IO 流处理：加缓冲、加压缩、加加密
+2. 日志系统：日志记录 + 格式化 + 过滤
+3. GUI 控件：控件 + 滚动条 + 边框 + 背景
+4. 网络请求：请求对象 + 缓存 + 重试 + 日志
+5. 测试环境中动态增强对象行为
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-9"><a class="header" href="#10-和相似模式的区别-9">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>代理模式</strong>：代理关注访问控制或延迟加载；装饰器关注增强功能。</li>
+<li><strong>适配器模式</strong>：适配器修改接口使调用方兼容；装饰器保持接口一致，增强行为。</li>
+<li><strong>工厂模式</strong>：工厂负责创建对象；装饰器负责增强对象功能。</li>
+<li><strong>策略模式</strong>：策略替换整个算法或行为；装饰器增强原对象功能，不改变整体行为骨架。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-9"><a class="header" href="#11-使用该模式的优点-9">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">1. 可以在不修改原对象的情况下增强功能
+2. 支持多层装饰和功能组合
+3. 调用方无需关心装饰逻辑
+4. 静态或动态分发可灵活选择
+5. 易于扩展新的装饰器
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-9"><a class="header" href="#12-使用该模式的代价-9">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">1. 包装层增加代码层级
+2. 动态分发有虚函数调用开销
+3. 链式装饰器过多可能增加调试难度
+4. 过度使用可能导致理解成本提高
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-9"><a class="header" href="#13-什么时候不应该使用-9">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">1. 原对象功能简单，不需要增强
+2. 不需要多层组合功能
+3. 功能增强逻辑可以直接在原对象实现
+4. 动态组合不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-9"><a class="header" href="#14-一个简单例子思路-9">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件打印系统</p>
+<ul>
+<li>原始打印机对象 <code>RealPrinter</code> 提供 <code>print(&amp;str)</code> 方法</li>
+<li>装饰器 <code>LoggingPrinter</code> 增加日志</li>
+<li>可以再包装 <code>EncryptionPrinter</code> 增加加密</li>
+<li>调用方只依赖 <code>Printer</code> trait，通过多层包装实现链式增强</li>
+</ul>
+<p>练习 Rust 特性：trait、包装结构体、Box<dyn trait="">、泛型、闭包、所有权和借用。</dyn></p>
+<hr>
+<h2 id="15-总结一句话-9"><a class="header" href="#15-总结一句话-9">15. 总结一句话</a></h2>
+<blockquote>
+<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="外观模式"><a class="header" href="#外观模式">外观模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
