@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -186,7 +186,7 @@
 <p><strong>中文名称：</strong> 代理模式</p>
 <p><strong>英文名称：</strong> Proxy Pattern</p>
 <p><strong>模式类型：</strong> 结构型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、Box<dyn trait=""></dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
 <p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
 <hr>
@@ -287,7 +287,7 @@ subject.request();
 <ol>
 <li>Rust 不使用继承体系，而是 trait + 包装结构体替代接口和代理类。</li>
 <li>静态分发（泛型）可在编译期确定类型，效率高。</li>
-<li>动态分发（Box<dyn subject="">）允许运行时选择代理或真实对象。</dyn></li>
+<li>动态分发（<code>Box&lt;dyn Subject&gt;</code>）允许运行时选择代理或真实对象。</li>
 <li>没有虚函数指针和子类继承复杂性，类型安全。</li>
 </ol>
 <hr>
@@ -311,7 +311,7 @@ Arc / Mutex（共享访问或多线程安全）
 <h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发代理无虚函数开销，性能接近直接调用。</li>
-<li>动态分发代理（Box<dyn trait="">）有轻微虚函数调用开销。</dyn></li>
+<li>动态分发代理（<code>Box&lt;dyn Trait&gt;</code>）有轻微虚函数调用开销。</li>
 <li>包装层过多可能增加代码层级，但运行时开销低。</li>
 <li>延迟初始化可以节省资源，但首次访问需要初始化成本。</li>
 </ul>
@@ -371,7 +371,7 @@ Box&lt;dyn Trait&gt; 可选动态分发
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>
-<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
+<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
 </blockquote>
 
                     </main>

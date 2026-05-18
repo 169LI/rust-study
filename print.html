@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-c3e67eef.js"></script>
+        <script src="toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -6650,6 +6650,650 @@ TokenTree / TokenStream
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="并发与异步"><a class="header" href="#并发与异步">并发与异步</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="概要"><a class="header" href="#概要">概要</a></h1>
+<h2 id="目录"><a class="header" href="#目录">目录</a></h2>
+<p>1、代码风格(建议要遵守的)</p>
+<ul>
+<li><a href="Rust学习/1命名规则.html">命名规则</a></li>
+<li><a href="Rust学习/2格式.html">格式</a></li>
+<li><a href="Rust学习/3注释.html">注释</a></li>
+</ul>
+<p>2、编码实践(实际语法中如何规范化来提升代码可读性)</p>
+<p><a href="https://rust-coding-guidelines.github.io/rust-coding-guidelines-zh/safe-guides/coding_practice.html">这里并没有做筛选，可以直接看人家写的</a></p>
+<p>3、自动格式化</p>
+<p><a href="https://rust-lang.github.io/rustfmt/?version=master&amp;search=">rustfmtRust</a></p>
+<p>自动格式化工具，能够将用户编写的代码自动调整为一种标准风格。最新版的 <code>Rust</code> 中已经包含了该工具。详细使用参见命令手册：<code>rustfmt --help</code></p>
+<h2 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h2>
+<p>[1] <a href="https://rust-coding-guidelines.github.io/rust-coding-guidelines-zh/overview.html">Rust编码规范(中文) V1.0 beta. 张汉东（开源项目）</a></p>
+<p>[2] <a href="https://rust-lang.github.io/api-guidelines/about.html">Rust API Guidelines. 官方</a></p>
+<p>[3] <a href="https://deterministic.space/elegant-apis-in-rust.html">Elegant Library APIs in Rust. Pascal Hertleif.et 2016-07-21 最近一次更新2020-06-01</a></p>
+<p>[4] <a href="https://blog.csdn.net/ZCShouCSDN/article/details/140838969">项目管理、文档规范、编码规范. ZC·Shou.2025-04-23</a></p>
+<p>[5] <a href="https://blog.csdn.net/silenceallat/article/details/138411619">了解如何使用rustfmt工具自动格式化Rust代码. 多多的编程笔记.2024-05-03</a></p>
+<p>[6] <a href="https://github.com/rust-lang/rustfmt">Rustfmt使用说明.官方</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="命名"><a class="header" href="#命名">命名</a></h1>
+<h2 id="使用统一的命名风格"><a class="header" href="#使用统一的命名风格">使用统一的命名风格</a></h2>
+<p>Rust 倾向于在“类型”级的结构中使用大驼峰（<code>UpperCamelCase</code>） 命名风格，在 “变量、值（实例）、函数名”等结构中使用蛇形（<code>snake_case</code>）命名风格。</p>
+<p>下面是汇总信息：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Item</th><th>规范</th></tr>
+</thead>
+<tbody>
+<tr><td>包（Crates）</td><td><a href="https://github.com/rust-lang/api-guidelines/issues/29">通常使用 snake_case</a></td></tr>
+<tr><td>模块（Modules）</td><td><code>snake_case</code></td></tr>
+<tr><td>类型（Types）</td><td><code>UpperCamelCase</code></td></tr>
+<tr><td>特质（Traits）</td><td><code>UpperCamelCase</code></td></tr>
+<tr><td>枚举体（Enum variants）</td><td><code>UpperCamelCase</code></td></tr>
+<tr><td>函数（Functions）</td><td><code>snake_case</code></td></tr>
+<tr><td>方法（Methods）</td><td><code>snake_case</code></td></tr>
+<tr><td>通用构造函数（General constructors）</td><td><code>new</code> 或者 <code>with_more_details</code></td></tr>
+<tr><td>转换构造函数（Conversion constructors）</td><td><code>from_some_other_type</code></td></tr>
+<tr><td>宏（Macros）</td><td><code>snake_case!</code></td></tr>
+<tr><td>本地变量（Local variables）</td><td><code>snake_case</code></td></tr>
+<tr><td>静态变量（Statics）</td><td><code>SCREAMING_SNAKE_CASE</code></td></tr>
+<tr><td>常量（Constants）</td><td><code>SCREAMING_SNAKE_CASE</code></td></tr>
+<tr><td>类型参数（Type parameters）</td><td>简明的 <code>UpperCamelCase</code> ，通常使用单个大写字母： <code>T</code></td></tr>
+<tr><td>生命周期（Lifetimes）</td><td>简短的 <code>lowercase</code>，通常使用单个小写字母 <code>'a</code>, <code>'de</code>, <code>'src</code>，尽量保持语义</td></tr>
+<tr><td>特性（Features）</td><td><code>snake_case</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>说明 :</p>
+<ol>
+<li>在 <code>UpperCamelCase</code>情况下，由首字母缩写组成的缩略语和 复合词的缩写，算作单个词。比如，应该使用 <code>Uuid</code> 而非 <code>UUID</code>，使用 <code>Usize</code> 而不是 <code>USize</code>，或者是 <code>Stdin</code> 而不是 <code>StdIn</code>。</li>
+<li>在<code>snake_case</code>中，首字母缩写和缩略词是小写的 <code>is_xid_start</code>。</li>
+<li>在 <code>snake_case</code> 或者 <code>SCREAMING_SNAKE_CASE</code> 情况下，每个词不应该由单个字母组成——除非这个字母是最后一个词。比如，使用 <code>btree_map</code> 而不使用 <code>b_tree_map</code>，使用 <code>PI_2</code> 而不使用 <code>PI2</code> 。</li>
+</ol>
+<p>关于包命名：</p>
+<ul>
+<li>由于历史问题，包名有两种形式 <code>snake_case</code> 或 <code>kebab-case</code> ，但实际在代码中需要引入包名的时候，Rust 只能识别 <code>snake_case</code>，也会自动将 <code>kebab-case</code> 识别为  <code>kebab_case</code>。所以建议使用<code>snake_case</code>。</li>
+<li>Crate 的名称通常不应该使用 <code>-rs</code> 或者 <code>-rust</code> 作为后缀或者前缀。但是有些情况下，比如是其他语言移植的同名 Rust 实现，则可以使用 <code>-rs</code> 后缀来表明这是 Rust 实现的版本。</li>
+</ul>
+<p>Rust 命名规范在 <a href="https://github.com/rust-lang/rfcs/blob/master/text/0430-finalizing-naming-conventions.md">RFC 0430</a> 中有也描述。</p>
+<p><strong>Lint 检测</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>lint name</th><th><code>Clippy</code> 可检测</th><th><code>Rustc</code> 可检测</th><th><code>Lint Group</code></th></tr>
+</thead>
+<tbody>
+<tr><td><a href="https://doc.rust-lang.org/rustc/lints/listing/warn-by-default.html#non-camel-case-types"><code>Rustc: non_camel_case_types</code></a></td><td>no</td><td>yes</td><td>Style</td></tr>
+<tr><td><a href="https://doc.rust-lang.org/rustc/lints/listing/warn-by-default.html#non-snake-case"><code>Rustc: non_snake_case</code></a></td><td>no</td><td>yes</td><td>Style</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="类型转换函数命名需要遵循所有权语义"><a class="header" href="#类型转换函数命名需要遵循所有权语义">类型转换函数命名需要遵循所有权语义</a></h2>
+<p>进行特定类型转换的方法名应该包含以下前缀：</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>名称前缀</th><th>内存代价</th><th>所有权</th></tr>
+</thead>
+<tbody>
+<tr><td><code>as_</code></td><td>无代价</td><td>borrowed -&gt; borrowed</td></tr>
+<tr><td><code>to_</code></td><td>代价昂贵</td><td>borrowed -&gt; borrowed<br>borrowed -&gt; owned (非 Copy 类型)<br>owned -&gt; owned (Copy 类型)</td></tr>
+<tr><td><code>into_</code></td><td>看情况</td><td>owned -&gt; owned (非 Copy 类型)</td></tr>
+</tbody>
+</table>
+</div>
+<p>以 <code>as_</code> 和 <code>into_</code> 作为前缀的类型转换通常是 <em>降低抽象层次</em> ，要么是查看背后的数据 ( <code>as</code> ) ，要么是分解 (<code>deconstructe</code>) 背后的数据 ( <code>into</code> ) 。
+相对来说，以 <code>to_</code> 作为前缀的类型转换处于同一个抽象层次，但是底层会做更多工作，比如多了内存拷贝等操作。</p>
+<p>当一个类型用更高级别的语义 (higher-level semantics) 封装 (wraps) 一个内部类型时，应该使用 <code>into_inner()</code> 方法名来取出被封装类型的值。</p>
+<h2 id="同一个crate中标识符的命名规则应该使用统一的词序"><a class="header" href="#同一个crate中标识符的命名规则应该使用统一的词序">同一个crate中标识符的命名规则应该使用统一的词序</a></h2>
+<p>具体选择什么样的词序并不重要，但务必要保证同一个 <code>crate</code> 内词序的一致性。 若提供与标准库中相似功能的东西时，也要与标准库名称的词性顺序一致.</p>
+<p>拿错误类型来举个例子：</p>
+<p>当crate中类型名称都按照 <code>动词-宾语-error</code> 这样的顺序来命名错误类型时，如果要增加新的错误类型，则也需要按同样的词序来增加。</p>
+<pre><code class="language-Rust">struct AddrParseError {}// 不符合：与标准库错误类型词序 "`动-宾-Error`"  不一致，应该为 `ParseAddrError`
+struct ParseAddrError{} // 符合： 与标准库错误类型一致
+</code></pre>
+<h2 id="标识符命名应该符合阅读习惯"><a class="header" href="#标识符命名应该符合阅读习惯">标识符命名应该符合阅读习惯</a></h2>
+<p>一些好的实践包括但不限于：</p>
+<ul>
+<li>使用正确的英文单词并符合英文语法，不要使用拼音</li>
+<li>仅使用常见或领域内通用的单词缩写</li>
+<li>布尔型变量或函数避免使用否定形式，双重否定不利于理解</li>
+<li>不要使用<code>Unicode</code> 标识符</li>
+</ul>
+<h2 id="作用域越大命名越精确反之应简短"><a class="header" href="#作用域越大命名越精确反之应简短">作用域越大命名越精确，反之应简短</a></h2>
+<ul>
+<li>对于全局函数、全局变量、宏、类型名、枚举命名，应当精确描述并全局唯一。</li>
+<li>对于函数局部变量，或者结构体、枚举中的成员变量，在其命名能够准确表达含义的前提下，应该尽量简短，避免冗余信息重复描述。</li>
+</ul>
+<pre><code class="language-Rust">// 不符合：描述不精确
+static GET_COUNT: i32 = 42;
+// 不符合：信息冗余
+enum WebEvent {
+    PageLoadEvent,
+    PageUnloadEvent,
+    KeyPressEvent(char),
+    PasteEvent(String),
+    ClickEvent { x: i64, y: i64 },
+}
+// 不符合：信息冗余
+type MaskSize = u16;
+pub struct HeaderMap {
+mask: MaskSize,
+}
+</code></pre>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 符合
+static MAX_THREAD_COUNT: i32 = 42;
+// 符合： 上下文信息已经知道它是 Event
+enum WebEvent {
+    PageLoad,
+    PageUnload,
+    KeyPress(char),
+    Paste(String),
+    Click { x: i64, y: i64 },
+}
+// 符合：在使用它的地方自然就知道是描述谁的大小
+type Size = u16;
+pub struct HeaderMap {
+    mask: Size,
+}
+<span class="boring">}</span></code></pre>
+<h2 id="避免使用语言内置保留字关键字内置类型和trait等特殊名称"><a class="header" href="#避免使用语言内置保留字关键字内置类型和trait等特殊名称">避免使用语言内置保留字、关键字、内置类型和trait等特殊名称</a></h2>
+<p>命名必须要避免使用语言内置的<strong>保留字、关键字、内置类型和trait等特殊名称</strong>。</p>
+<p>具体可以参考<a href="https://doc.rust-lang.org/stable/reference/keywords.html">The Rust Reference-Keywords</a>。</p>
+<h2 id="避免在变量的命名中添加类型标识"><a class="header" href="#避免在变量的命名中添加类型标识">避免在变量的命名中添加类型标识</a></h2>
+<p>因为<code>Rust</code>语言类型系统崇尚显式的哲学，所以不需要在变量命名中也添加关于类型的标识。</p>
+<pre><code class="language-Rust">#![allow(unused)]
+fn main() {
+    let account_bytes: Vec&lt;u8&gt; = read_some_input();   // 不符合：account 的类型很清楚，没必要在命名中加 `_bytes`
+    let account_str = String::from_utf8(account_bytes)?; // 不符合：account 的类型很清楚，没必要在命名中加 `_str`
+    let account: Account = account_str.parse()?;   // 不符合：account 的类型很清楚，没必要在命名中加 `_str`
+}
+</code></pre>
+<h2 id="定义全局静态变量时需加前缀g_以便和常量有所区分"><a class="header" href="#定义全局静态变量时需加前缀g_以便和常量有所区分">定义全局静态变量时需加前缀G_以便和常量有所区分</a></h2>
+<p>为了提升代码可读性和可维护性，有必要将常量的命名和全局静态变量加以区分。所以在定义全局静态变量时，需要以前缀G_命名。</p>
+<pre><code class="language-Rust">// 不符合： 无法通过命名直接区分常量和静态变量
+static EVENT: [i32;5]=[1,2,3,4,5];
+const MAGIC_NUM: i32 = 65 ;
+
+// 符合： 通过前缀区分常量和静态变量   
+static G_EVENT: [i32;5]=[1,2,3,4,5];
+const MAGIC_NUM: i32 = 65 ;
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="格式"><a class="header" href="#格式">格式</a></h1>
+<h2 id="使用-rustfmt-进行自动格式化代码"><a class="header" href="#使用-rustfmt-进行自动格式化代码">使用 <code>rustfmt</code> 进行自动格式化代码</a></h2>
+<p>应该总是在项目中添加 <code>rustfmt.toml</code> 或<code> .rustfmt.toml</code>文件。即使它是空文件，这是向潜在的合作者表明你希望代码是自动格式化的。</p>
+<p>在特殊的情况下，可以通过条件编译属性 <code>#[rustfmt::skip] </code>来关闭自动格式化。</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    #[rustfmt::skip] 
+    let got = vec![
+            0x00, 0x05, 0x01, 0x00,
+            0xff,
+            0x00,
+            0x00,
+    
+            0x01, 0x0c, 0x02, 0x00,
+            0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef,
+            b'd', b'e', b'a', b'd', b'b', b'e', b'e', b'f', 0x00,
+            0x00,
+    
+            127, 0x06, 0x03, 0x00,
+            0x01, 0x02,
+            b'a', b'b', b'c', b'd', 0x00,
+            b'1', b'2', b'3', b'4', 0x00,
+            0x00,
+    ];
+}</code></pre>
+<h2 id="行间距最大宽度空一行"><a class="header" href="#行间距最大宽度空一行">行间距最大宽度空一行</a></h2>
+<p>代码行之间，最小间隔 0 行，最大间隔1行。</p>
+<h2 id="存在多个标识符时应该保持块状block缩进"><a class="header" href="#存在多个标识符时应该保持块状block缩进">存在多个标识符时应该保持块状（Block）缩进</a></h2>
+<p>当在表达式或语言项定义中出现多个标识符，则应该让其保持块状风格缩进。</p>
+<p>数组：</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    // 符合： 缩进四个空格
+    let lorem = vec![
+        "ipsum",
+        "dolor",
+        "sit",
+        "amet",
+        "consectetur",
+        "adipiscing",
+        "elit",
+    ];
+}</code></pre>
+<p>流程控制:</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    // 符合： 缩进四个空格
+    if lorem_ipsum
+        &amp;&amp; dolor_sit // 注意：没有和前一行 `lorem_ipsum`对齐
+        &amp;&amp; amet_consectetur
+        &amp;&amp; lorem_sit
+        &amp;&amp; dolor_consectetur
+        &amp;&amp; amet_ipsum
+        &amp;&amp; lorem_consectetur
+    {
+        // ...
+    }
+}</code></pre>
+<p>函数参数:</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    fn lorem() {}
+    fn lorem(ipsum: usize) {}
+    // 符合： 缩进四个空格
+    fn lorem(
+        ipsum: usize,
+        dolor: usize,
+        sit: usize,
+        amet: usize,
+        consectetur: usize,
+        adipiscing: usize,
+        elit: usize,
+    ) {
+        // body
+    }
+}</code></pre>
+<p>函数调用:</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    // 符合： 缩进四个空格
+    lorem(
+        "lorem",
+        "ipsum",
+        "dolor",
+        "sit",
+        "amet",
+        "consectetur",
+        "adipiscing",
+        "elit",
+    );
+}</code></pre>
+<p>泛型:</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 符合： 缩进四个空格
+fn lorem&lt;
+    Ipsum,
+    Dolor,
+    Sit,
+    Amet,
+    Adipiscing,
+    Consectetur,
+    Elit,
+&gt;(
+    ipsum: Ipsum,
+    dolor: Dolor,
+    sit: Sit,
+    amet: Amet,
+    adipiscing: Adipiscing,
+    consectetur: Consectetur,
+    elit: Elit,
+) -&gt; T {
+    // body
+}
+<span class="boring">}</span></code></pre>
+<p>结构体:</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    let lorem = Lorem {
+        ipsum: dolor,
+        sit: amet,
+    };
+}</code></pre>
+<h2 id="当有多行表达式操作时操作符应该置于行首"><a class="header" href="#当有多行表达式操作时操作符应该置于行首">当有多行表达式操作时，操作符应该置于行首</a></h2>
+<p>当有多行表达式操作时，操作符应该置于行首，这样有利于代码的可读性和可维护性。</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    // 不符合
+    let or = foofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoo ||
+        barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar;
+    // 不符合
+    let sum = 123456789012345678901234567890 +
+        123456789012345678901234567890 +
+        123456789012345678901234567890;
+    // 不符合
+    let range = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..
+        bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+    
+    // 符合
+    let or = foofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoo
+        || barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar;
+
+    // 符合
+    let sum = 123456789012345678901234567890
+        + 123456789012345678901234567890
+        + 123456789012345678901234567890;
+    // 符合
+    let range = aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        ..bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb;
+}
+</code></pre>
+<h2 id="枚举变体和结构体字段都应左对齐"><a class="header" href="#枚举变体和结构体字段都应左对齐">枚举变体和结构体字段都应左对齐</a></h2>
+<p>对于自定义了判别式的枚举体，和有字段的结构体而言，默认只需要左对齐就可以。</p>
+<pre class="playground"><code class="language-rust edition2024">
+#![allow(unused)]
+fn main() {
+// 符合: 无论变体长度多长，都左对齐
+enum Bar {
+    A = 0,
+    Bb = 1,
+    RandomLongVariantGoesHere = 10,
+    Ccc = 71,
+}
+// 符合
+enum Bar {
+    VeryLongVariantNameHereA = 0,
+    VeryLongVariantNameHereBb = 1,
+    VeryLongVariantNameHereCcc = 2,
+}
+}</code></pre>
+<h2 id="函数参数超过五个或导入模块个数超过四个需换行"><a class="header" href="#函数参数超过五个或导入模块个数超过四个需换行">函数参数超过五个或导入模块个数超过四个需换行</a></h2>
+<ul>
+<li>五个以内函数参数可以置于一行，超过五个则使用「块」状缩进</li>
+<li>导入模块每行超过四个，则换行</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">
+fn main() {
+trait Lorem {
+    fn lorem(ipsum: Ipsum, dolor: Dolor, sit: Sit, amet: Amet, consectetur: Consectetur);
+
+    fn lorem(ipsum: Ipsum, dolor: Dolor, sit: Sit, amet: Amet) {
+        // body
+    }
+
+    // 符合
+    fn lorem(
+        ipsum: Ipsum,
+        dolor: Dolor,
+        sit: Sit,
+        amet: Amet,
+        consectetur: Consectetur,
+        adipiscing: Adipiscing,
+        elit: Elit,
+    );
+
+    // 符合
+    fn lorem(
+        ipsum: Ipsum,
+        dolor: Dolor,
+        sit: Sit,
+        amet: Amet,
+        consectetur: Consectetur,
+        adipiscing: Adipiscing,
+        elit: Elit,
+    ) {
+        // body
+    }
+}
+
+use foo::{xxxxxxxxxxxxxxxxxx, yyyyyyyyyyyyyyyyyy, zzzzzzzzzzzzzzzzzz};
+
+// 符合
+use foo::{
+    aaaaaaaaaaaaaaaaaa, bbbbbbbbbbbbbbbbbb, cccccccccccccccccc, dddddddddddddddddd,
+    eeeeeeeeeeeeeeeeee,
+};
+}</code></pre>
+<h2 id="不同的场景使用不同的空格风格"><a class="header" href="#不同的场景使用不同的空格风格">不同的场景，使用不同的空格风格</a></h2>
+<ul>
+<li>在冒号之后添加空格，在冒号之前不要加空格</li>
+<li>在范围（range）操作符（..和..=）前后不要使用空格</li>
+<li>在+或=操作符前后要加空格</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+// 符合
+fn lorem&lt;T: Eq&gt;(t: T) {
+    let lorem: Dolor = Lorem {
+        ipsum: dolor,
+        sit: amet,
+    };
+}
+
+// 符合
+fn lorem&lt;T: Eq&gt;(t: T) {
+    let lorem: Dolor = Lorem {
+        ipsum: dolor,
+        sit: amet,
+    };
+}
+
+// 符合
+let lorem = 0..10;
+let ipsum = 0..=10;
+}</code></pre>
+<h2 id="match-分支应该具有良好的可读性"><a class="header" href="#match-分支应该具有良好的可读性">match 分支应该具有良好的可读性</a></h2>
+<ul>
+<li>当match分支右侧代码体太长无法和=&gt;置于同一行需要使用块(block)来包裹</li>
+<li>在match分支左侧匹配表达式前不要增加管道符(|)</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    match lorem {
+        // 符合
+        ipsum =&gt; { 
+            foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo(x)
+        }
+        dolor =&gt; println!("{}", sit),
+        // 符合
+        sit =&gt; foo(
+            "foooooooooooooooooooooooo",
+            "baaaaaaaaaaaaaaaaaaaaaaaarr",
+            "baaaaaaaaaaaaaaaaaaaazzzzzzzzzzzzz",
+            "qqqqqqqqquuuuuuuuuuuuuuuuuuuuuuuuuuxxx",
+        ),
+    }
+}
+fn foo() {
+
+    match foo {
+        // 符合
+        "foo" | "bar" =&gt; {}
+        "baz"
+        | "something relatively long"
+        | "something really really really realllllllllllllly long" =&gt; println!("x"),
+        "qux" =&gt; println!("y"),
+        _ =&gt; {}
+    }
+}
+</code></pre>
+<h2 id="导入模块分组应该具有良好的可读性"><a class="header" href="#导入模块分组应该具有良好的可读性">导入模块分组应该具有良好的可读性</a></h2>
+<ul>
+<li>导入同一模块的类型，应该置于同一个块内</li>
+<li>模块导入应该按以下规则进行分组：
+<ul>
+<li>导入来自 std、core 和 alloc的模块需要置于前面</li>
+<li>导入来自 第三方库的模块 应该置于中间</li>
+<li>导入来自本地 self、super和crate前缀的模块，置于后面</li>
+</ul>
+</li>
+<li>分组内使用字典序进行排序</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">
+#![allow(unused)]
+fn main() {
+    // 符合
+    use foo::{
+        a, b,
+        b::{f, g},
+        c,
+        d::e,
+    };
+    use qux::{h, i};
+    
+    // 符合
+    use alloc::alloc::Layout;
+    use core::f32;
+    use std::sync::Arc;
+
+    use broker::database::PooledConnection;
+    use chrono::Utc;
+    use juniper::{FieldError, FieldResult};
+    use uuid::Uuid;
+
+    use super::schema::{Context, Payload};
+    use super::update::convert_publish_payload;
+    use crate::models::Event;
+}</code></pre>
+<h2 id="声明宏分支应该具有良好的可读性"><a class="header" href="#声明宏分支应该具有良好的可读性">声明宏分支应该具有良好的可读性</a></h2>
+<ul>
+<li>在声明宏中，模式匹配分支（=&gt; 左侧）应该使用紧凑格式（format_macro_matchers=true）。</li>
+<li>而分支代码体（=&gt; 右侧） 使用宽松格式。</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+// 当 `format_macro_matchers=true` 且 `format_macro_bodies=true`
+macro_rules! foo {
+    // 符合：匹配分支紧凑格式， `$a:ident` 和 `$b:ty` 各自配对
+    ($a:ident : $b:ty) =&gt; {
+        $a(42): $b; // 在代码体内，则宽松一点
+    };
+    // 符合
+    ($a:ident $b:ident $c:ident) =&gt; {
+        $a = $b + $c;
+    };
+}
+}</code></pre>
+<h2 id="具名结构体字段初始化时不要省略字段名"><a class="header" href="#具名结构体字段初始化时不要省略字段名">具名结构体字段初始化时不要省略字段名</a></h2>
+<ul>
+<li>省略字段名的时候需要注意变量名和字段名保持一致</li>
+<li>变量名和字段名不一致的情况下，不要省略字段名</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">
+struct Foo {
+    a: u32,
+    y: u32,
+    z: u32,
+}
+
+fn main() {
+    let x = 1;
+    let y = 2;
+    let z = 3;
+    // 符合
+    let a = Foo { a: x, y: y, z: z };
+}</code></pre>
+<h2 id="extern-外部函数需要显式指定-c-abi"><a class="header" href="#extern-外部函数需要显式指定-c-abi">extern 外部函数需要显式指定 C-ABI</a></h2>
+<ul>
+<li>当使用 <code>extern</code> 指定外部函数时，建议显式指定<code> C-ABI</code>。</li>
+<li>虽然 <code>extern</code> 不指定的话默认就是 <code>C-ABI</code>，但是 <code>Rust </code>语言显式指定是一种约定俗成。</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">
+#![allow(unused)]
+fn main() {
+// 符合
+extern "C" {
+    pub static lorem: c_int;
+}
+
+extern "Rust" {
+    type MyType;
+    fn f(&amp;self) -&gt; usize;
+}
+}</code></pre>
+<h2 id="不要将派生宏中多个不相关的特质合并为同一行"><a class="header" href="#不要将派生宏中多个不相关的特质合并为同一行">不要将派生宏中多个不相关的特质合并为同一行</a></h2>
+<ul>
+<li>不要将派生宏（<code>Derive</code>）中多个特质（<code>trait</code>）合并为同一行，这样可以增加代码可读性，明确语义。</li>
+<li>说明： <code>rustfmt</code> 并不会识别哪些特质相关，所以需要开发者手工指定好。</li>
+</ul>
+<pre class="playground"><code class="language-rust edition2024">#![allow(unused)]
+fn main() {
+// 符合
+    #[derive(Eq, PartialEq)]
+    #[derive(Debug)]
+    #[derive(Copy, Clone)]
+    pub enum Foo {}
+}</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="注释"><a class="header" href="#注释">注释</a></h1>
+<h2 id="代码能做到自注释文档要干练简洁"><a class="header" href="#代码能做到自注释文档要干练简洁">代码能做到自注释，文档要干练简洁</a></h2>
+<ul>
+<li>代码能够做到自注释，避免冗余的普通代码注释。</li>
+</ul>
+<p>注释固然很重要, 但最好的代码应当本身就是文档。有意义的类型名、函数名和变量名, 要远胜过要用注释解释的含糊不清的名字。当有意义的类型名、函数名和变量名还不能表达完整的语义时，再使用注释。</p>
+<p>不要描述显而易见的现象, 永远不要用自然语言翻译代码作为注释。</p>
+<ul>
+<li>文档注释要干练简洁：</li>
+</ul>
+<p>文档注释中内容用语应该尽量简短精干，不宜篇幅过长。请确保你的代码注释良好并且易于他人理解，好的注释能够传达上下文关系和代码目的。</p>
+<p>注释内容始终围绕两个关键点来构建：</p>
+<p>What : 用于阐述代码为了什么而实现。</p>
+<p>how : 用于阐述代码如何去使用。</p>
+<p>注释和文档注释使用的自然语言要保持一致。</p>
+<p>Rust 项目文档应该始终基于 rustdoc 工具来构建，rustdoc 支持 Markdown 格式，为了使得文档更加美观易读，文档注释应该使用 Markdown 格式。</p>
+<p>模块级文档</p>
+<pre><code class="language-text">//! # The Rust core allocation and collections library
+//!
+//! This library provides smart pointers and collections for managing
+//! heap-allocated values.
+//!
+//! This library, like libcore, normally doesn’t need to be used directly
+//! since its contents are re-exported in the [`std` crate](../std/index.html).
+//! Crates that use the `#![no_std]` attribute however will typically
+//! not depend on `std`, so they’d use this crate instead.
+//!
+//! ## Boxed values
+//!
+//! The [`Box`] type is a smart pointer type. There can only be one owner of a
+//! [`Box`], and the owner can decide to mutate the contents, which live on the
+//! heap.
+</code></pre>
+<p>普通文档注释示例</p>
+<pre><code class="language-markdown">#![allow(unused)]
+/// Constructs a new, empty `Vec&lt;T&gt;`.
+///
+/// The vector will not allocate until elements are pushed onto it.
+///
+/// # Examples
+///
+/// ```
+/// # #![allow(unused_mut)]
+/// let mut vec: Vec&lt;i32&gt; = Vec::new();
+/// ```
+#[inline]
+#[rustc_const_stable(feature = "const_vec_new", since = "1.39.0")]
+#[stable(feature = "rust1", since = "1.0.0")]
+pub const fn new() -&gt; Self {
+    Vec { buf: RawVec::NEW, len: 0 }
+}
+</code></pre>
+<h2 id="使用行注释而避免使用块注释"><a class="header" href="#使用行注释而避免使用块注释">使用行注释而避免使用块注释</a></h2>
+<p>尽量使用行注释（// 或 ///），而非块注释。这是Rust社区的约定俗成。</p>
+<p>对于文档注释，仅在编写模块级文档时使用 //!，在其他情况使用 ///更好。</p>
+<p>说明： #![doc] 和 #[doc] 对于简化文档注释有特殊作用，没有必要通过 rustfmt 将其强制转化为 //! 或 /// 。</p>
+<h2 id="文件头注释包含版权说明"><a class="header" href="#文件头注释包含版权说明">文件头注释包含版权说明</a></h2>
+<p>文件头（即，模块级）注释应先包含版权说明。如果文件头注释需要增加其他内容，可以在版权说明下面补充。</p>
+<p>可以包括：</p>
+<ul>
+<li>文件功能说明。</li>
+<li>作者。</li>
+<li>创建日期 和 最后修改日期。</li>
+<li>注意事项。</li>
+<li>开源许可证(比如, Apache 2.0, BSD, LGPL, GPL)。</li>
+<li>其他。</li>
+</ul>
+<h2 id="在注释中使用-fixme-和-todo-来帮助任务协作"><a class="header" href="#在注释中使用-fixme-和-todo-来帮助任务协作">在注释中使用 FIXME 和 TODO 来帮助任务协作</a></h2>
+<p>通过在注释中开启 FIXME 和 TODO 可以方便协作。正式发布版本可以不做此类标注。</p>
+<h2 id="在公开的返回result类型的函数文档中增加-error-注释"><a class="header" href="#在公开的返回result类型的函数文档中增加-error-注释">在公开的返回Result类型的函数文档中增加 Error 注释</a></h2>
+<p>在公开（pub）的返回Result类型的函数文档中，建议增加 # Error 注释来解释什么场景下该函数会返回什么样的错误类型，方便用户处理错误。</p>
+<pre><code class="language-markdown">fn main() {
+    use std::io;
+    // 符合：增加了规范的 Errors 文档注释
+    /// # Errors
+    ///
+    /// Will return `Err` if `filename` does not exist or the user does not have
+    /// permission to read it.
+    pub fn read(filename: String) -&gt; io::Result&lt;String&gt; {
+        unimplemented!();
+    }
+}
+</code></pre>
+<h2 id="如果公开的api在某些情况下会发生panic则相应文档中需增加-panic-注释"><a class="header" href="#如果公开的api在某些情况下会发生panic则相应文档中需增加-panic-注释">如果公开的API在某些情况下会发生Panic，则相应文档中需增加 Panic 注释</a></h2>
+<p>在公开（pub）函数文档中，建议增加 # Panic 注释来解释该函数在什么条件下会 Panic，便于使用者进行预处理。</p>
+<pre><code class="language-markdown">    // 符合：增加了规范的 Panic 注释
+    /// # Panics
+    ///
+    /// Will panic if y is 0
+    pub fn divide_by(x: i32, y: i32) -&gt; i32 {
+        if y == 0 {
+            panic!("Cannot divide by 0")
+        } else {
+            x / y
+        }
+    }
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="进阶std"><a class="header" href="#进阶std">进阶std</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="conversion"><a class="header" href="#conversion">Conversion</a></h1>
@@ -9628,7 +10272,7 @@ impl
 <p><strong>中文名称：</strong> 工厂模式</p>
 <p><strong>英文名称：</strong> Factory Pattern</p>
 <p><strong>模式类型：</strong> 创建型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + Box<dyn trait="">、泛型、枚举</dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + <code>Box&lt;dyn Trait&gt;</code>、泛型、枚举</p>
 <p>工厂模式的核心是：<strong>将对象创建逻辑封装在独立的“工厂”里，调用方无需知道具体构造过程即可获取对象。</strong></p>
 <p>在 Rust 中，工厂模式不依赖类继承，而是通过 trait、关联函数和泛型实现创建解耦和动态选择。</p>
 <hr>
@@ -9699,7 +10343,7 @@ impl MySqlConnection {
 }
 <span class="boring">}</span></code></pre>
 <ul>
-<li><strong>trait + Box<dyn trait=""></dyn></strong> 动态工厂</li>
+<li><strong>trait + <code>Box&lt;dyn Trait&gt;</code></strong> 动态工厂</li>
 </ul>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -9751,7 +10395,7 @@ fn create_database2(db_type: DatabaseType) -&gt; Box&lt;dyn Database&gt; {
 <ul>
 <li>对于简单对象，直接用 <code>struct::new()</code> 或 <code>struct { .. }</code> 即可，无需专门工厂函数。</li>
 <li>对于配置复杂的对象，可用 <strong>构建者模式</strong>（Builder）结合工厂函数生成对象。</li>
-<li>对于需要动态选择类型的对象，使用 trait + Box<dyn trait=""> 是最自然方式。</dyn></li>
+<li>对于需要动态选择类型的对象，使用 trait + <code>Box&lt;dyn Trait&gt;</code> 是最自然方式。</li>
 </ul>
 <hr>
 <h2 id="7-rust-中涉及的语言特性-5"><a class="header" href="#7-rust-中涉及的语言特性-5">7. Rust 中涉及的语言特性</a></h2>
@@ -9766,7 +10410,7 @@ match / enum
 <h2 id="8-性能与工程代价-5"><a class="header" href="#8-性能与工程代价-5">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态工厂（泛型 + new）几乎无开销。</li>
-<li>动态工厂（Box<dyn trait="">）需要一次虚函数调用，轻微性能开销。</dyn></li>
+<li>动态工厂（<code>Box&lt;dyn Trait&gt;</code>）需要一次虚函数调用，轻微性能开销。</li>
 <li>使用枚举 + match 创建对象性能接近静态工厂，且类型安全。</li>
 <li>Rust 不需要手动管理内存或构造对象，避免了 OOP 中可能出现的对象泄漏问题。</li>
 </ul>
@@ -9812,12 +10456,12 @@ GUI 控件工厂（不同平台实现）
 <li>定义 <code>Database</code> trait</li>
 <li>实现 <code>MySql</code> 和 <code>Postgres</code></li>
 <li>调用方只传入类型字符串或枚举，工厂函数返回对应实例</li>
-<li>可用泛型或 Box<dyn trait=""> 管理返回对象</dyn></li>
+<li>可用泛型或 <code>Box&lt;dyn Trait&gt;</code> 管理返回对象</li>
 </ul>
 <hr>
 <h2 id="15-总结一句话-5"><a class="header" href="#15-总结一句话-5">15. 总结一句话</a></h2>
 <blockquote>
-<p>工厂模式的本质是：<strong>封装对象创建逻辑，让调用方无需关心具体构造方式，从而实现类型解耦和灵活扩展。在 Rust 中，关联函数、trait + Box<dyn trait=""></dyn></strong> <strong>或枚举 match 是最常用实现方式。</strong></p>
+<p>工厂模式的本质是：<strong>封装对象创建逻辑，让调用方无需关心具体构造方式，从而实现类型解耦和灵活扩展。在 Rust 中，关联函数、trait + <code>Box&lt;dyn Trait&gt;</code></strong> <strong>或枚举 match 是最常用实现方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="07_适配器模式-adapter-pattern"><a class="header" href="#07_适配器模式-adapter-pattern">07_适配器模式 Adapter Pattern</a></h1>
@@ -10201,7 +10845,7 @@ fn main() {
 <p><strong>中文名称：</strong> 代理模式</p>
 <p><strong>英文名称：</strong> Proxy Pattern</p>
 <p><strong>模式类型：</strong> 结构型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、Box<dyn trait=""></dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
 <p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
 <hr>
@@ -10302,7 +10946,7 @@ subject.request();
 <ol>
 <li>Rust 不使用继承体系，而是 trait + 包装结构体替代接口和代理类。</li>
 <li>静态分发（泛型）可在编译期确定类型，效率高。</li>
-<li>动态分发（Box<dyn subject="">）允许运行时选择代理或真实对象。</dyn></li>
+<li>动态分发（<code>Box&lt;dyn Subject&gt;</code>）允许运行时选择代理或真实对象。</li>
 <li>没有虚函数指针和子类继承复杂性，类型安全。</li>
 </ol>
 <hr>
@@ -10326,7 +10970,7 @@ Arc / Mutex（共享访问或多线程安全）
 <h2 id="8-性能与工程代价-8"><a class="header" href="#8-性能与工程代价-8">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发代理无虚函数开销，性能接近直接调用。</li>
-<li>动态分发代理（Box<dyn trait="">）有轻微虚函数调用开销。</dyn></li>
+<li>动态分发代理（<code>Box&lt;dyn Trait&gt;</code>）有轻微虚函数调用开销。</li>
 <li>包装层过多可能增加代码层级，但运行时开销低。</li>
 <li>延迟初始化可以节省资源，但首次访问需要初始化成本。</li>
 </ul>
@@ -10386,7 +11030,7 @@ Box&lt;dyn Trait&gt; 可选动态分发
 <hr>
 <h2 id="15-总结一句话-8"><a class="header" href="#15-总结一句话-8">15. 总结一句话</a></h2>
 <blockquote>
-<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
+<p>代理模式的本质是：<strong>通过代理对象控制对原对象的访问，在访问前后增加逻辑或延迟初始化。在 Rust 中，通过 trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或 Arc/Mutex 实现安全、高效的代理。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="10_装饰器模式-decorator-pattern"><a class="header" href="#10_装饰器模式-decorator-pattern">10_装饰器模式 Decorator Pattern</a></h1>
@@ -10394,7 +11038,7 @@ Box&lt;dyn Trait&gt; 可选动态分发
 <p><strong>中文名称：</strong> 装饰器模式</p>
 <p><strong>英文名称：</strong> Decorator Pattern</p>
 <p><strong>模式类型：</strong> 结构型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、Box<dyn trait=""></dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
 <p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
 <hr>
@@ -10452,7 +11096,7 @@ Decorator
 <hr>
 <h2 id="6-rust-中的实现思路-9"><a class="header" href="#6-rust-中的实现思路-9">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现-9"><a class="header" href="#61-rust-中通常怎么实现-9">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong>：</p>
+<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong>：</p>
 <pre class="playground"><code class="language-rust edition2024">// 定义接口
 trait Printer {
     fn print(&amp;self, msg: &amp;str);
@@ -10569,11 +11213,11 @@ fn main() {
 <li>可以再包装 <code>EncryptionPrinter</code> 增加加密</li>
 <li>调用方只依赖 <code>Printer</code> trait，通过多层包装实现链式增强</li>
 </ul>
-<p>练习 Rust 特性：trait、包装结构体、Box<dyn trait="">、泛型、闭包、所有权和借用。</dyn></p>
+<p>练习 Rust 特性：trait、包装结构体、<code>Box&lt;dyn Trait&gt;</code>、泛型、闭包、所有权和借用。</p>
 <hr>
 <h2 id="15-总结一句话-9"><a class="header" href="#15-总结一句话-9">15. 总结一句话</a></h2>
 <blockquote>
-<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
+<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="11_外观模式-facade-pattern"><a class="header" href="#11_外观模式-facade-pattern">11_外观模式 Facade Pattern</a></h1>
@@ -10760,14 +11404,12 @@ fn main() {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="命令模式"><a class="header" href="#命令模式">命令模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<p>好的，下面按照统一模板，为你生成 <strong>12_观察者模式 Observer Pattern</strong> 的笔记示范版。重点突出 Rust 的实现方式、与传统 OOP 对比、性能及应用场景。</p>
-<hr>
 <h1 id="12_观察者模式-observer-pattern"><a class="header" href="#12_观察者模式-observer-pattern">12_观察者模式 Observer Pattern</a></h1>
 <h2 id="1-基本信息-12"><a class="header" href="#1-基本信息-12">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 观察者模式</p>
 <p><strong>英文名称：</strong> Observer Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、Vec&lt;Box<dyn observer="">&gt;、channel、闭包</dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、<code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code>、<code>channel</code>、闭包</p>
 <p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
 <hr>
 <h2 id="2-模式核心思想-11"><a class="header" href="#2-模式核心思想-11">2. 模式核心思想</a></h2>
@@ -10824,7 +11466,7 @@ Observer
 <hr>
 <h2 id="6-rust-中的实现思路-11"><a class="header" href="#6-rust-中的实现思路-11">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现-11"><a class="header" href="#61-rust-中通常怎么实现-11">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，观察者模式常用 <strong>trait + Vec&lt;Box<dyn observer="">&gt;</dyn></strong> 实现：</p>
+<p>在 Rust 中，观察者模式常用 <strong>trait + <code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust edition2024">// 定义观察者 trait
 trait Observer {
     fn update(&amp;self, msg: &amp;str);
@@ -10872,14 +11514,14 @@ fn main() {
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同-11"><a class="header" href="#62-和传统-oop-写法相比有什么不同-11">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
-<li>Rust 不使用类继承体系，而是 trait + Box<dyn observer=""> 实现多态。</dyn></li>
+<li>Rust 不使用类继承体系，而是 trait + <code>Box&lt;dyn Observer&gt;</code> 实现多态。</li>
 <li>所有权和借用机制保证安全，避免悬挂指针或内存泄漏。</li>
 <li>可以通过泛型或闭包实现静态分发，提高性能。</li>
-<li>多线程场景下可结合 Arc&lt;Mutex&lt;&gt;&gt; 或 channel，实现线程安全的事件通知。</li>
+<li>多线程场景下可结合 <code>Arc&lt;Mutex&lt;&gt;&gt;</code> 或 <code>channel</code>，实现线程安全的事件通知。</li>
 </ol>
 <h3 id="63-rust-中是否有更自然的替代写法-11"><a class="header" href="#63-rust-中是否有更自然的替代写法-11">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
-<li>对单线程简单通知，可以直接使用 <strong>Vec&lt;&amp;dyn Observer&gt;</strong> 避免堆分配。</li>
+<li>对单线程简单通知，可以直接使用 <strong><code>Vec&lt;&amp; Observer&gt;</code></strong> 避免堆分配。</li>
 <li>对异步或跨线程通知，可用 <strong>channel</strong>，让 Subject 发送事件到观察者。</li>
 <li>对简单场景，也可用闭包数组代替 trait 对象，减少动态分发开销。</li>
 </ul>
@@ -10897,8 +11539,8 @@ channel（可选，异步通知）
 <h2 id="8-性能与工程代价-11"><a class="header" href="#8-性能与工程代价-11">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型 Observer）性能高，编译期内联</li>
-<li>Box<dyn observer=""> 有虚函数调用开销，但方便动态注册观察者</dyn></li>
-<li>channel 异步通知开销依赖消息队列和线程</li>
+<li><code>Box&lt;dyn Observer&gt;</code> 有虚函数调用开销，但方便动态注册观察者</li>
+<li><code>channel</code> 异步通知开销依赖消息队列和线程</li>
 <li>多观察者数量大时，遍历通知可能增加 CPU 消耗</li>
 <li>Rust 静态类型和借用检查保证访问安全，无运行时内存泄漏</li>
 </ul>
@@ -10950,11 +11592,11 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <li>Sensor 温度变化 → 调用 notify_all() 通知观察者</li>
 <li>Observer 通过 trait 方法 update() 接收通知</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Vec、Arc/Mutex（多线程）、channel（异步通知）。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Vec</code>、<code>Arc/Mutex</code>（多线程）、<code>channel</code>（异步通知）。</p>
 <hr>
 <h2 id="15-总结一句话-11"><a class="header" href="#15-总结一句话-11">15. 总结一句话</a></h2>
 <blockquote>
-<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 channel 是最常用实现方式。</strong></p>
+<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或<code>channel</code> 是最常用实现方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="13_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#13_责任链模式-chain-of-responsibility-pattern">13_责任链模式 Chain of Responsibility Pattern</a></h1>
@@ -11024,7 +11666,7 @@ ConcreteHandler
 <hr>
 <h2 id="6-rust-中的实现思路-12"><a class="header" href="#6-rust-中的实现思路-12">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现-12"><a class="header" href="#61-rust-中通常怎么实现-12">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong> 实现：</p>
+<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust id=&quot;a6t9jh&quot; edition2024">// 请求处理接口
 trait Handler {
     fn handle(&amp;self, request: &amp;str);
@@ -11071,13 +11713,13 @@ fn main() {
 <li>调用方只发送请求</li>
 <li>每个处理者独立判断是否能处理请求</li>
 <li>链条可动态组合</li>
-<li>可通过 Box<dyn handler=""> 支持动态分发，也可用泛型实现静态分发</dyn></li>
+<li>可通过 <code>Box&lt;dyn Handler&gt;</code> 支持动态分发，也可用泛型实现静态分发</li>
 </ul>
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同-12"><a class="header" href="#62-和传统-oop-写法相比有什么不同-12">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
 <li>Rust 没有类继承，使用 trait + Box/Arc 实现多态。</li>
-<li>静态分发可使用泛型，动态分发使用 Box<dyn handler="">。</dyn></li>
+<li>静态分发可使用泛型，动态分发使用 <code>Box&lt;dyn Handler&gt;</code>。</li>
 <li>所有权机制保证链条引用安全，无悬挂指针。</li>
 <li>不依赖虚函数或继承体系，类型安全，零成本抽象。</li>
 </ol>
@@ -11101,7 +11743,7 @@ fn main() {
 <h2 id="8-性能与工程代价-12"><a class="header" href="#8-性能与工程代价-12">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型）性能高，调用可内联</li>
-<li>动态分发（Box<dyn trait="">）有一次虚函数调用开销</dyn></li>
+<li>动态分发（<code>Box&lt;dyn Trait&gt;</code>）可能有一次虚函数调用开销</li>
 <li>链条长度过长可能增加栈调用开销，但通常可忽略</li>
 <li>多线程异步链条增加 channel 或锁开销</li>
 <li>Rust 所有权机制保证内存安全，无运行时 GC</li>
@@ -11153,7 +11795,7 @@ fn main() {
 <li>请求沿链传递，每个 Handler 判断是否处理</li>
 <li>调用方发送请求，无需知道具体 Handler</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Option 链条、Arc/Mutex（多线程）、闭包链。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Option</code>、<code>Arc/Mutex</code>（多线程）、闭包链。</p>
 <hr>
 <h2 id="15-总结一句话-12"><a class="header" href="#15-总结一句话-12">15. 总结一句话</a></h2>
 <blockquote>
@@ -11279,14 +11921,14 @@ impl ColleagueB {
 <span class="boring">}</span></code></pre>
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同-13"><a class="header" href="#62-和传统-oop-写法相比有什么不同-13">6.2 和传统 OOP 写法相比有什么不同</a></h3>
-<p>Rust 不依赖类继承体系，trait + Rc/Arc/RefCell/Mutex 替代中介者接口和对象引用。
+<p>Rust 不依赖类继承体系，<code>trait + Rc/Arc/RefCell/Mutex</code> 替代中介者接口和对象引用。
 静态类型保证对象安全，避免空引用或悬挂指针。
 多线程场景可通过 channel 或 Arc/Mutex 安全通信。
-动态分发可通过 Box<dyn mediator=""> 或 Arc<dyn mediator=""> 实现灵活中介。</dyn></dyn></p>
+动态分发可通过 <code>Box&lt;dyn Mediator&gt; </code>或 <code>Arc&lt;dyn Mediator&gt;</code> 实现灵活中介。</p>
 <h3 id="63-rust-中是否有更自然的替代写法-13"><a class="header" href="#63-rust-中是否有更自然的替代写法-13">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
-<li>单线程简单场景可直接用 <strong>Rc&lt;RefCell&lt;&gt;&gt;</strong> 管理对象，调用 trait 方法协调。</li>
-<li>异步或跨线程场景可用 <strong>channel</strong> 做事件总线，实现解耦。</li>
+<li>单线程简单场景可直接用 <strong><code>Rc&lt;RefCell&lt;&gt;&gt;</code></strong> 管理对象，调用 trait 方法协调。</li>
+<li>异步或跨线程场景可用 <strong>ch`annel</strong> 做事件总线，实现解耦。</li>
 <li>对简单事件流，也可用闭包数组代替 trait 对象。</li>
 </ul>
 <hr>
@@ -11303,7 +11945,7 @@ channel（异步事件）
 <h2 id="8-性能与工程代价-13"><a class="header" href="#8-性能与工程代价-13">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发中介者性能接近直接方法调用</li>
-<li>Box<dyn trait=""> 或 channel 动态分发增加一次虚函数或消息开销</dyn></li>
+<li><code>Box&lt;dyn Trait&gt;</code> 或 <code>channel</code> 动态分发增加一次虚函数或消息开销</li>
 <li>多线程异步实现增加同步或锁开销</li>
 <li>链条或事件订阅过多可能增加 CPU 消耗</li>
 <li>Rust 的所有权检查保证内存安全，无 GC 开销</li>
@@ -11356,7 +11998,7 @@ channel（异步事件）
 <li>Mediator 协调 TextBox 和 List 行为</li>
 <li>调用方直接操作 Mediator，无需知道控件内部逻辑</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</p>
 <hr>
 <h2 id="15-总结一句话-13"><a class="header" href="#15-总结一句话-13">15. 总结一句话</a></h2>
 <blockquote>

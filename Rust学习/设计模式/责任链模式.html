@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -248,7 +248,7 @@ ConcreteHandler
 <hr>
 <h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong> 实现：</p>
+<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust id=&quot;a6t9jh&quot; edition2024">// 请求处理接口
 trait Handler {
     fn handle(&amp;self, request: &amp;str);
@@ -295,13 +295,13 @@ fn main() {
 <li>调用方只发送请求</li>
 <li>每个处理者独立判断是否能处理请求</li>
 <li>链条可动态组合</li>
-<li>可通过 Box<dyn handler=""> 支持动态分发，也可用泛型实现静态分发</dyn></li>
+<li>可通过 <code>Box&lt;dyn Handler&gt;</code> 支持动态分发，也可用泛型实现静态分发</li>
 </ul>
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
 <li>Rust 没有类继承，使用 trait + Box/Arc 实现多态。</li>
-<li>静态分发可使用泛型，动态分发使用 Box<dyn handler="">。</dyn></li>
+<li>静态分发可使用泛型，动态分发使用 <code>Box&lt;dyn Handler&gt;</code>。</li>
 <li>所有权机制保证链条引用安全，无悬挂指针。</li>
 <li>不依赖虚函数或继承体系，类型安全，零成本抽象。</li>
 </ol>
@@ -325,7 +325,7 @@ fn main() {
 <h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型）性能高，调用可内联</li>
-<li>动态分发（Box<dyn trait="">）有一次虚函数调用开销</dyn></li>
+<li>动态分发（<code>Box&lt;dyn Trait&gt;</code>）可能有一次虚函数调用开销</li>
 <li>链条长度过长可能增加栈调用开销，但通常可忽略</li>
 <li>多线程异步链条增加 channel 或锁开销</li>
 <li>Rust 所有权机制保证内存安全，无运行时 GC</li>
@@ -377,7 +377,7 @@ fn main() {
 <li>请求沿链传递，每个 Handler 判断是否处理</li>
 <li>调用方发送请求，无需知道具体 Handler</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Option 链条、Arc/Mutex（多线程）、闭包链。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Option</code>、<code>Arc/Mutex</code>（多线程）、闭包链。</p>
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>

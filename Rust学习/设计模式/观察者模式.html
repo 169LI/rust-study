@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,14 +181,12 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <p>好的，下面按照统一模板，为你生成 <strong>12_观察者模式 Observer Pattern</strong> 的笔记示范版。重点突出 Rust 的实现方式、与传统 OOP 对比、性能及应用场景。</p>
-<hr>
-<h1 id="12_观察者模式-observer-pattern"><a class="header" href="#12_观察者模式-observer-pattern">12_观察者模式 Observer Pattern</a></h1>
+                        <h1 id="12_观察者模式-observer-pattern"><a class="header" href="#12_观察者模式-observer-pattern">12_观察者模式 Observer Pattern</a></h1>
 <h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 观察者模式</p>
 <p><strong>英文名称：</strong> Observer Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、Vec&lt;Box<dyn observer="">&gt;、channel、闭包</dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、<code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code>、<code>channel</code>、闭包</p>
 <p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
 <hr>
 <h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
@@ -245,7 +243,7 @@ Observer
 <hr>
 <h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，观察者模式常用 <strong>trait + Vec&lt;Box<dyn observer="">&gt;</dyn></strong> 实现：</p>
+<p>在 Rust 中，观察者模式常用 <strong>trait + <code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust edition2024">// 定义观察者 trait
 trait Observer {
     fn update(&amp;self, msg: &amp;str);
@@ -293,14 +291,14 @@ fn main() {
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
-<li>Rust 不使用类继承体系，而是 trait + Box<dyn observer=""> 实现多态。</dyn></li>
+<li>Rust 不使用类继承体系，而是 trait + <code>Box&lt;dyn Observer&gt;</code> 实现多态。</li>
 <li>所有权和借用机制保证安全，避免悬挂指针或内存泄漏。</li>
 <li>可以通过泛型或闭包实现静态分发，提高性能。</li>
-<li>多线程场景下可结合 Arc&lt;Mutex&lt;&gt;&gt; 或 channel，实现线程安全的事件通知。</li>
+<li>多线程场景下可结合 <code>Arc&lt;Mutex&lt;&gt;&gt;</code> 或 <code>channel</code>，实现线程安全的事件通知。</li>
 </ol>
 <h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
-<li>对单线程简单通知，可以直接使用 <strong>Vec&lt;&amp;dyn Observer&gt;</strong> 避免堆分配。</li>
+<li>对单线程简单通知，可以直接使用 <strong><code>Vec&lt;&amp; Observer&gt;</code></strong> 避免堆分配。</li>
 <li>对异步或跨线程通知，可用 <strong>channel</strong>，让 Subject 发送事件到观察者。</li>
 <li>对简单场景，也可用闭包数组代替 trait 对象，减少动态分发开销。</li>
 </ul>
@@ -318,8 +316,8 @@ channel（可选，异步通知）
 <h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型 Observer）性能高，编译期内联</li>
-<li>Box<dyn observer=""> 有虚函数调用开销，但方便动态注册观察者</dyn></li>
-<li>channel 异步通知开销依赖消息队列和线程</li>
+<li><code>Box&lt;dyn Observer&gt;</code> 有虚函数调用开销，但方便动态注册观察者</li>
+<li><code>channel</code> 异步通知开销依赖消息队列和线程</li>
 <li>多观察者数量大时，遍历通知可能增加 CPU 消耗</li>
 <li>Rust 静态类型和借用检查保证访问安全，无运行时内存泄漏</li>
 </ul>
@@ -371,11 +369,11 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <li>Sensor 温度变化 → 调用 notify_all() 通知观察者</li>
 <li>Observer 通过 trait 方法 update() 接收通知</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Vec、Arc/Mutex（多线程）、channel（异步通知）。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Vec</code>、<code>Arc/Mutex</code>（多线程）、<code>channel</code>（异步通知）。</p>
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>
-<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 channel 是最常用实现方式。</strong></p>
+<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或<code>channel</code> 是最常用实现方式。</strong></p>
 </blockquote>
 
                     </main>

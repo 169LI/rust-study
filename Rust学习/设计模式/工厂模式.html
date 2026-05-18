@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -186,7 +186,7 @@
 <p><strong>中文名称：</strong> 工厂模式</p>
 <p><strong>英文名称：</strong> Factory Pattern</p>
 <p><strong>模式类型：</strong> 创建型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + Box<dyn trait="">、泛型、枚举</dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + <code>Box&lt;dyn Trait&gt;</code>、泛型、枚举</p>
 <p>工厂模式的核心是：<strong>将对象创建逻辑封装在独立的“工厂”里，调用方无需知道具体构造过程即可获取对象。</strong></p>
 <p>在 Rust 中，工厂模式不依赖类继承，而是通过 trait、关联函数和泛型实现创建解耦和动态选择。</p>
 <hr>
@@ -257,7 +257,7 @@ impl MySqlConnection {
 }
 <span class="boring">}</span></code></pre>
 <ul>
-<li><strong>trait + Box<dyn trait=""></dyn></strong> 动态工厂</li>
+<li><strong>trait + <code>Box&lt;dyn Trait&gt;</code></strong> 动态工厂</li>
 </ul>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -309,7 +309,7 @@ fn create_database2(db_type: DatabaseType) -&gt; Box&lt;dyn Database&gt; {
 <ul>
 <li>对于简单对象，直接用 <code>struct::new()</code> 或 <code>struct { .. }</code> 即可，无需专门工厂函数。</li>
 <li>对于配置复杂的对象，可用 <strong>构建者模式</strong>（Builder）结合工厂函数生成对象。</li>
-<li>对于需要动态选择类型的对象，使用 trait + Box<dyn trait=""> 是最自然方式。</dyn></li>
+<li>对于需要动态选择类型的对象，使用 trait + <code>Box&lt;dyn Trait&gt;</code> 是最自然方式。</li>
 </ul>
 <hr>
 <h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
@@ -324,7 +324,7 @@ match / enum
 <h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态工厂（泛型 + new）几乎无开销。</li>
-<li>动态工厂（Box<dyn trait="">）需要一次虚函数调用，轻微性能开销。</dyn></li>
+<li>动态工厂（<code>Box&lt;dyn Trait&gt;</code>）需要一次虚函数调用，轻微性能开销。</li>
 <li>使用枚举 + match 创建对象性能接近静态工厂，且类型安全。</li>
 <li>Rust 不需要手动管理内存或构造对象，避免了 OOP 中可能出现的对象泄漏问题。</li>
 </ul>
@@ -370,12 +370,12 @@ GUI 控件工厂（不同平台实现）
 <li>定义 <code>Database</code> trait</li>
 <li>实现 <code>MySql</code> 和 <code>Postgres</code></li>
 <li>调用方只传入类型字符串或枚举，工厂函数返回对应实例</li>
-<li>可用泛型或 Box<dyn trait=""> 管理返回对象</dyn></li>
+<li>可用泛型或 <code>Box&lt;dyn Trait&gt;</code> 管理返回对象</li>
 </ul>
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>
-<p>工厂模式的本质是：<strong>封装对象创建逻辑，让调用方无需关心具体构造方式，从而实现类型解耦和灵活扩展。在 Rust 中，关联函数、trait + Box<dyn trait=""></dyn></strong> <strong>或枚举 match 是最常用实现方式。</strong></p>
+<p>工厂模式的本质是：<strong>封装对象创建逻辑，让调用方无需关心具体构造方式，从而实现类型解耦和灵活扩展。在 Rust 中，关联函数、trait + <code>Box&lt;dyn Trait&gt;</code></strong> <strong>或枚举 match 是最常用实现方式。</strong></p>
 </blockquote>
 
                     </main>

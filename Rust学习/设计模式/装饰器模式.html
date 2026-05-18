@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -186,7 +186,7 @@
 <p><strong>中文名称：</strong> 装饰器模式</p>
 <p><strong>英文名称：</strong> Decorator Pattern</p>
 <p><strong>模式类型：</strong> 结构型设计模式</p>
-<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、Box<dyn trait=""></dyn></p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
 <p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
 <hr>
@@ -244,7 +244,7 @@ Decorator
 <hr>
 <h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
-<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong>：</p>
+<p>在 Rust 中，装饰器模式通常使用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong>：</p>
 <pre class="playground"><code class="language-rust edition2024">// 定义接口
 trait Printer {
     fn print(&amp;self, msg: &amp;str);
@@ -361,11 +361,11 @@ fn main() {
 <li>可以再包装 <code>EncryptionPrinter</code> 增加加密</li>
 <li>调用方只依赖 <code>Printer</code> trait，通过多层包装实现链式增强</li>
 </ul>
-<p>练习 Rust 特性：trait、包装结构体、Box<dyn trait="">、泛型、闭包、所有权和借用。</dyn></p>
+<p>练习 Rust 特性：trait、包装结构体、<code>Box&lt;dyn Trait&gt;</code>、泛型、闭包、所有权和借用。</p>
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>
-<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
+<p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
 </blockquote>
 
                     </main>

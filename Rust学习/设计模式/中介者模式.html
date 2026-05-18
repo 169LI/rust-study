@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
+            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-c3e67eef.js"></script>
+        <script src="../../toc-173617b7.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -300,14 +300,14 @@ impl ColleagueB {
 <span class="boring">}</span></code></pre>
 <hr>
 <h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
-<p>Rust 不依赖类继承体系，trait + Rc/Arc/RefCell/Mutex 替代中介者接口和对象引用。
+<p>Rust 不依赖类继承体系，<code>trait + Rc/Arc/RefCell/Mutex</code> 替代中介者接口和对象引用。
 静态类型保证对象安全，避免空引用或悬挂指针。
 多线程场景可通过 channel 或 Arc/Mutex 安全通信。
-动态分发可通过 Box<dyn mediator=""> 或 Arc<dyn mediator=""> 实现灵活中介。</dyn></dyn></p>
+动态分发可通过 <code>Box&lt;dyn Mediator&gt; </code>或 <code>Arc&lt;dyn Mediator&gt;</code> 实现灵活中介。</p>
 <h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
-<li>单线程简单场景可直接用 <strong>Rc&lt;RefCell&lt;&gt;&gt;</strong> 管理对象，调用 trait 方法协调。</li>
-<li>异步或跨线程场景可用 <strong>channel</strong> 做事件总线，实现解耦。</li>
+<li>单线程简单场景可直接用 <strong><code>Rc&lt;RefCell&lt;&gt;&gt;</code></strong> 管理对象，调用 trait 方法协调。</li>
+<li>异步或跨线程场景可用 <strong>ch`annel</strong> 做事件总线，实现解耦。</li>
 <li>对简单事件流，也可用闭包数组代替 trait 对象。</li>
 </ul>
 <hr>
@@ -324,7 +324,7 @@ channel（异步事件）
 <h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发中介者性能接近直接方法调用</li>
-<li>Box<dyn trait=""> 或 channel 动态分发增加一次虚函数或消息开销</dyn></li>
+<li><code>Box&lt;dyn Trait&gt;</code> 或 <code>channel</code> 动态分发增加一次虚函数或消息开销</li>
 <li>多线程异步实现增加同步或锁开销</li>
 <li>链条或事件订阅过多可能增加 CPU 消耗</li>
 <li>Rust 的所有权检查保证内存安全，无 GC 开销</li>
@@ -377,7 +377,7 @@ channel（异步事件）
 <li>Mediator 协调 TextBox 和 List 行为</li>
 <li>调用方直接操作 Mediator，无需知道控件内部逻辑</li>
 </ul>
-<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</dyn></p>
+<p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</p>
 <hr>
 <h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
 <blockquote>
