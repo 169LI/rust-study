@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
+            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,202 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="观察者模式"><a class="header" href="#观察者模式">观察者模式</a></h1>
+                        <p>好的，下面按照统一模板，为你生成 <strong>12_观察者模式 Observer Pattern</strong> 的笔记示范版。重点突出 Rust 的实现方式、与传统 OOP 对比、性能及应用场景。</p>
+<hr>
+<h1 id="12_观察者模式-observer-pattern"><a class="header" href="#12_观察者模式-observer-pattern">12_观察者模式 Observer Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 观察者模式</p>
+<p><strong>英文名称：</strong> Observer Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、Vec&lt;Box<dyn observer="">&gt;、channel、闭包</dyn></p>
+<p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>观察者模式的核心思想是：</p>
+<blockquote>
+<p><strong>定义对象间的一对多依赖关系，当一个对象状态发生改变时，所有依赖它的对象都会得到通知并自动更新。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>Subject（被观察者）维护依赖列表</li>
+<li>Observer（观察者）注册到 Subject</li>
+<li>Subject 状态变化 → 通知所有 Observer</li>
+<li>调用方无需主动轮询状态</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，观察者模式主要解决以下问题：</p>
+<pre><code class="language-text">一个对象状态变化需要通知多个对象
+需要保持调用方与被观察者的松耦合
+依赖数量可变，易于动态添加或删除观察者
+避免调用方主动轮询状态，提高性能和可维护性
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>GUI：按钮点击通知多个监听器</li>
+<li>消息系统：事件发生通知订阅者</li>
+<li>数据模型：模型变化自动更新视图</li>
+<li>日志系统：状态变化触发多个处理模块</li>
+<li>多线程事件通知</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用观察者模式，可能出现：</p>
+<pre><code class="language-text">调用方需要主动轮询状态，浪费性能
+调用方和被观察对象耦合，维护成本高
+新增依赖对象时，需要修改原对象代码
+事件通知逻辑分散，不统一
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，观察者模式通常有两个角色：</p>
+<pre><code class="language-text">Observer（观察者）：实现 update() 方法接收通知
+</code></pre>
+<p>调用方或观察者通过 <code>register()</code> 方法注册，Subject 通过 <code>notify()</code> 方法遍历观察者列表并调用 <code>update()</code>。</p>
+<p>结构示意：</p>
+<pre><code class="language-text">Subject
+ ├── observers: Vec&lt;Observer&gt;
+ ├── register(observer)
+ ├── remove(observer)
+ └── notify_all()
+Observer
+ └── update()
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，观察者模式常用 <strong>trait + Vec&lt;Box<dyn observer="">&gt;</dyn></strong> 实现：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义观察者 trait
+trait Observer {
+    fn update(&amp;self, msg: &amp;str);
+}
+
+// 被观察者
+struct Subject {
+    observers: Vec&lt;Box&lt;dyn Observer&gt;&gt;,
+}
+
+impl Subject {
+    fn new() -&gt; Self { Self { observers: Vec::new() } }
+
+    fn register(&amp;mut self, observer: Box&lt;dyn Observer&gt;) {
+        self.observers.push(observer);
+    }
+
+    fn notify_all(&amp;self, msg: &amp;str) {
+        for obs in &amp;self.observers {
+            obs.update(msg);
+        }
+    }
+}
+
+// 具体观察者
+struct ConcreteObserver;
+
+impl Observer for ConcreteObserver {
+    fn update(&amp;self, msg: &amp;str) {
+        println!("收到通知: {}", msg);
+    }
+}
+
+fn main() {
+    let mut subject = Subject::new();
+    subject.register(Box::new(ConcreteObserver));
+
+    subject.notify_all("事件已发生");
+}</code></pre>
+<ul>
+<li>调用方只操作 <code>Subject</code></li>
+<li>Observer 可动态注册或移除</li>
+<li>支持多观察者同时通知</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用类继承体系，而是 trait + Box<dyn observer=""> 实现多态。</dyn></li>
+<li>所有权和借用机制保证安全，避免悬挂指针或内存泄漏。</li>
+<li>可以通过泛型或闭包实现静态分发，提高性能。</li>
+<li>多线程场景下可结合 Arc&lt;Mutex&lt;&gt;&gt; 或 channel，实现线程安全的事件通知。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对单线程简单通知，可以直接使用 <strong>Vec&lt;&amp;dyn Observer&gt;</strong> 避免堆分配。</li>
+<li>对异步或跨线程通知，可用 <strong>channel</strong>，让 Subject 发送事件到观察者。</li>
+<li>对简单场景，也可用闭包数组代替 trait 对象，减少动态分发开销。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+Box&lt;dyn Trait&gt;
+Vec&lt;Observer&gt;（管理观察者列表）
+所有权与借用
+Arc / Mutex（多线程安全）
+channel（可选，异步通知）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发（泛型 Observer）性能高，编译期内联</li>
+<li>Box<dyn observer=""> 有虚函数调用开销，但方便动态注册观察者</dyn></li>
+<li>channel 异步通知开销依赖消息队列和线程</li>
+<li>多观察者数量大时，遍历通知可能增加 CPU 消耗</li>
+<li>Rust 静态类型和借用检查保证访问安全，无运行时内存泄漏</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text">GUI 事件系统（按钮、控件、视图）
+数据模型变化通知视图
+日志或监控系统事件通知
+消息或事件驱动架构
+测试框架状态变更通知
+异步事件处理或订阅发布
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式替换算法或行为；观察者模式通知状态变化。</li>
+<li><strong>代理模式</strong>：代理控制访问或延迟执行；观察者模式关注多对象状态通知。</li>
+<li><strong>装饰器模式</strong>：装饰器增强单个对象行为；观察者模式关注多个对象响应事件。</li>
+<li><strong>外观模式</strong>：外观简化调用接口，隐藏子系统复杂性；观察者模式关注状态变更通知机制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">松耦合：调用方与观察者解耦
+支持动态添加/移除观察者
+自动通知依赖对象
+可组合多个观察者，事件驱动灵活
+可结合 trait、Box、channel 实现线程安全
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">多观察者数量大时遍历通知开销增加
+Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
+多线程场景需要同步或锁
+复杂事件链可能增加调试难度
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">只有单个依赖对象，无需通知多方
+状态变化不需要异步或自动通知
+系统简单，不需要解耦通知机制
+动态注册观察者不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 温度传感器状态变化通知多个观察者</p>
+<ul>
+<li>Subject：TemperatureSensor</li>
+<li>Observer：Display、Logger、Alert</li>
+<li>Sensor 温度变化 → 调用 notify_all() 通知观察者</li>
+<li>Observer 通过 trait 方法 update() 接收通知</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Vec、Arc/Mutex（多线程）、channel（异步通知）。</dyn></p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 channel 是最常用实现方式。</strong></p>
+</blockquote>
 
                     </main>
 

@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
+            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,208 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="中介者模式"><a class="header" href="#中介者模式">中介者模式</a></h1>
+                        <h1 id="14_中介者模式-mediator-pattern"><a class="header" href="#14_中介者模式-mediator-pattern">14_中介者模式 Mediator Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 中介者模式</p>
+<p><strong>英文名称：</strong> Mediator Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 结构体 + Rc/Arc + RefCell/Mutex、channel、闭包</p>
+<p>中介者模式的核心是：<strong>将对象之间的通信封装到中介者中，降低对象之间的直接耦合，让对象只依赖中介者而非彼此。</strong></p>
+<p>在 Rust 中，中介者模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>消息通道</strong> 实现，支持松耦合的对象通信和事件协调。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>中介者模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过一个中介者对象封装多个对象之间的交互，所有对象不直接通信，而通过中介者进行协调。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>参与对象（Colleague）只依赖中介者接口</li>
+<li>中介者管理对象交互逻辑</li>
+<li>对象耦合度降低，系统可维护性和扩展性增强</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，中介者模式主要解决以下问题：</p>
+<pre><code class="language-text">多个对象之间存在复杂依赖和交互
+直接通信导致耦合度高，系统难以维护
+希望集中管理对象之间的协调逻辑
+对象可能会动态增加或替换
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>GUI 控件事件协调（按钮、文本框、列表等）</li>
+<li>聊天系统：多个用户通过服务器中介发送消息</li>
+<li>交通控制：各个设备通过中介协调状态</li>
+<li>任务调度系统：多个任务通过调度器协调执行</li>
+<li>游戏事件：玩家、NPC、环境通过中介管理事件</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用中介者模式，可能出现：</p>
+<pre><code class="language-text">对象之间直接依赖，形成网状耦合
+系统复杂度高，维护困难
+修改一个对象可能影响其他多个对象
+难以扩展或增加新的交互对象
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，中介者模式通常有两个角色：</p>
+<pre><code class="language-text">Mediator（中介者接口）：声明协调对象交互的方法
+ConcreteMediator（具体中介者）：实现中介者接口，管理各个 Colleague
+Colleague（同事类）：依赖中介者接口与其他对象通信
+</code></pre>
+<p>调用流程：</p>
+<ul>
+<li>Colleague 调用中介者方法</li>
+<li>中介者根据逻辑协调其他 Colleague</li>
+<li>避免 Colleague 直接互相调用</li>
+</ul>
+<p>结构示意：</p>
+<pre><code class="language-text">Mediator
+ └── notify(sender, event)
+ConcreteMediator
+ └── 实现 notify，协调各 Colleague
+Colleague
+ ├── send(event)
+ └── receive(event)
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，中介者模式通常通过 <strong>trait + Rc/Arc + RefCell/Mutex</strong> 或 <strong>channel</strong> 实现：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 中介者接口
+trait Mediator {
+    fn notify(&amp;self, sender: &amp;str, event: &amp;str);
+}
+
+// 具体中介者
+use std::rc::Rc;
+use std::cell::RefCell;
+
+struct ConcreteMediator {
+    colleague_a: Rc&lt;ColleagueA&gt;,
+    colleague_b: Rc&lt;ColleagueB&gt;,
+}
+
+impl Mediator for ConcreteMediator {
+    fn notify(&amp;self, sender: &amp;str, event: &amp;str) {
+        println!("中介者接收 {} 的事件: {}", sender, event);
+        if sender == "A" {
+            self.colleague_b.receive(event);
+        } else {
+            self.colleague_a.receive(event);
+        }
+    }
+}
+
+// Colleague
+struct ColleagueA { mediator: Rc&lt;dyn Mediator&gt; }
+struct ColleagueB { mediator: Rc&lt;dyn Mediator&gt; }
+
+impl ColleagueA {
+    fn send(&amp;self, event: &amp;str) { self.mediator.notify("A", event); }
+    fn receive(&amp;self, event: &amp;str) { println!("A 收到事件: {}", event); }
+}
+
+impl ColleagueB {
+    fn send(&amp;self, event: &amp;str) { self.mediator.notify("B", event); }
+    fn receive(&amp;self, event: &amp;str) { println!("B 收到事件: {}", event); }
+}
+<span class="boring">}</span></code></pre>
+<p>或者在多线程异步场景下，使用 <strong>channel</strong>：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let (tx, rx) = std::sync::mpsc::channel::&lt;Event&gt;();
+// 各 Colleague 发送事件到 tx，中介者监听 rx 并协调
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>Rust 不依赖类继承体系，trait + Rc/Arc/RefCell/Mutex 替代中介者接口和对象引用。
+静态类型保证对象安全，避免空引用或悬挂指针。
+多线程场景可通过 channel 或 Arc/Mutex 安全通信。
+动态分发可通过 Box<dyn mediator=""> 或 Arc<dyn mediator=""> 实现灵活中介。</dyn></dyn></p>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>单线程简单场景可直接用 <strong>Rc&lt;RefCell&lt;&gt;&gt;</strong> 管理对象，调用 trait 方法协调。</li>
+<li>异步或跨线程场景可用 <strong>channel</strong> 做事件总线，实现解耦。</li>
+<li>对简单事件流，也可用闭包数组代替 trait 对象。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+Rc/Arc + RefCell/Mutex
+Box&lt;dyn Trait&gt;（动态分发可选）
+所有权和借用
+channel（异步事件）
+闭包（可选，用于事件回调）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发中介者性能接近直接方法调用</li>
+<li>Box<dyn trait=""> 或 channel 动态分发增加一次虚函数或消息开销</dyn></li>
+<li>多线程异步实现增加同步或锁开销</li>
+<li>链条或事件订阅过多可能增加 CPU 消耗</li>
+<li>Rust 的所有权检查保证内存安全，无 GC 开销</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. GUI 控件事件协调（按钮、文本框、列表等）
+2. 聊天系统消息中介（用户之间通过服务器通信）
+3. 任务调度系统（调度器协调多个任务执行）
+4. 交通控制或设备协调
+5. 游戏事件系统（玩家、NPC、环境事件协调）
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；中介者模式通过中心对象协调对象交互，通常单条链路。</li>
+<li><strong>责任链模式</strong>：责任链模式请求沿链传递，每个对象可处理或传递；中介者模式通过中心统一处理多个对象的交互。</li>
+<li><strong>代理模式</strong>：代理模式控制访问或增强对象；中介者模式负责协调对象之间的交互。</li>
+<li><strong>外观模式</strong>：外观模式提供统一接口简化调用；中介者模式关注对象间通信和协调机制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">降低对象之间的耦合度
+所有对象通过中介者交互，逻辑集中管理
+易于增加新的对象或改变交互逻辑
+支持松耦合的事件驱动或异步通信
+可结合 trait、Box、channel 实现线程安全
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">中介者对象可能变得复杂
+动态分发或 channel 有性能开销
+调试逻辑可能较复杂，事件链条难追踪
+过度集中可能增加单点逻辑负担
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">系统对象少，交互简单
+对象间关系稳定且不需要动态协调
+单线程简单调用可直接引用对象
+过度集中逻辑增加维护成本
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> GUI 控件事件协调</p>
+<ul>
+<li>中介者对象 <code>UiMediator</code></li>
+<li>控件：Button、TextBox、List</li>
+<li>Button 点击 → 通知 Mediator</li>
+<li>Mediator 协调 TextBox 和 List 行为</li>
+<li>调用方直接操作 Mediator，无需知道控件内部逻辑</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</dyn></p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>中介者模式的本质是：<strong>通过中心对象管理多个对象之间的交互，实现松耦合、集中管理和灵活协调。在 Rust 中，trait + 包装结构体、Box/Arc/RefCell/Mutex 或 channel 是实现中介者模式的常用方法。</strong></p>
+</blockquote>
 
                     </main>
 

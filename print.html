@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-630bcc48.js";
+            window.path_to_searchindex_js = "searchindex-4ad808e0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-c3e67eef.js"></script>
@@ -8182,7 +8182,7 @@ Rust 中常用到的语法：
 </ol>
 <p>第 3 组：结构组织</p>
 <ol>
-<li><a href="#外观模式">外观模式</a></li>
+<li><a href="#11_外观模式-facade-pattern">外观模式</a></li>
 <li><a href="#组合模式">组合模式</a></li>
 <li><a href="#桥接模式">桥接模式</a></li>
 <li><a href="#享元模式">享元模式</a></li>
@@ -8190,9 +8190,9 @@ Rust 中常用到的语法：
 <p>第 4 组：行为协作</p>
 <ol>
 <li><a href="#命令模式">命令模式</a></li>
-<li><a href="#观察者模式">观察者模式</a></li>
-<li><a href="#责任链模式">责任链模式</a></li>
-<li><a href="#中介者模式">中介者模式</a></li>
+<li><a href="#12_观察者模式-observer-pattern">观察者模式</a></li>
+<li><a href="#13_责任链模式-chain-of-responsibility-pattern">责任链模式</a></li>
+<li><a href="#14_中介者模式-mediator-pattern">中介者模式</a></li>
 </ol>
 <p>第 5 组：状态与解释</p>
 <ol>
@@ -10576,7 +10576,181 @@ fn main() {
 <p>装饰器模式的本质是：<strong>在不修改原对象的情况下，通过包装对象动态增强功能或行为。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或泛型是实现装饰器模式的核心方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="外观模式"><a class="header" href="#外观模式">外观模式</a></h1>
+<h1 id="11_外观模式-facade-pattern"><a class="header" href="#11_外观模式-facade-pattern">11_外观模式 Facade Pattern</a></h1>
+<h2 id="1-基本信息-11"><a class="header" href="#1-基本信息-11">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 外观模式</p>
+<p><strong>英文名称：</strong> Facade Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> 封装模块 + 结构体 + trait、impl、函数接口</p>
+<p>外观模式的核心是：<strong>为复杂子系统提供统一、高层次接口，使调用方无需了解子系统内部细节即可使用系统功能。</strong></p>
+<p>在 Rust 中，外观模式通常通过 <strong>结构体封装多个子模块接口</strong> 或 <strong>提供高层函数接口</strong> 实现。</p>
+<hr>
+<h2 id="2-模式核心思想-10"><a class="header" href="#2-模式核心思想-10">2. 模式核心思想</a></h2>
+<p>外观模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过提供一个统一接口，将多个子系统操作组合在一起，简化调用方的使用，同时隐藏内部复杂性。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方只需要调用外观接口</li>
+<li>子系统内部结构复杂，但对调用方透明</li>
+<li>可以组合多个模块完成复杂任务</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-10"><a class="header" href="#3-这个模式解决什么问题-10">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，外观模式主要解决以下问题：</p>
+<pre><code class="language-text id=&quot;v9k8qp&quot;">系统内部存在多个复杂模块，调用方难以直接使用。
+子系统接口复杂、调用顺序或参数多。
+希望提供简单统一的 API，隐藏内部实现。
+调用方不需要了解子系统细节即可完成任务。
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>多个子系统操作组合：文件处理 + 压缩 + 加密</li>
+<li>网络请求流程：认证 + 请求 + 响应解析</li>
+<li>游戏引擎：渲染模块 + 音频模块 + 物理模块</li>
+<li>测试框架：初始化 + 配置 + 执行 + 清理</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-10"><a class="header" href="#4-不使用这个模式会怎样-10">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用外观模式，可能出现：</p>
+<pre><code class="language-text id=&quot;f6m2rs&quot;">1. 调用方直接访问子系统，耦合度高。
+2. 调用顺序和参数管理复杂。
+3. 多个模块组合逻辑分散，易出错。
+4. 系统修改时调用方也需调整。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-10"><a class="header" href="#5-传统面向对象中的实现思路-10">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，外观模式通常有以下角色：</p>
+<pre><code class="language-text id=&quot;q1k7sv&quot;">1. Subsystem：子系统类，提供具体功能。
+2. Facade：外观类，组合子系统接口，提供高层次方法。
+3. Client：调用方，只依赖外观接口。
+</code></pre>
+<p>调用方只与 Facade 交互，Facade 内部调用子系统方法完成任务。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-10"><a class="header" href="#6-rust-中的实现思路-10">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-10"><a class="header" href="#61-rust-中通常怎么实现-10">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，外观模式通常通过 <strong>结构体封装子模块 + impl 提供高层方法</strong> 实现：</p>
+<pre class="playground"><code class="language-rust id=&quot;a7f2jk&quot; edition2024">// 子系统 A
+struct FileSystem;
+impl FileSystem {
+    fn read_file(&amp;self, path: &amp;str) { println!("读取文件 {}", path); }
+}
+
+// 子系统 B
+struct Compressor;
+impl Compressor {
+    fn compress(&amp;self, data: &amp;str) { println!("压缩数据 {}", data); }
+}
+
+// 外观
+struct FileFacade {
+    fs: FileSystem,
+    compressor: Compressor,
+}
+
+impl FileFacade {
+    fn new() -&gt; Self {
+        Self { fs: FileSystem, compressor: Compressor }
+    }
+
+    fn read_and_compress(&amp;self, path: &amp;str) {
+        self.fs.read_file(path);
+        self.compressor.compress(path);
+    }
+}
+
+fn main() {
+    let facade = FileFacade::new();
+    facade.read_and_compress("data.txt");
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>FileFacade</code></li>
+<li>外观封装子系统操作顺序</li>
+<li>内部子系统结构对调用方透明</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-10"><a class="header" href="#62-和传统-oop-写法相比有什么不同-10">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用类继承体系，使用结构体 + impl 封装子系统接口。</li>
+<li>外观方法可以是 trait 方法或普通函数接口，无需虚函数。</li>
+<li>静态类型和所有权保证调用安全，无需额外同步或引用计数（除非多线程共享）。</li>
+<li>通过组合结构体和模块化，可以灵活实现子系统封装。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-10"><a class="header" href="#63-rust-中是否有更自然的替代写法-10">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单子系统，可以直接提供高层函数接口而不创建外观结构体。</li>
+<li>对共享资源和多线程子系统，可以结合 Arc/Mutex 或 trait 对象实现更灵活的外观接口。</li>
+<li>模块封装 + 函数接口在 Rust 中也是一种自然且常用的外观实现。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-10"><a class="header" href="#7-rust-中涉及的语言特性-10">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text id=&quot;v3k9rt&quot;">1. struct + impl
+2. trait（可选）
+3. 函数接口封装
+4. 模块系统
+5. 所有权与借用
+6. Arc / Mutex（多线程安全）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-10"><a class="header" href="#8-性能与工程代价-10">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态封装无运行时开销，调用开销与直接调用子系统方法接近。</li>
+<li>动态分发或多线程共享可能增加轻微开销。</li>
+<li>外观模式增加代码层级和封装结构，但利于维护和可扩展性。</li>
+<li>在 Rust 中，不需要虚函数和继承体系，因此运行时效率高。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-10"><a class="header" href="#9-典型应用场景-10">9. 典型应用场景</a></h2>
+<pre><code class="language-text id=&quot;k2v7rh&quot;">1. 文件处理系统：读取 → 压缩 → 加密
+2. 网络请求系统：认证 → 请求 → 响应解析
+3. 游戏引擎：渲染 + 音频 + 物理
+4. 测试框架：初始化 → 配置 → 执行 → 清理
+5. 多模块组合操作的统一接口
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-10"><a class="header" href="#10-和相似模式的区别-10">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>适配器模式</strong>：适配器关注接口兼容，转换接口使调用方能使用；外观模式保持接口一致，关注组合和简化调用。</li>
+<li><strong>代理模式</strong>：代理模式控制访问或延迟初始化；外观模式关注简化调用和隐藏子系统复杂性。</li>
+<li><strong>装饰器模式</strong>：装饰器动态增强单个对象功能；外观模式提供统一接口组合多个对象或模块操作。</li>
+<li><strong>工厂模式</strong>：工厂模式关注对象创建；外观模式关注调用多个对象或子系统的操作。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-10"><a class="header" href="#11-使用该模式的优点-10">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text id=&quot;d7k9rv&quot;">1. 调用方使用简单接口，隐藏子系统复杂性
+2. 减少调用方依赖和耦合
+3. 可以集中管理子系统操作顺序
+4. 易于扩展新的子系统操作
+5. 保持系统模块化和可维护性
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-10"><a class="header" href="#12-使用该模式的代价-10">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text id=&quot;v8m3qp&quot;">1. 增加外观结构层级
+2. 外观方法需要维护内部子系统调用顺序
+3. 调用方无法直接访问子系统特殊方法
+4. 多层封装可能略增加调试难度
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-10"><a class="header" href="#13-什么时候不应该使用-10">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text id=&quot;q6f2xd&quot;">1. 子系统本身简单，无需统一接口
+2. 调用方需要频繁访问子系统特殊方法
+3. 系统模块很少，外观结构冗余
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-10"><a class="header" href="#14-一个简单例子思路-10">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件操作外观</p>
+<ul>
+<li>子系统：FileSystem（读取文件）、Compressor（压缩）、Encryptor（加密）</li>
+<li>外观：FileFacade 封装子系统操作顺序</li>
+<li>调用方直接调用 <code>FileFacade::read_compress_encrypt()</code> 完成流程</li>
+</ul>
+<p>适合练习 Rust 特性：struct + impl、trait、模块封装、函数接口、Arc/Mutex（可选）。</p>
+<hr>
+<h2 id="15-总结一句话-10"><a class="header" href="#15-总结一句话-10">15. 总结一句话</a></h2>
+<blockquote>
+<p>外观模式的本质是：<strong>提供统一高层接口，将多个子系统操作组合在一起，简化调用方使用，同时隐藏内部复杂性。在 Rust 中，通过结构体封装、trait 或函数接口即可高效实现外观模式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="组合模式"><a class="header" href="#组合模式">组合模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -10586,11 +10760,608 @@ fn main() {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="命令模式"><a class="header" href="#命令模式">命令模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="观察者模式"><a class="header" href="#观察者模式">观察者模式</a></h1>
+<p>好的，下面按照统一模板，为你生成 <strong>12_观察者模式 Observer Pattern</strong> 的笔记示范版。重点突出 Rust 的实现方式、与传统 OOP 对比、性能及应用场景。</p>
+<hr>
+<h1 id="12_观察者模式-observer-pattern"><a class="header" href="#12_观察者模式-observer-pattern">12_观察者模式 Observer Pattern</a></h1>
+<h2 id="1-基本信息-12"><a class="header" href="#1-基本信息-12">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 观察者模式</p>
+<p><strong>英文名称：</strong> Observer Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、Vec&lt;Box<dyn observer="">&gt;、channel、闭包</dyn></p>
+<p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
+<hr>
+<h2 id="2-模式核心思想-11"><a class="header" href="#2-模式核心思想-11">2. 模式核心思想</a></h2>
+<p>观察者模式的核心思想是：</p>
+<blockquote>
+<p><strong>定义对象间的一对多依赖关系，当一个对象状态发生改变时，所有依赖它的对象都会得到通知并自动更新。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>Subject（被观察者）维护依赖列表</li>
+<li>Observer（观察者）注册到 Subject</li>
+<li>Subject 状态变化 → 通知所有 Observer</li>
+<li>调用方无需主动轮询状态</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-11"><a class="header" href="#3-这个模式解决什么问题-11">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，观察者模式主要解决以下问题：</p>
+<pre><code class="language-text">一个对象状态变化需要通知多个对象
+需要保持调用方与被观察者的松耦合
+依赖数量可变，易于动态添加或删除观察者
+避免调用方主动轮询状态，提高性能和可维护性
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>GUI：按钮点击通知多个监听器</li>
+<li>消息系统：事件发生通知订阅者</li>
+<li>数据模型：模型变化自动更新视图</li>
+<li>日志系统：状态变化触发多个处理模块</li>
+<li>多线程事件通知</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-11"><a class="header" href="#4-不使用这个模式会怎样-11">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用观察者模式，可能出现：</p>
+<pre><code class="language-text">调用方需要主动轮询状态，浪费性能
+调用方和被观察对象耦合，维护成本高
+新增依赖对象时，需要修改原对象代码
+事件通知逻辑分散，不统一
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-11"><a class="header" href="#5-传统面向对象中的实现思路-11">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，观察者模式通常有两个角色：</p>
+<pre><code class="language-text">Observer（观察者）：实现 update() 方法接收通知
+</code></pre>
+<p>调用方或观察者通过 <code>register()</code> 方法注册，Subject 通过 <code>notify()</code> 方法遍历观察者列表并调用 <code>update()</code>。</p>
+<p>结构示意：</p>
+<pre><code class="language-text">Subject
+ ├── observers: Vec&lt;Observer&gt;
+ ├── register(observer)
+ ├── remove(observer)
+ └── notify_all()
+Observer
+ └── update()
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-11"><a class="header" href="#6-rust-中的实现思路-11">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-11"><a class="header" href="#61-rust-中通常怎么实现-11">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，观察者模式常用 <strong>trait + Vec&lt;Box<dyn observer="">&gt;</dyn></strong> 实现：</p>
+<pre class="playground"><code class="language-rust edition2024">// 定义观察者 trait
+trait Observer {
+    fn update(&amp;self, msg: &amp;str);
+}
+
+// 被观察者
+struct Subject {
+    observers: Vec&lt;Box&lt;dyn Observer&gt;&gt;,
+}
+
+impl Subject {
+    fn new() -&gt; Self { Self { observers: Vec::new() } }
+
+    fn register(&amp;mut self, observer: Box&lt;dyn Observer&gt;) {
+        self.observers.push(observer);
+    }
+
+    fn notify_all(&amp;self, msg: &amp;str) {
+        for obs in &amp;self.observers {
+            obs.update(msg);
+        }
+    }
+}
+
+// 具体观察者
+struct ConcreteObserver;
+
+impl Observer for ConcreteObserver {
+    fn update(&amp;self, msg: &amp;str) {
+        println!("收到通知: {}", msg);
+    }
+}
+
+fn main() {
+    let mut subject = Subject::new();
+    subject.register(Box::new(ConcreteObserver));
+
+    subject.notify_all("事件已发生");
+}</code></pre>
+<ul>
+<li>调用方只操作 <code>Subject</code></li>
+<li>Observer 可动态注册或移除</li>
+<li>支持多观察者同时通知</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-11"><a class="header" href="#62-和传统-oop-写法相比有什么不同-11">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用类继承体系，而是 trait + Box<dyn observer=""> 实现多态。</dyn></li>
+<li>所有权和借用机制保证安全，避免悬挂指针或内存泄漏。</li>
+<li>可以通过泛型或闭包实现静态分发，提高性能。</li>
+<li>多线程场景下可结合 Arc&lt;Mutex&lt;&gt;&gt; 或 channel，实现线程安全的事件通知。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-11"><a class="header" href="#63-rust-中是否有更自然的替代写法-11">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对单线程简单通知，可以直接使用 <strong>Vec&lt;&amp;dyn Observer&gt;</strong> 避免堆分配。</li>
+<li>对异步或跨线程通知，可用 <strong>channel</strong>，让 Subject 发送事件到观察者。</li>
+<li>对简单场景，也可用闭包数组代替 trait 对象，减少动态分发开销。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-11"><a class="header" href="#7-rust-中涉及的语言特性-11">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+Box&lt;dyn Trait&gt;
+Vec&lt;Observer&gt;（管理观察者列表）
+所有权与借用
+Arc / Mutex（多线程安全）
+channel（可选，异步通知）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-11"><a class="header" href="#8-性能与工程代价-11">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发（泛型 Observer）性能高，编译期内联</li>
+<li>Box<dyn observer=""> 有虚函数调用开销，但方便动态注册观察者</dyn></li>
+<li>channel 异步通知开销依赖消息队列和线程</li>
+<li>多观察者数量大时，遍历通知可能增加 CPU 消耗</li>
+<li>Rust 静态类型和借用检查保证访问安全，无运行时内存泄漏</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-11"><a class="header" href="#9-典型应用场景-11">9. 典型应用场景</a></h2>
+<pre><code class="language-text">GUI 事件系统（按钮、控件、视图）
+数据模型变化通知视图
+日志或监控系统事件通知
+消息或事件驱动架构
+测试框架状态变更通知
+异步事件处理或订阅发布
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-11"><a class="header" href="#10-和相似模式的区别-11">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式替换算法或行为；观察者模式通知状态变化。</li>
+<li><strong>代理模式</strong>：代理控制访问或延迟执行；观察者模式关注多对象状态通知。</li>
+<li><strong>装饰器模式</strong>：装饰器增强单个对象行为；观察者模式关注多个对象响应事件。</li>
+<li><strong>外观模式</strong>：外观简化调用接口，隐藏子系统复杂性；观察者模式关注状态变更通知机制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-11"><a class="header" href="#11-使用该模式的优点-11">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">松耦合：调用方与观察者解耦
+支持动态添加/移除观察者
+自动通知依赖对象
+可组合多个观察者，事件驱动灵活
+可结合 trait、Box、channel 实现线程安全
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-11"><a class="header" href="#12-使用该模式的代价-11">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">多观察者数量大时遍历通知开销增加
+Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
+多线程场景需要同步或锁
+复杂事件链可能增加调试难度
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-11"><a class="header" href="#13-什么时候不应该使用-11">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">只有单个依赖对象，无需通知多方
+状态变化不需要异步或自动通知
+系统简单，不需要解耦通知机制
+动态注册观察者不必要
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-11"><a class="header" href="#14-一个简单例子思路-11">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 温度传感器状态变化通知多个观察者</p>
+<ul>
+<li>Subject：TemperatureSensor</li>
+<li>Observer：Display、Logger、Alert</li>
+<li>Sensor 温度变化 → 调用 notify_all() 通知观察者</li>
+<li>Observer 通过 trait 方法 update() 接收通知</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Vec、Arc/Mutex（多线程）、channel（异步通知）。</dyn></p>
+<hr>
+<h2 id="15-总结一句话-11"><a class="header" href="#15-总结一句话-11">15. 总结一句话</a></h2>
+<blockquote>
+<p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、Box<dyn trait=""></dyn></strong> <strong>或 channel 是最常用实现方式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="责任链模式"><a class="header" href="#责任链模式">责任链模式</a></h1>
+<h1 id="13_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#13_责任链模式-chain-of-responsibility-pattern">13_责任链模式 Chain of Responsibility Pattern</a></h1>
+<h2 id="1-基本信息-13"><a class="header" href="#1-基本信息-13">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 责任链模式</p>
+<p><strong>英文名称：</strong> Chain of Responsibility Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体 + Box/Arc、枚举 + match、闭包链</p>
+<p>责任链模式的核心是：<strong>将请求沿着处理链传递，多个对象都有机会处理请求，从而避免调用方和处理对象的强耦合。</strong></p>
+<p>在 Rust 中，责任链模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>枚举 + match</strong> 实现，也可利用闭包链处理请求。</p>
+<hr>
+<h2 id="2-模式核心思想-12"><a class="header" href="#2-模式核心思想-12">2. 模式核心思想</a></h2>
+<p>责任链模式的核心思想是：</p>
+<blockquote>
+<p><strong>将请求沿着处理对象链传递，每个对象判断是否处理该请求，如果不能处理则传递给下一个对象，直到处理完或链末尾。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方只发送请求，不关心具体谁处理</li>
+<li>每个处理者独立判断是否能处理</li>
+<li>请求沿链传递，动态组合处理对象</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-12"><a class="header" href="#3-这个模式解决什么问题-12">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，责任链模式主要解决以下问题：</p>
+<pre><code class="language-text id=&quot;v8k2pq&quot;">1. 多个对象可以处理同类请求，调用方无需指定处理者
+2. 动态组合处理对象，增加灵活性
+3. 避免调用方与具体处理对象的强耦合
+4. 可以扩展处理链而不修改调用方代码
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>请求审批流程：部门主管 → 分管领导 → 总经理</li>
+<li>日志系统：Debug → Info → Error → Critical</li>
+<li>UI 事件处理：事件沿控件层级传递</li>
+<li>中间件链：Web 请求经过多个处理器（验证 → 日志 → 缓存 → 路由）</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-12"><a class="header" href="#4-不使用这个模式会怎样-12">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用责任链模式，可能出现：</p>
+<pre><code class="language-text id=&quot;f7m9rz&quot;">1. 调用方需要明确指定具体处理对象
+2. 多个处理对象调用耦合度高
+3. 新增处理对象需要修改调用方
+4. 请求处理逻辑分散，维护成本高
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-12"><a class="header" href="#5-传统面向对象中的实现思路-12">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，责任链模式通常包含三个角色：</p>
+<pre><code class="language-text id=&quot;p3f9kv&quot;">1. Handler（处理者接口）：定义处理请求方法
+2. ConcreteHandler（具体处理者）：实现 Handler 接口，并持有下一个处理者
+3. Client（调用方）：发送请求，不关心处理者
+</code></pre>
+<p>调用流程：</p>
+<ul>
+<li>Client 调用链头 Handler</li>
+<li>Handler 判断是否能处理请求</li>
+<li>如果不能处理，则调用 next_handler 的 handle 方法</li>
+<li>链条一直传递直到被处理或末尾</li>
+</ul>
+<p>结构示意：</p>
+<pre><code class="language-text id=&quot;x9k8hf&quot;">Handler
+ ├── set_next(next: Box&lt;dyn Handler&gt;)
+ └── handle(request)
+ConcreteHandler
+ ├── handle(request) { if can_handle { ... } else { next.handle(request) } }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-12"><a class="header" href="#6-rust-中的实现思路-12">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-12"><a class="header" href="#61-rust-中通常怎么实现-12">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong> 实现：</p>
+<pre class="playground"><code class="language-rust id=&quot;a6t9jh&quot; edition2024">// 请求处理接口
+trait Handler {
+    fn handle(&amp;self, request: &amp;str);
+}
+
+// 具体处理者
+struct AuthHandler {
+    next: Option&lt;Box&lt;dyn Handler&gt;&gt;,
+}
+
+impl Handler for AuthHandler {
+    fn handle(&amp;self, request: &amp;str) {
+        if request == "auth" {
+            println!("AuthHandler 处理请求");
+        } else if let Some(next) = &amp;self.next {
+            next.handle(request);
+        }
+    }
+}
+
+struct LogHandler {
+    next: Option&lt;Box&lt;dyn Handler&gt;&gt;,
+}
+
+impl Handler for LogHandler {
+    fn handle(&amp;self, request: &amp;str) {
+        if request == "log" {
+            println!("LogHandler 处理请求");
+        } else if let Some(next) = &amp;self.next {
+            next.handle(request);
+        }
+    }
+}
+
+fn main() {
+    let log_handler = LogHandler { next: None };
+    let auth_handler = AuthHandler { next: Some(Box::new(log_handler)) };
+
+    auth_handler.handle("auth");
+    auth_handler.handle("log");
+}</code></pre>
+<p>特点：</p>
+<ul>
+<li>调用方只发送请求</li>
+<li>每个处理者独立判断是否能处理请求</li>
+<li>链条可动态组合</li>
+<li>可通过 Box<dyn handler=""> 支持动态分发，也可用泛型实现静态分发</dyn></li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-12"><a class="header" href="#62-和传统-oop-写法相比有什么不同-12">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 没有类继承，使用 trait + Box/Arc 实现多态。</li>
+<li>静态分发可使用泛型，动态分发使用 Box<dyn handler="">。</dyn></li>
+<li>所有权机制保证链条引用安全，无悬挂指针。</li>
+<li>不依赖虚函数或继承体系，类型安全，零成本抽象。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法-12"><a class="header" href="#63-rust-中是否有更自然的替代写法-12">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>简单处理链可使用 <strong>闭包链</strong>，每个闭包处理请求或传递下一个闭包。</li>
+<li>枚举 + match 可替代静态处理链，适合请求类型固定且数量有限。</li>
+<li>多线程场景可用 channel +线程，实现异步责任链。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-12"><a class="header" href="#7-rust-中涉及的语言特性-12">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text id=&quot;v4k1qh&quot;">1. trait
+2. impl
+3. Box&lt;dyn Trait&gt;（动态分发）
+4. Option&lt;Box&lt;dyn Trait&gt;&gt;（链式结构）
+5. 所有权和借用
+6. Arc / Mutex（多线程安全，可选）
+7. 闭包（可选，用于函数链）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-12"><a class="header" href="#8-性能与工程代价-12">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发（泛型）性能高，调用可内联</li>
+<li>动态分发（Box<dyn trait="">）有一次虚函数调用开销</dyn></li>
+<li>链条长度过长可能增加栈调用开销，但通常可忽略</li>
+<li>多线程异步链条增加 channel 或锁开销</li>
+<li>Rust 所有权机制保证内存安全，无运行时 GC</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-12"><a class="header" href="#9-典型应用场景-12">9. 典型应用场景</a></h2>
+<pre><code class="language-text id=&quot;k2m9rv&quot;">1. Web 中间件链：身份验证 → 日志 → 缓存 → 路由
+2. GUI 事件处理链：控件层级事件传递
+3. 审批流程：部门 → 分管领导 → 总经理
+4. 日志级别处理链：Debug → Info → Warning → Error
+5. 消息处理系统：多个处理者按顺序处理请求
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-12"><a class="header" href="#10-和相似模式的区别-12">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式替换整个算法；责任链模式沿链传递请求，多个处理者可依次处理。</li>
+<li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；责任链模式请求沿链传递，通常只处理一次或部分处理。</li>
+<li><strong>装饰器模式</strong>：装饰器增强对象功能；责任链模式处理请求沿链传递，不改变原对象。</li>
+<li><strong>外观模式</strong>：外观提供统一接口简化调用；责任链模式是请求动态沿处理者链传递。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-12"><a class="header" href="#11-使用该模式的优点-12">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text id=&quot;d9g3hr&quot;">1. 调用方无需关心具体处理对象
+2. 可以动态组合处理链
+3. 每个处理者独立封装逻辑
+4. 松耦合，易于扩展新处理者
+5. 可支持异步和多线程处理链
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-12"><a class="header" href="#12-使用该模式的代价-12">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text id=&quot;v8k6qp&quot;">1. 链条过长可能增加调用开销
+2. Box&lt;dyn Trait&gt; 动态分发有虚函数调用成本
+3. 多线程或异步实现增加同步或消息开销
+4. 调试链条逻辑可能较复杂
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-12"><a class="header" href="#13-什么时候不应该使用-12">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text id=&quot;q7f3xz&quot;">1. 请求处理对象数量固定且少
+2. 调用方只需处理单个对象
+3. 链条组合和动态传递不必要
+4. 系统简单，不需要松耦合
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-12"><a class="header" href="#14-一个简单例子思路-12">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> Web 请求中间件链</p>
+<ul>
+<li>Subject：请求对象</li>
+<li>Handler：AuthenticationHandler → LoggingHandler → CacheHandler → RouteHandler</li>
+<li>请求沿链传递，每个 Handler 判断是否处理</li>
+<li>调用方发送请求，无需知道具体 Handler</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Option 链条、Arc/Mutex（多线程）、闭包链。</dyn></p>
+<hr>
+<h2 id="15-总结一句话-12"><a class="header" href="#15-总结一句话-12">15. 总结一句话</a></h2>
+<blockquote>
+<p>责任链模式的本质是：<strong>将请求沿处理者链传递，每个对象独立判断是否处理，从而实现松耦合和动态扩展。在 Rust 中，trait + 包装结构体 + Box/Option 或闭包链是常用实现方式。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="中介者模式"><a class="header" href="#中介者模式">中介者模式</a></h1>
+<h1 id="14_中介者模式-mediator-pattern"><a class="header" href="#14_中介者模式-mediator-pattern">14_中介者模式 Mediator Pattern</a></h1>
+<h2 id="1-基本信息-14"><a class="header" href="#1-基本信息-14">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 中介者模式</p>
+<p><strong>英文名称：</strong> Mediator Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 结构体 + Rc/Arc + RefCell/Mutex、channel、闭包</p>
+<p>中介者模式的核心是：<strong>将对象之间的通信封装到中介者中，降低对象之间的直接耦合，让对象只依赖中介者而非彼此。</strong></p>
+<p>在 Rust 中，中介者模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>消息通道</strong> 实现，支持松耦合的对象通信和事件协调。</p>
+<hr>
+<h2 id="2-模式核心思想-13"><a class="header" href="#2-模式核心思想-13">2. 模式核心思想</a></h2>
+<p>中介者模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过一个中介者对象封装多个对象之间的交互，所有对象不直接通信，而通过中介者进行协调。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>参与对象（Colleague）只依赖中介者接口</li>
+<li>中介者管理对象交互逻辑</li>
+<li>对象耦合度降低，系统可维护性和扩展性增强</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题-13"><a class="header" href="#3-这个模式解决什么问题-13">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，中介者模式主要解决以下问题：</p>
+<pre><code class="language-text">多个对象之间存在复杂依赖和交互
+直接通信导致耦合度高，系统难以维护
+希望集中管理对象之间的协调逻辑
+对象可能会动态增加或替换
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>GUI 控件事件协调（按钮、文本框、列表等）</li>
+<li>聊天系统：多个用户通过服务器中介发送消息</li>
+<li>交通控制：各个设备通过中介协调状态</li>
+<li>任务调度系统：多个任务通过调度器协调执行</li>
+<li>游戏事件：玩家、NPC、环境通过中介管理事件</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样-13"><a class="header" href="#4-不使用这个模式会怎样-13">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用中介者模式，可能出现：</p>
+<pre><code class="language-text">对象之间直接依赖，形成网状耦合
+系统复杂度高，维护困难
+修改一个对象可能影响其他多个对象
+难以扩展或增加新的交互对象
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-13"><a class="header" href="#5-传统面向对象中的实现思路-13">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，中介者模式通常有两个角色：</p>
+<pre><code class="language-text">Mediator（中介者接口）：声明协调对象交互的方法
+ConcreteMediator（具体中介者）：实现中介者接口，管理各个 Colleague
+Colleague（同事类）：依赖中介者接口与其他对象通信
+</code></pre>
+<p>调用流程：</p>
+<ul>
+<li>Colleague 调用中介者方法</li>
+<li>中介者根据逻辑协调其他 Colleague</li>
+<li>避免 Colleague 直接互相调用</li>
+</ul>
+<p>结构示意：</p>
+<pre><code class="language-text">Mediator
+ └── notify(sender, event)
+ConcreteMediator
+ └── 实现 notify，协调各 Colleague
+Colleague
+ ├── send(event)
+ └── receive(event)
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-13"><a class="header" href="#6-rust-中的实现思路-13">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-13"><a class="header" href="#61-rust-中通常怎么实现-13">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，中介者模式通常通过 <strong>trait + Rc/Arc + RefCell/Mutex</strong> 或 <strong>channel</strong> 实现：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 中介者接口
+trait Mediator {
+    fn notify(&amp;self, sender: &amp;str, event: &amp;str);
+}
+
+// 具体中介者
+use std::rc::Rc;
+use std::cell::RefCell;
+
+struct ConcreteMediator {
+    colleague_a: Rc&lt;ColleagueA&gt;,
+    colleague_b: Rc&lt;ColleagueB&gt;,
+}
+
+impl Mediator for ConcreteMediator {
+    fn notify(&amp;self, sender: &amp;str, event: &amp;str) {
+        println!("中介者接收 {} 的事件: {}", sender, event);
+        if sender == "A" {
+            self.colleague_b.receive(event);
+        } else {
+            self.colleague_a.receive(event);
+        }
+    }
+}
+
+// Colleague
+struct ColleagueA { mediator: Rc&lt;dyn Mediator&gt; }
+struct ColleagueB { mediator: Rc&lt;dyn Mediator&gt; }
+
+impl ColleagueA {
+    fn send(&amp;self, event: &amp;str) { self.mediator.notify("A", event); }
+    fn receive(&amp;self, event: &amp;str) { println!("A 收到事件: {}", event); }
+}
+
+impl ColleagueB {
+    fn send(&amp;self, event: &amp;str) { self.mediator.notify("B", event); }
+    fn receive(&amp;self, event: &amp;str) { println!("B 收到事件: {}", event); }
+}
+<span class="boring">}</span></code></pre>
+<p>或者在多线程异步场景下，使用 <strong>channel</strong>：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let (tx, rx) = std::sync::mpsc::channel::&lt;Event&gt;();
+// 各 Colleague 发送事件到 tx，中介者监听 rx 并协调
+<span class="boring">}</span></code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-13"><a class="header" href="#62-和传统-oop-写法相比有什么不同-13">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>Rust 不依赖类继承体系，trait + Rc/Arc/RefCell/Mutex 替代中介者接口和对象引用。
+静态类型保证对象安全，避免空引用或悬挂指针。
+多线程场景可通过 channel 或 Arc/Mutex 安全通信。
+动态分发可通过 Box<dyn mediator=""> 或 Arc<dyn mediator=""> 实现灵活中介。</dyn></dyn></p>
+<h3 id="63-rust-中是否有更自然的替代写法-13"><a class="header" href="#63-rust-中是否有更自然的替代写法-13">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>单线程简单场景可直接用 <strong>Rc&lt;RefCell&lt;&gt;&gt;</strong> 管理对象，调用 trait 方法协调。</li>
+<li>异步或跨线程场景可用 <strong>channel</strong> 做事件总线，实现解耦。</li>
+<li>对简单事件流，也可用闭包数组代替 trait 对象。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-13"><a class="header" href="#7-rust-中涉及的语言特性-13">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text">trait
+impl
+Rc/Arc + RefCell/Mutex
+Box&lt;dyn Trait&gt;（动态分发可选）
+所有权和借用
+channel（异步事件）
+闭包（可选，用于事件回调）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-13"><a class="header" href="#8-性能与工程代价-13">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发中介者性能接近直接方法调用</li>
+<li>Box<dyn trait=""> 或 channel 动态分发增加一次虚函数或消息开销</dyn></li>
+<li>多线程异步实现增加同步或锁开销</li>
+<li>链条或事件订阅过多可能增加 CPU 消耗</li>
+<li>Rust 的所有权检查保证内存安全，无 GC 开销</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景-13"><a class="header" href="#9-典型应用场景-13">9. 典型应用场景</a></h2>
+<pre><code class="language-text">1. GUI 控件事件协调（按钮、文本框、列表等）
+2. 聊天系统消息中介（用户之间通过服务器通信）
+3. 任务调度系统（调度器协调多个任务执行）
+4. 交通控制或设备协调
+5. 游戏事件系统（玩家、NPC、环境事件协调）
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别-13"><a class="header" href="#10-和相似模式的区别-13">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；中介者模式通过中心对象协调对象交互，通常单条链路。</li>
+<li><strong>责任链模式</strong>：责任链模式请求沿链传递，每个对象可处理或传递；中介者模式通过中心统一处理多个对象的交互。</li>
+<li><strong>代理模式</strong>：代理模式控制访问或增强对象；中介者模式负责协调对象之间的交互。</li>
+<li><strong>外观模式</strong>：外观模式提供统一接口简化调用；中介者模式关注对象间通信和协调机制。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点-13"><a class="header" href="#11-使用该模式的优点-13">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text">降低对象之间的耦合度
+所有对象通过中介者交互，逻辑集中管理
+易于增加新的对象或改变交互逻辑
+支持松耦合的事件驱动或异步通信
+可结合 trait、Box、channel 实现线程安全
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-13"><a class="header" href="#12-使用该模式的代价-13">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text">中介者对象可能变得复杂
+动态分发或 channel 有性能开销
+调试逻辑可能较复杂，事件链条难追踪
+过度集中可能增加单点逻辑负担
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用-13"><a class="header" href="#13-什么时候不应该使用-13">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text">系统对象少，交互简单
+对象间关系稳定且不需要动态协调
+单线程简单调用可直接引用对象
+过度集中逻辑增加维护成本
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-13"><a class="header" href="#14-一个简单例子思路-13">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> GUI 控件事件协调</p>
+<ul>
+<li>中介者对象 <code>UiMediator</code></li>
+<li>控件：Button、TextBox、List</li>
+<li>Button 点击 → 通知 Mediator</li>
+<li>Mediator 协调 TextBox 和 List 行为</li>
+<li>调用方直接操作 Mediator，无需知道控件内部逻辑</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</dyn></p>
+<hr>
+<h2 id="15-总结一句话-13"><a class="header" href="#15-总结一句话-13">15. 总结一句话</a></h2>
+<blockquote>
+<p>中介者模式的本质是：<strong>通过中心对象管理多个对象之间的交互，实现松耦合、集中管理和灵活协调。在 Rust 中，trait + 包装结构体、Box/Arc/RefCell/Mutex 或 channel 是实现中介者模式的常用方法。</strong></p>
+</blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="状态模式"><a class="header" href="#状态模式">状态模式</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>

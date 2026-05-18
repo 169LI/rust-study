@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
+            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,208 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="责任链模式"><a class="header" href="#责任链模式">责任链模式</a></h1>
+                        <h1 id="13_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#13_责任链模式-chain-of-responsibility-pattern">13_责任链模式 Chain of Responsibility Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 责任链模式</p>
+<p><strong>英文名称：</strong> Chain of Responsibility Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体 + Box/Arc、枚举 + match、闭包链</p>
+<p>责任链模式的核心是：<strong>将请求沿着处理链传递，多个对象都有机会处理请求，从而避免调用方和处理对象的强耦合。</strong></p>
+<p>在 Rust 中，责任链模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>枚举 + match</strong> 实现，也可利用闭包链处理请求。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>责任链模式的核心思想是：</p>
+<blockquote>
+<p><strong>将请求沿着处理对象链传递，每个对象判断是否处理该请求，如果不能处理则传递给下一个对象，直到处理完或链末尾。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方只发送请求，不关心具体谁处理</li>
+<li>每个处理者独立判断是否能处理</li>
+<li>请求沿链传递，动态组合处理对象</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，责任链模式主要解决以下问题：</p>
+<pre><code class="language-text id=&quot;v8k2pq&quot;">1. 多个对象可以处理同类请求，调用方无需指定处理者
+2. 动态组合处理对象，增加灵活性
+3. 避免调用方与具体处理对象的强耦合
+4. 可以扩展处理链而不修改调用方代码
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>请求审批流程：部门主管 → 分管领导 → 总经理</li>
+<li>日志系统：Debug → Info → Error → Critical</li>
+<li>UI 事件处理：事件沿控件层级传递</li>
+<li>中间件链：Web 请求经过多个处理器（验证 → 日志 → 缓存 → 路由）</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用责任链模式，可能出现：</p>
+<pre><code class="language-text id=&quot;f7m9rz&quot;">1. 调用方需要明确指定具体处理对象
+2. 多个处理对象调用耦合度高
+3. 新增处理对象需要修改调用方
+4. 请求处理逻辑分散，维护成本高
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，责任链模式通常包含三个角色：</p>
+<pre><code class="language-text id=&quot;p3f9kv&quot;">1. Handler（处理者接口）：定义处理请求方法
+2. ConcreteHandler（具体处理者）：实现 Handler 接口，并持有下一个处理者
+3. Client（调用方）：发送请求，不关心处理者
+</code></pre>
+<p>调用流程：</p>
+<ul>
+<li>Client 调用链头 Handler</li>
+<li>Handler 判断是否能处理请求</li>
+<li>如果不能处理，则调用 next_handler 的 handle 方法</li>
+<li>链条一直传递直到被处理或末尾</li>
+</ul>
+<p>结构示意：</p>
+<pre><code class="language-text id=&quot;x9k8hf&quot;">Handler
+ ├── set_next(next: Box&lt;dyn Handler&gt;)
+ └── handle(request)
+ConcreteHandler
+ ├── handle(request) { if can_handle { ... } else { next.handle(request) } }
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + Box<dyn trait=""></dyn></strong> 实现：</p>
+<pre class="playground"><code class="language-rust id=&quot;a6t9jh&quot; edition2024">// 请求处理接口
+trait Handler {
+    fn handle(&amp;self, request: &amp;str);
+}
+
+// 具体处理者
+struct AuthHandler {
+    next: Option&lt;Box&lt;dyn Handler&gt;&gt;,
+}
+
+impl Handler for AuthHandler {
+    fn handle(&amp;self, request: &amp;str) {
+        if request == "auth" {
+            println!("AuthHandler 处理请求");
+        } else if let Some(next) = &amp;self.next {
+            next.handle(request);
+        }
+    }
+}
+
+struct LogHandler {
+    next: Option&lt;Box&lt;dyn Handler&gt;&gt;,
+}
+
+impl Handler for LogHandler {
+    fn handle(&amp;self, request: &amp;str) {
+        if request == "log" {
+            println!("LogHandler 处理请求");
+        } else if let Some(next) = &amp;self.next {
+            next.handle(request);
+        }
+    }
+}
+
+fn main() {
+    let log_handler = LogHandler { next: None };
+    let auth_handler = AuthHandler { next: Some(Box::new(log_handler)) };
+
+    auth_handler.handle("auth");
+    auth_handler.handle("log");
+}</code></pre>
+<p>特点：</p>
+<ul>
+<li>调用方只发送请求</li>
+<li>每个处理者独立判断是否能处理请求</li>
+<li>链条可动态组合</li>
+<li>可通过 Box<dyn handler=""> 支持动态分发，也可用泛型实现静态分发</dyn></li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 没有类继承，使用 trait + Box/Arc 实现多态。</li>
+<li>静态分发可使用泛型，动态分发使用 Box<dyn handler="">。</dyn></li>
+<li>所有权机制保证链条引用安全，无悬挂指针。</li>
+<li>不依赖虚函数或继承体系，类型安全，零成本抽象。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>简单处理链可使用 <strong>闭包链</strong>，每个闭包处理请求或传递下一个闭包。</li>
+<li>枚举 + match 可替代静态处理链，适合请求类型固定且数量有限。</li>
+<li>多线程场景可用 channel +线程，实现异步责任链。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text id=&quot;v4k1qh&quot;">1. trait
+2. impl
+3. Box&lt;dyn Trait&gt;（动态分发）
+4. Option&lt;Box&lt;dyn Trait&gt;&gt;（链式结构）
+5. 所有权和借用
+6. Arc / Mutex（多线程安全，可选）
+7. 闭包（可选，用于函数链）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态分发（泛型）性能高，调用可内联</li>
+<li>动态分发（Box<dyn trait="">）有一次虚函数调用开销</dyn></li>
+<li>链条长度过长可能增加栈调用开销，但通常可忽略</li>
+<li>多线程异步链条增加 channel 或锁开销</li>
+<li>Rust 所有权机制保证内存安全，无运行时 GC</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text id=&quot;k2m9rv&quot;">1. Web 中间件链：身份验证 → 日志 → 缓存 → 路由
+2. GUI 事件处理链：控件层级事件传递
+3. 审批流程：部门 → 分管领导 → 总经理
+4. 日志级别处理链：Debug → Info → Warning → Error
+5. 消息处理系统：多个处理者按顺序处理请求
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>策略模式</strong>：策略模式替换整个算法；责任链模式沿链传递请求，多个处理者可依次处理。</li>
+<li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；责任链模式请求沿链传递，通常只处理一次或部分处理。</li>
+<li><strong>装饰器模式</strong>：装饰器增强对象功能；责任链模式处理请求沿链传递，不改变原对象。</li>
+<li><strong>外观模式</strong>：外观提供统一接口简化调用；责任链模式是请求动态沿处理者链传递。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text id=&quot;d9g3hr&quot;">1. 调用方无需关心具体处理对象
+2. 可以动态组合处理链
+3. 每个处理者独立封装逻辑
+4. 松耦合，易于扩展新处理者
+5. 可支持异步和多线程处理链
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text id=&quot;v8k6qp&quot;">1. 链条过长可能增加调用开销
+2. Box&lt;dyn Trait&gt; 动态分发有虚函数调用成本
+3. 多线程或异步实现增加同步或消息开销
+4. 调试链条逻辑可能较复杂
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text id=&quot;q7f3xz&quot;">1. 请求处理对象数量固定且少
+2. 调用方只需处理单个对象
+3. 链条组合和动态传递不必要
+4. 系统简单，不需要松耦合
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> Web 请求中间件链</p>
+<ul>
+<li>Subject：请求对象</li>
+<li>Handler：AuthenticationHandler → LoggingHandler → CacheHandler → RouteHandler</li>
+<li>请求沿链传递，每个 Handler 判断是否处理</li>
+<li>调用方发送请求，无需知道具体 Handler</li>
+</ul>
+<p>适合练习 Rust 特性：trait、Box<dyn trait="">、Option 链条、Arc/Mutex（多线程）、闭包链。</dyn></p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>责任链模式的本质是：<strong>将请求沿处理者链传递，每个对象独立判断是否处理，从而实现松耦合和动态扩展。在 Rust 中，trait + 包装结构体 + Box/Option 或闭包链是常用实现方式。</strong></p>
+</blockquote>
 
                     </main>
 

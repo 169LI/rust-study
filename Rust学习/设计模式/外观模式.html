@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-630bcc48.js";
+            window.path_to_searchindex_js = "../../searchindex-4ad808e0.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-c3e67eef.js"></script>
@@ -181,7 +181,181 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="外观模式"><a class="header" href="#外观模式">外观模式</a></h1>
+                        <h1 id="11_外观模式-facade-pattern"><a class="header" href="#11_外观模式-facade-pattern">11_外观模式 Facade Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 外观模式</p>
+<p><strong>英文名称：</strong> Facade Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> 封装模块 + 结构体 + trait、impl、函数接口</p>
+<p>外观模式的核心是：<strong>为复杂子系统提供统一、高层次接口，使调用方无需了解子系统内部细节即可使用系统功能。</strong></p>
+<p>在 Rust 中，外观模式通常通过 <strong>结构体封装多个子模块接口</strong> 或 <strong>提供高层函数接口</strong> 实现。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>外观模式的核心思想是：</p>
+<blockquote>
+<p><strong>通过提供一个统一接口，将多个子系统操作组合在一起，简化调用方的使用，同时隐藏内部复杂性。</strong></p>
+</blockquote>
+<p>换句话说：</p>
+<ul>
+<li>调用方只需要调用外观接口</li>
+<li>子系统内部结构复杂，但对调用方透明</li>
+<li>可以组合多个模块完成复杂任务</li>
+</ul>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>在实际开发中，外观模式主要解决以下问题：</p>
+<pre><code class="language-text id=&quot;v9k8qp&quot;">系统内部存在多个复杂模块，调用方难以直接使用。
+子系统接口复杂、调用顺序或参数多。
+希望提供简单统一的 API，隐藏内部实现。
+调用方不需要了解子系统细节即可完成任务。
+</code></pre>
+<p>典型场景：</p>
+<ul>
+<li>多个子系统操作组合：文件处理 + 压缩 + 加密</li>
+<li>网络请求流程：认证 + 请求 + 响应解析</li>
+<li>游戏引擎：渲染模块 + 音频模块 + 物理模块</li>
+<li>测试框架：初始化 + 配置 + 执行 + 清理</li>
+</ul>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用外观模式，可能出现：</p>
+<pre><code class="language-text id=&quot;f6m2rs&quot;">1. 调用方直接访问子系统，耦合度高。
+2. 调用顺序和参数管理复杂。
+3. 多个模块组合逻辑分散，易出错。
+4. 系统修改时调用方也需调整。
+</code></pre>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，外观模式通常有以下角色：</p>
+<pre><code class="language-text id=&quot;q1k7sv&quot;">1. Subsystem：子系统类，提供具体功能。
+2. Facade：外观类，组合子系统接口，提供高层次方法。
+3. Client：调用方，只依赖外观接口。
+</code></pre>
+<p>调用方只与 Facade 交互，Facade 内部调用子系统方法完成任务。</p>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>在 Rust 中，外观模式通常通过 <strong>结构体封装子模块 + impl 提供高层方法</strong> 实现：</p>
+<pre class="playground"><code class="language-rust id=&quot;a7f2jk&quot; edition2024">// 子系统 A
+struct FileSystem;
+impl FileSystem {
+    fn read_file(&amp;self, path: &amp;str) { println!("读取文件 {}", path); }
+}
+
+// 子系统 B
+struct Compressor;
+impl Compressor {
+    fn compress(&amp;self, data: &amp;str) { println!("压缩数据 {}", data); }
+}
+
+// 外观
+struct FileFacade {
+    fs: FileSystem,
+    compressor: Compressor,
+}
+
+impl FileFacade {
+    fn new() -&gt; Self {
+        Self { fs: FileSystem, compressor: Compressor }
+    }
+
+    fn read_and_compress(&amp;self, path: &amp;str) {
+        self.fs.read_file(path);
+        self.compressor.compress(path);
+    }
+}
+
+fn main() {
+    let facade = FileFacade::new();
+    facade.read_and_compress("data.txt");
+}</code></pre>
+<ul>
+<li>调用方只依赖 <code>FileFacade</code></li>
+<li>外观封装子系统操作顺序</li>
+<li>内部子系统结构对调用方透明</li>
+</ul>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<ol>
+<li>Rust 不使用类继承体系，使用结构体 + impl 封装子系统接口。</li>
+<li>外观方法可以是 trait 方法或普通函数接口，无需虚函数。</li>
+<li>静态类型和所有权保证调用安全，无需额外同步或引用计数（除非多线程共享）。</li>
+<li>通过组合结构体和模块化，可以灵活实现子系统封装。</li>
+</ol>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<ul>
+<li>对简单子系统，可以直接提供高层函数接口而不创建外观结构体。</li>
+<li>对共享资源和多线程子系统，可以结合 Arc/Mutex 或 trait 对象实现更灵活的外观接口。</li>
+<li>模块封装 + 函数接口在 Rust 中也是一种自然且常用的外观实现。</li>
+</ul>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<pre><code class="language-text id=&quot;v3k9rt&quot;">1. struct + impl
+2. trait（可选）
+3. 函数接口封装
+4. 模块系统
+5. 所有权与借用
+6. Arc / Mutex（多线程安全）
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<ul>
+<li>静态封装无运行时开销，调用开销与直接调用子系统方法接近。</li>
+<li>动态分发或多线程共享可能增加轻微开销。</li>
+<li>外观模式增加代码层级和封装结构，但利于维护和可扩展性。</li>
+<li>在 Rust 中，不需要虚函数和继承体系，因此运行时效率高。</li>
+</ul>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<pre><code class="language-text id=&quot;k2v7rh&quot;">1. 文件处理系统：读取 → 压缩 → 加密
+2. 网络请求系统：认证 → 请求 → 响应解析
+3. 游戏引擎：渲染 + 音频 + 物理
+4. 测试框架：初始化 → 配置 → 执行 → 清理
+5. 多模块组合操作的统一接口
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<ul>
+<li><strong>适配器模式</strong>：适配器关注接口兼容，转换接口使调用方能使用；外观模式保持接口一致，关注组合和简化调用。</li>
+<li><strong>代理模式</strong>：代理模式控制访问或延迟初始化；外观模式关注简化调用和隐藏子系统复杂性。</li>
+<li><strong>装饰器模式</strong>：装饰器动态增强单个对象功能；外观模式提供统一接口组合多个对象或模块操作。</li>
+<li><strong>工厂模式</strong>：工厂模式关注对象创建；外观模式关注调用多个对象或子系统的操作。</li>
+</ul>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<pre><code class="language-text id=&quot;d7k9rv&quot;">1. 调用方使用简单接口，隐藏子系统复杂性
+2. 减少调用方依赖和耦合
+3. 可以集中管理子系统操作顺序
+4. 易于扩展新的子系统操作
+5. 保持系统模块化和可维护性
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<pre><code class="language-text id=&quot;v8m3qp&quot;">1. 增加外观结构层级
+2. 外观方法需要维护内部子系统调用顺序
+3. 调用方无法直接访问子系统特殊方法
+4. 多层封装可能略增加调试难度
+</code></pre>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<pre><code class="language-text id=&quot;q6f2xd&quot;">1. 子系统本身简单，无需统一接口
+2. 调用方需要频繁访问子系统特殊方法
+3. 系统模块很少，外观结构冗余
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件操作外观</p>
+<ul>
+<li>子系统：FileSystem（读取文件）、Compressor（压缩）、Encryptor（加密）</li>
+<li>外观：FileFacade 封装子系统操作顺序</li>
+<li>调用方直接调用 <code>FileFacade::read_compress_encrypt()</code> 完成流程</li>
+</ul>
+<p>适合练习 Rust 特性：struct + impl、trait、模块封装、函数接口、Arc/Mutex（可选）。</p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<blockquote>
+<p>外观模式的本质是：<strong>提供统一高层接口，将多个子系统操作组合在一起，简化调用方使用，同时隐藏内部复杂性。在 Rust 中，通过结构体封装、trait 或函数接口即可高效实现外观模式。</strong></p>
+</blockquote>
 
                     </main>
 
