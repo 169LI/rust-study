@@ -2,7 +2,12 @@ book
 .vscode/
 markdownlint.json
 rusttest/
+.trae/
 
 # Added by cargo
 
 /target
+example_code/DesignPattern/target
+
+Cargo.lock
+

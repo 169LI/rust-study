@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "iterator_pattern",
+    "filter_pattern"
+]
+resolver = "2"
