@@ -1,0 +1,46 @@
+[package]
+name = "sort_algorithm"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "bubble_sort"
+path = "src/bubble_sort.rs"
+
+[[bin]]
+name="selection_sort"
+path="src/selection_sort.rs"
+
+[[bin]]
+name="insertion_sort"
+path="src/insertion_sort.rs"
+
+[[bin]]
+name = "merge_sort"
+path = "src/merge_sort.rs"
+
+[[bin]]
+name = "quick_sort"
+path = "src/quick_sort.rs"
+
+[[bin]]
+name = "heap_sort"
+path = "src/heap_sort.rs"
+
+[[bin]]
+name = "shell_sort"
+path = "src/shell_sort.rs"
+
+[[bin]]
+name = "radix_sort"
+path = "src/radix_sort.rs"
+
+[[bin]]
+name = "bucket_sort"
+path = "src/bucket_sort.rs"
+
+[[bin]]
+name = "count_sort"
+path = "src/count_sort.rs"
+
+[dependencies]

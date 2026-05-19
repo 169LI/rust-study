@@ -88,9 +88,14 @@
 ---
 
 - [LeetCode](./LeetCode.md)
-  - [定长滑动窗口](./LeetCode/定长滑动窗口.md)
-    - [基础](./LeetCode/定长滑动窗口/基础.md)
+  - [数据结构](./LeetCode/数据结构.md)
+    - [Rust数据结构的性能](./LeetCode/数据结构/Rust数据结构的性能.md)
+    - [基本数据结构](./LeetCode/数据结构/基本数据结构.md)
+    - [查找算法](./LeetCode/数据结构/查找算法.md)
+    - [排序算法](./LeetCode/数据结构/排序算法.md)
+    - [树](./LeetCode/数据结构/树.md)
+    - [图](./LeetCode/数据结构/图.md)
+  - [算法刷题](./LeetCode/算法.md)
 
 ---
-
 [Contributors](misc/contributors.md)

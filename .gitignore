@@ -6,8 +6,7 @@ rusttest/
 
 # Added by cargo
 
-/target
-example_code/DesignPattern/target
-
+target/
+example_code/DesignPattern/target/
+example_code/data_struct/target/
 Cargo.lock
-

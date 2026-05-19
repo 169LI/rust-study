@@ -1,0 +1,52 @@
+[package]
+name = "search_algorithm"
+version.workspace = true
+edition.workspace = true
+
+
+[[bin]]
+name = "search_algorithm_example"
+path = "src/sequential_search_example.rs"
+
+[[bin]]
+name = "sequential_search_achieve"
+path = "src/sequential_search_achieve.rs"
+
+[[bin]]
+name = "binary_search_achieve"
+path = "src/binary_search_achieve.rs"
+
+[[bin]]
+name = "binary_search_example"
+path = "src/binary_search_example.rs"
+
+[[bin]]
+name="interpolation_search"
+path="src/interpolation_search.rs"
+
+[[bin]]
+name="hash_search_example"
+path="src/hash_search_example.rs"
+
+[[bin]]
+name="hash_search_achieve"
+path="src/hash_search_achieve.rs"
+
+[[bin]]
+name="chaining_hash_search"
+path="src/chaining_hash_search.rs"
+
+[[bin]]
+name="string_search_example"
+path="src/string_search_example.rs"
+
+[[bin]]
+name="kmp_search"
+path="src/kmp_search.rs"
+
+[[bin]]
+name="parall_search_example"
+path="src/parallel_search_example.rs"
+
+[dependencies]
+rayon = {workspace = true}

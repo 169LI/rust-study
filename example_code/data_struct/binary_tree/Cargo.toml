@@ -1,0 +1,26 @@
+[package]
+name = "binary_tree"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "tree"
+path = "src/binary_tree.rs"
+
+[[bin]]
+name = "binary_heap_example"
+path = "src/binary_heap_example.rs"
+
+[[bin]]
+name = "binary_heap"
+path = "src/binary_heap.rs"
+
+[[bin]]
+name = "binary_search_tree"
+path = "src/binary_search_tree.rs"
+
+[[bin]]
+name = "balanced_binary_tree"
+path = "src/balanced_binary_tree.rs"
+
+[dependencies]

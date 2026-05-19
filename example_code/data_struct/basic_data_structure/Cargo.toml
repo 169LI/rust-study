@@ -1,0 +1,68 @@
+[package]
+name = "basic_data_structure"
+version ={workspace = true}
+edition ={workspace = true}
+
+
+[[bin]]
+name = "array"
+path = "src/array_example.rs"
+
+[[bin]]
+name = "vec"
+path = "src/vec_example.rs"
+
+[[bin]]
+name = "queue_example"
+path = "src/queue_example.rs"
+
+[[bin]]
+name = "queue_achieve"
+path = "src/queue_achieve.rs"
+
+[[bin]]
+name= "deque_achieve"
+path = "src/deque_achieve.rs"
+
+[[bin]]
+name = "deque_example"
+path = "src/deque_example.rs"
+
+[[bin]]
+name = "link_example"
+path = "src/link_example.rs"
+
+[[bin]]
+name = "link_achieve"
+path = "src/link_achieve.rs"
+
+[[bin]]
+name = "slice_example"
+path = "src/slice_example.rs"
+
+[[bin]]
+name = "string_example"
+path = "src/string_example.rs"
+
+[[bin]]
+name = "stack_vec_achieve"
+path = "src/stack_vec_achieve.rs"
+
+[[bin]]
+name = "stack_deque_achieve"
+path = "src/stack_deque_achieve.rs"
+
+[[bin]]
+name = "stack_bracket_matching"
+path = "src/stack_bracket_matching.rs"
+
+[[bin]]
+name = "stack_base_conversion"
+path = "src/stack_base_conversion.rs"
+
+[[bin]]
+name = "stack_infix_to_postfix"
+path = "src/stack_infix_to_postfix.rs"
+
+
+[dependencies]

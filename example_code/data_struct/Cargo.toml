@@ -1,0 +1,16 @@
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = [
+    "basic_data_structure",
+    "graph",
+    "search_algorithm",
+    "sort_algorithm",
+    "binary_tree",
+]
+resolver = "2"  # 显式指定解析器版本
+
+[workspace.dependencies]
+rayon = "1.5"

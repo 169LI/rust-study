@@ -1,0 +1,25 @@
+[package]
+name = "graph"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name="adj_list_graph_achieve"
+path="src/adj_list_graph_achieve.rs"
+
+[[bin]]
+name="adj_matrix_graph_achieve"
+path="src/adj_matrix_graph_achieve.rs"
+
+[[bin]]
+name="bfs"
+path="src/bfs.rs"
+
+[[bin]]
+name="dfs"
+path="src/dfs.rs"
+
+[[bin]]
+name="dijkstra"
+path="src/dijkstra.rs"
+[dependencies]
