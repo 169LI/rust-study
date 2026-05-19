@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-57756be3.js";
+            window.path_to_searchindex_js = "../../searchindex-cfab9861.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-3631dbdf.js"></script>
@@ -203,8 +203,8 @@
 <li><strong>缺点</strong>：效率低，不适合大数据或频繁查找。</li>
 <li><strong>Rust 实现</strong>：使用 <code>iter().position()</code> 或 <code>find()</code>，支持泛型，安全高效。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/sequential_search_example.rs">顺序查找演示</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/sequential_search_achieve.rs">顺序查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/sequential_search_example.rs">顺序查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/sequential_search_achieve.rs">顺序查找实现</a></p>
 <p><img src="./image/查找算法/img.png" alt="顺序查找复杂度.png"></p>
 <h2 id="二分查找"><a class="header" href="#二分查找">二分查找</a></h2>
 <p>二分查找是一种高效的查找算法，适用于<strong>有序数据集合</strong>。
@@ -218,9 +218,9 @@
 <li><strong>缺点</strong>：要求数据预先排序，不适用动态数据或无序集合。</li>
 <li><strong>Rust 特性</strong>：标准库提供 <code>binary_search</code> 等 <code>API</code>，泛型支持，安全高效。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/binary_search_example.rs">二分查找演示</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/binary_search_achieve.rs">二分查找实现</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/interpolation_search.rs">插值查找</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/binary_search_example.rs">二分查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/binary_search_achieve.rs">二分查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/interpolation_search.rs">插值查找</a></p>
 <h2 id="哈希查找"><a class="header" href="#哈希查找">哈希查找</a></h2>
 <p>哈希查找是一种基于哈希表的数据结构（如 <code>HashMap</code> 或 <code>HashSet</code>）的查找算法，通过将键映射到哈希值实现快速定位</p>
 <p>（这里以<strong>线性探测法</strong>为例）</p>
@@ -238,9 +238,9 @@
 <li><strong>缺点</strong>：依赖哈希函数质量，冲突可能降低性能，空间开销较大。</li>
 <li><strong>Rust 特性</strong>：标准库提供 <code>HashMap</code> 和 <code>HashSet</code>，高效、安全，支持泛型</li>
 </ul>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/hash_search_example.rs">哈希查找演示</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/hash_search_achieve.rs">哈希查找实现</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/chaining_hash_search.rs">基于拉链法的哈希查找</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/hash_search_example.rs">哈希查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/hash_search_achieve.rs">哈希查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/chaining_hash_search.rs">基于拉链法的哈希查找</a></p>
 <h2 id="字符串查找"><a class="header" href="#字符串查找">字符串查找</a></h2>
 <p>字符串查找是计算机科学中的一个重要领域，涉及在文本中查找特定模式或子字符串的方法。
 其中，<code>KMP（Knuth-Morris-Pratt）</code>算法是一种高效的字符串查找算法，适用于模式匹配。</p>
@@ -265,8 +265,8 @@
 </ul>
 </li>
 </ul>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/string_search_example.rs">字符串查找演示</a></p>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/kmp_search.rs">KMP 实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/string_search_example.rs">字符串查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/kmp_search.rs">KMP 实现</a></p>
 <p><img src="./image/查找算法/string_search.png" alt="常见字符串查找算法复杂度.png"></p>
 <h2 id="并行查找"><a class="header" href="#并行查找">并行查找</a></h2>
 <ul>
@@ -283,7 +283,7 @@
 <li><strong>缺点</strong>：线程开销大，小数据集性能可能不如单线程。</li>
 <li><strong>适用场景</strong>：大规模排序数组，多核处理器环境。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/search_algorithm/src/parallel_search_example.rs">并行查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/parallel_search_example.rs">并行查找演示</a></p>
 
                     </main>
 
