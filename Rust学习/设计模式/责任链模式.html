@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
+            window.path_to_searchindex_js = "../../searchindex-cc346656.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-173617b7.js"></script>
@@ -181,7 +181,7 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="13_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#13_责任链模式-chain-of-responsibility-pattern">13_责任链模式 Chain of Responsibility Pattern</a></h1>
+                        <h1 id="18_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#18_责任链模式-chain-of-responsibility-pattern">18_责任链模式 Chain of Responsibility Pattern</a></h1>
 <h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 责任链模式</p>
 <p><strong>英文名称：</strong> Chain of Responsibility Pattern</p>
@@ -204,7 +204,7 @@
 <hr>
 <h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
 <p>在实际开发中，责任链模式主要解决以下问题：</p>
-<pre><code class="language-text id=&quot;v8k2pq&quot;">1. 多个对象可以处理同类请求，调用方无需指定处理者
+<pre><code class="language-text">1. 多个对象可以处理同类请求，调用方无需指定处理者
 2. 动态组合处理对象，增加灵活性
 3. 避免调用方与具体处理对象的强耦合
 4. 可以扩展处理链而不修改调用方代码
@@ -219,7 +219,7 @@
 <hr>
 <h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用责任链模式，可能出现：</p>
-<pre><code class="language-text id=&quot;f7m9rz&quot;">1. 调用方需要明确指定具体处理对象
+<pre><code class="language-text">1. 调用方需要明确指定具体处理对象
 2. 多个处理对象调用耦合度高
 3. 新增处理对象需要修改调用方
 4. 请求处理逻辑分散，维护成本高
@@ -227,7 +227,7 @@
 <hr>
 <h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，责任链模式通常包含三个角色：</p>
-<pre><code class="language-text id=&quot;p3f9kv&quot;">1. Handler（处理者接口）：定义处理请求方法
+<pre><code class="language-text">1. Handler（处理者接口）：定义处理请求方法
 2. ConcreteHandler（具体处理者）：实现 Handler 接口，并持有下一个处理者
 3. Client（调用方）：发送请求，不关心处理者
 </code></pre>
@@ -239,7 +239,7 @@
 <li>链条一直传递直到被处理或末尾</li>
 </ul>
 <p>结构示意：</p>
-<pre><code class="language-text id=&quot;x9k8hf&quot;">Handler
+<pre><code class="language-text">Handler
  ├── set_next(next: Box&lt;dyn Handler&gt;)
  └── handle(request)
 ConcreteHandler
@@ -249,7 +249,7 @@ ConcreteHandler
 <h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
 <p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong> 实现：</p>
-<pre class="playground"><code class="language-rust id=&quot;a6t9jh&quot; edition2024">// 请求处理接口
+<pre class="playground"><code class="language-rust edition2024">// 请求处理接口
 trait Handler {
     fn handle(&amp;self, request: &amp;str);
 }
@@ -313,7 +313,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
-<pre><code class="language-text id=&quot;v4k1qh&quot;">1. trait
+<pre><code class="language-text">1. trait
 2. impl
 3. Box&lt;dyn Trait&gt;（动态分发）
 4. Option&lt;Box&lt;dyn Trait&gt;&gt;（链式结构）
@@ -332,7 +332,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
-<pre><code class="language-text id=&quot;k2m9rv&quot;">1. Web 中间件链：身份验证 → 日志 → 缓存 → 路由
+<pre><code class="language-text">1. Web 中间件链：身份验证 → 日志 → 缓存 → 路由
 2. GUI 事件处理链：控件层级事件传递
 3. 审批流程：部门 → 分管领导 → 总经理
 4. 日志级别处理链：Debug → Info → Warning → Error
@@ -348,7 +348,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
-<pre><code class="language-text id=&quot;d9g3hr&quot;">1. 调用方无需关心具体处理对象
+<pre><code class="language-text">1. 调用方无需关心具体处理对象
 2. 可以动态组合处理链
 3. 每个处理者独立封装逻辑
 4. 松耦合，易于扩展新处理者
@@ -356,14 +356,14 @@ fn main() {
 </code></pre>
 <hr>
 <h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
-<pre><code class="language-text id=&quot;v8k6qp&quot;">1. 链条过长可能增加调用开销
+<pre><code class="language-text">1. 链条过长可能增加调用开销
 2. Box&lt;dyn Trait&gt; 动态分发有虚函数调用成本
 3. 多线程或异步实现增加同步或消息开销
 4. 调试链条逻辑可能较复杂
 </code></pre>
 <hr>
 <h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
-<pre><code class="language-text id=&quot;q7f3xz&quot;">1. 请求处理对象数量固定且少
+<pre><code class="language-text">1. 请求处理对象数量固定且少
 2. 调用方只需处理单个对象
 3. 链条组合和动态传递不必要
 4. 系统简单，不需要松耦合

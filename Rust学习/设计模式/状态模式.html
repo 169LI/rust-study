@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
+            window.path_to_searchindex_js = "../../searchindex-cc346656.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-173617b7.js"></script>
@@ -181,7 +181,415 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="状态模式"><a class="header" href="#状态模式">状态模式</a></h1>
+                        <h1 id="20_状态模式-state-pattern"><a class="header" href="#20_状态模式-state-pattern">20_状态模式 State Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 状态模式</p>
+<p><strong>英文名称：</strong> State Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>enum</code> 状态机、<code>match</code> 分发、trait + 状态对象、类型状态模式 Typestate</p>
+<p>状态模式的核心是：<strong>当对象内部状态发生变化时，对象的行为也随之改变，使对象在不同状态下表现出不同的行为。</strong></p>
+<p>在 Rust 中，状态模式最常见的写法不是传统 OOP 中的“一个状态一个类”，而是优先使用：</p>
+<pre><code class="language-text">enum 表达有限状态
+match 处理不同状态行为
+方法控制状态转换
+</code></pre>
+<p>如果需要在编译期禁止非法状态操作，还可以使用 Rust 很有特色的 <strong>类型状态模式 Typestate Pattern</strong>。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>状态模式的核心思想是：</p>
+<pre><code class="language-text">把对象的不同行为和它所处的状态关联起来。
+当状态变化时，对象的行为也随之变化。
+</code></pre>
+<p>也就是说，状态模式关注的是：</p>
+<pre><code class="language-text">同一个对象，在不同状态下，对同一个操作有不同反应。
+</code></pre>
+<p>例如订单系统中：</p>
+<pre><code class="language-text">未支付订单：可以支付，可以取消
+已支付订单：可以发货，不应该重复支付
+已发货订单：可以确认收货，不应该取消
+已完成订单：不能继续修改
+</code></pre>
+<p>这些行为都和“当前状态”有关。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>状态模式主要解决的是：<strong>对象存在多个状态，并且不同状态下行为不同的问题。</strong></p>
+<p>在实际开发中，如果一个对象状态较多，经常会写出大量判断：</p>
+<pre><code class="language-text">if state == "created" { ... }
+else if state == "paid" { ... }
+else if state == "shipped" { ... }
+else if state == "finished" { ... }
+</code></pre>
+<p>这种写法一开始简单，但状态越来越多后会变得难维护。</p>
+<p>状态模式试图解决：</p>
+<pre><code class="language-text">1. 状态判断分散在多个地方
+2. 状态变化规则不清晰
+3. 不同状态下的行为混在一起
+4. 新增状态时需要修改大量 if/else 或 match
+5. 容易出现非法状态转换
+</code></pre>
+<p>状态模式的目标是：<strong>把状态本身和状态对应的行为组织清楚。</strong></p>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用状态模式，可能出现以下问题：</p>
+<pre><code class="language-text">1. 代码中充满状态判断。
+2. 状态转换逻辑分散，难以追踪。
+3. 新增状态时，需要修改多个函数。
+4. 不同状态下的行为混在一起，代码可读性差。
+5. 容易出现非法状态，例如已完成订单又被取消。
+</code></pre>
+<p>在 Rust 中，如果用字符串表示状态，问题会更明显：</p>
+<pre><code class="language-text">"Created"
+"created"
+"CREATED"
+"creatd"
+</code></pre>
+<p>这些字符串编译器无法检查，写错了也可能运行时才发现。</p>
+<p>所以 Rust 更推荐用 <code>enum</code> 表达状态。</p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，状态模式通常包含三个角色：</p>
+<pre><code class="language-text">1. Context：上下文对象，持有当前状态。
+2. State：状态接口，定义状态相关行为。
+3. ConcreteState：具体状态类，实现不同行为和状态转换。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Context
+ ├── state: Box&lt;State&gt;
+ └── request()
+
+State
+ └── handle(context)
+
+ConcreteStateA
+ └── handle(context)
+
+ConcreteStateB
+ └── handle(context)
+</code></pre>
+<p>调用方调用 Context 的方法，Context 把行为委托给当前 State 对象。不同状态对象有不同实现。</p>
+<p>这种写法的好处是：每个状态类封装自己的行为。</p>
+<p>但缺点也明显：</p>
+<pre><code class="language-text">1. 状态类数量可能很多。
+2. 状态转换逻辑可能分散到多个状态类里。
+3. 类和对象结构较复杂。
+4. 简单状态机使用这种写法会显得过度设计。
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中最常见、最自然的状态模式实现方式是：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>例如订单状态可以写成：</p>
+<pre class="playground"><code class="language-rust edition2024">enum OrderState {
+    Created,
+    Paid,
+    Shipped,
+    Finished,
+    Cancelled,
+}
+
+struct Order {
+    state: OrderState,
+}
+
+impl Order {
+    fn new() -&gt; Self {
+        Self {
+            state: OrderState::Created,
+        }
+    }
+
+    fn pay(&amp;mut self) {
+        match self.state {
+            OrderState::Created =&gt; {
+                println!("订单支付成功");
+                self.state = OrderState::Paid;
+            }
+            _ =&gt; {
+                println!("当前状态不能支付");
+            }
+        }
+    }
+
+    fn ship(&amp;mut self) {
+        match self.state {
+            OrderState::Paid =&gt; {
+                println!("订单已发货");
+                self.state = OrderState::Shipped;
+            }
+            _ =&gt; {
+                println!("当前状态不能发货");
+            }
+        }
+    }
+
+    fn finish(&amp;mut self) {
+        match self.state {
+            OrderState::Shipped =&gt; {
+                println!("订单已完成");
+                self.state = OrderState::Finished;
+            }
+            _ =&gt; {
+                println!("当前状态不能完成");
+            }
+        }
+    }
+}
+
+fn main() {
+    let mut order = Order::new();
+
+    order.pay();
+    order.ship();
+    order.finish();
+}</code></pre>
+<p>这种写法的特点是：</p>
+<pre><code class="language-text">1. 状态是有限且明确的。
+2. match 会强制处理状态分支。
+3. 状态转换集中在对象方法中。
+4. 不需要为每个状态创建独立结构体。
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的状态模式有几个明显特点。</p>
+<p>第一，Rust 更倾向于用 <code>enum</code> 表达有限状态。
+传统 OOP 中可能会为每个状态创建一个类，而 Rust 中很多状态本质上是一组有限取值，用 <code>enum</code> 更直接。</p>
+<p>第二，Rust 的 <code>match</code> 可以检查状态是否处理完整。
+如果状态枚举新增了一个变体，相关 <code>match</code> 可能会提示你需要补充分支。这比字符串状态或状态码更安全。</p>
+<p>第三，Rust 可以让不同状态携带不同数据。
+例如：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum DownloadState {
+    Waiting,
+    Downloading { progress: u8 },
+    Finished { path: String },
+    Failed { reason: String },
+}
+<span class="boring">}</span></code></pre>
+<p>这比传统写法中把所有字段都放在一个对象里更清晰。</p>
+<p>第四，Rust 可以通过类型系统限制非法操作。
+如果只用 <code>enum + match</code>，非法操作通常是在运行时判断；如果使用类型状态模式，可以在编译期禁止某些操作。</p>
+<p>第五，Rust 不依赖继承体系。
+状态行为可以通过 <code>enum + match</code>、trait、泛型或类型状态实现，而不是必须依赖“状态父类 + 具体状态子类”。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，状态模式主要有三种实现层次。</p>
+<p>第一种是 <strong>enum 状态机</strong>。
+适合状态数量有限、状态转换规则清晰的场景。这是最推荐的入门写法。</p>
+<p>第二种是 <strong>trait + 状态对象</strong>。
+适合状态行为非常复杂，并且不同状态之间差异很大时。写法更接近传统 OOP。</p>
+<p>第三种是 <strong>类型状态模式 Typestate</strong>。
+适合希望在编译期限制非法操作的场景。</p>
+<p>例如网络连接：</p>
+<pre><code class="language-text">未连接状态：只能 connect
+已连接状态：才能 send
+已关闭状态：不能 send
+</code></pre>
+<p>如果使用类型状态模式，可以让“未连接时调用 send”直接编译失败，而不是运行时报错。</p>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<p>状态模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. enum
+2. match
+3. struct
+4. impl
+5. trait
+6. 泛型
+7. 所有权移动
+8. 类型状态模式 Typestate
+9. Option / Result
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">enum：表达有限状态
+match：根据状态分发行为
+struct：保存对象数据
+impl：定义状态转换方法
+trait：抽象复杂状态行为
+泛型：表达不同类型状态
+所有权移动：表达状态转换后旧状态失效
+Option / Result：表达状态转换成功或失败
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>如果要进一步体现 Rust 特色，则要理解：</p>
+<pre><code class="language-text">Typestate 类型状态模式
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<p>状态模式的性能和具体实现方式有关。</p>
+<p>如果使用 <code>enum + match</code>：</p>
+<pre><code class="language-text">1. 性能通常很好。
+2. 状态分支在编译期明确。
+3. 没有堆分配。
+4. 没有动态分发。
+5. 适合绝大多数普通状态机。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn State&gt;</code> 这类 trait object：</p>
+<pre><code class="language-text">1. 会有动态分发开销。
+2. 可能涉及堆分配。
+3. 结构更灵活，但性能和复杂度成本更高。
+</code></pre>
+<p>如果使用类型状态模式：</p>
+<pre><code class="language-text">1. 很多错误可以在编译期发现。
+2. 运行时状态判断可能减少。
+3. 代码类型数量会增加。
+4. 初学者理解成本较高。
+</code></pre>
+<p>所以在 Rust 中选择状态模式实现方式时，可以遵循：</p>
+<pre><code class="language-text">简单状态机：enum + match
+复杂行为状态：trait + 状态对象
+强约束流程：Typestate 类型状态模式
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">Rust 中状态模式的首选通常是 enum + match，性能好、表达清晰、类型安全。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<p>状态模式适合用于对象行为明显依赖状态的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 订单流程：创建、支付、发货、完成、取消
+2. 网络连接：未连接、已连接、断开、重连中
+3. 下载任务：等待、下载中、完成、失败
+4. 播放器：停止、播放中、暂停
+5. 文档审核：草稿、审核中、已发布、已驳回
+6. 游戏角色：普通、攻击、防御、眩晕、死亡
+7. 编译流程：词法分析、语法分析、类型检查、代码生成
+8. 设备控制：未初始化、已初始化、运行中、故障
+</code></pre>
+<p>在 Rust 项目中，状态模式经常出现在：</p>
+<pre><code class="language-text">协议解析
+任务调度
+异步流程控制
+文件处理流程
+网络客户端
+编译器或解释器
+嵌入式设备状态管理
+</code></pre>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<p>状态模式容易和策略模式、模板方法模式、责任链模式、备忘录模式混淆。</p>
+<h3 id="101-状态模式和策略模式"><a class="header" href="#101-状态模式和策略模式">10.1 状态模式和策略模式</a></h3>
+<p>二者都可能表现为“不同行为可以切换”，但关注点不同。</p>
+<pre><code class="language-text">策略模式关注：算法或行为可以被调用方主动替换。
+状态模式关注：对象内部状态变化后，行为自动变化。
+</code></pre>
+<p>策略模式更像是：</p>
+<pre><code class="language-text">我选择用哪种算法。
+</code></pre>
+<p>状态模式更像是：</p>
+<pre><code class="language-text">对象处于什么状态，就表现出什么行为。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">选择 zip/gzip 压缩算法：策略模式
+订单从未支付变成已支付后行为变化：状态模式
+</code></pre>
+<hr>
+<h3 id="102-状态模式和模板方法模式"><a class="header" href="#102-状态模式和模板方法模式">10.2 状态模式和模板方法模式</a></h3>
+<p>模板方法模式关注的是固定流程。</p>
+<p>状态模式关注的是不同状态下行为不同。</p>
+<pre><code class="language-text">模板方法模式：流程骨架固定，部分步骤可变。
+状态模式：对象状态变化后，同一操作的行为变化。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">文件处理固定为读取 → 解析 → 保存：模板方法模式
+播放器在播放、暂停、停止状态下点击按钮行为不同：状态模式
+</code></pre>
+<hr>
+<h3 id="103-状态模式和责任链模式"><a class="header" href="#103-状态模式和责任链模式">10.3 状态模式和责任链模式</a></h3>
+<p>责任链模式关注请求沿链传递。</p>
+<p>状态模式关注对象自身状态变化。</p>
+<pre><code class="language-text">责任链模式：请求交给谁处理。
+状态模式：当前状态决定如何处理。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">Web 请求经过多个中间件：责任链模式
+订单根据当前状态决定是否能取消：状态模式
+</code></pre>
+<hr>
+<h3 id="104-状态模式和备忘录模式"><a class="header" href="#104-状态模式和备忘录模式">10.4 状态模式和备忘录模式</a></h3>
+<p>二者都涉及状态，但目的不同。</p>
+<pre><code class="language-text">状态模式：根据当前状态改变行为。
+备忘录模式：保存历史状态，方便之后恢复。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">编辑器处于编辑/只读/预览状态：状态模式
+保存编辑器历史内容用于撤销：备忘录模式
+</code></pre>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<p>状态模式的优点主要有：</p>
+<pre><code class="language-text">1. 将状态和行为关联起来，逻辑更清晰。
+2. 减少大量散落的 if/else 状态判断。
+3. 状态转换规则更容易集中管理。
+4. 新增状态时结构更清楚。
+5. Rust 中使用 enum 可以获得编译期检查。
+6. 使用类型状态模式可以在编译期禁止非法操作。
+</code></pre>
+<p>从 Rust 角度看，状态模式最大的优点是：</p>
+<pre><code class="language-text">用类型系统表达状态边界，让错误尽量提前暴露。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<p>状态模式的代价主要有：</p>
+<pre><code class="language-text">1. 状态数量多时，match 分支可能变长。
+2. 如果用 trait 状态对象，结构会更复杂。
+3. 如果用 Typestate，类型数量会增加。
+4. 状态转换分散不当时，仍然会难以维护。
+5. 对简单状态使用复杂状态模式会显得过度设计。
+</code></pre>
+<p>特别是在 Rust 中，不能一看到状态就立刻写 <code>Box&lt;dyn State&gt;</code>。</p>
+<p>很多时候：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>已经足够清晰。</p>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用复杂的状态模式：</p>
+<pre><code class="language-text">1. 状态只有一两个，而且逻辑很简单。
+2. 状态不会影响对象行为。
+3. 普通布尔字段已经能清楚表达。
+4. 只是临时判断，不需要长期维护。
+5. 为了模仿传统 OOP，强行把每个状态拆成对象。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">状态少、逻辑简单：普通字段或 enum 即可。
+状态多、行为明显不同：状态模式。
+非法操作必须编译期禁止：Typestate。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 订单状态流转</p>
+<pre><code class="language-text">订单初始状态是 Created。
+Created 状态可以支付，也可以取消。
+Paid 状态可以发货。
+Shipped 状态可以确认完成。
+Finished 状态不能继续修改。
+Cancelled 状态不能继续操作。
+</code></pre>
+<p>处理流程可以设计为：</p>
+<pre><code class="language-text">1. 使用 enum OrderState 表达状态。
+2. Order 结构体保存当前状态。
+3. pay、ship、finish、cancel 方法根据当前状态执行不同逻辑。
+4. 非法状态转换返回错误或提示。
+5. 后续可以升级为 Typestate，让非法操作在编译期报错。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">enum
+match
+impl
+Result
+所有权移动
+Typestate
+</code></pre>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<p>状态模式的本质是：</p>
+<pre><code class="language-text">把对象行为和对象当前状态绑定起来，使对象在不同状态下对同一操作表现出不同的行为。
+</code></pre>
+<p>在 Rust 中，状态模式最自然的实现方式通常是 <code>enum + match</code>。当状态转换规则复杂时，可以结合 trait 状态对象；当希望编译期禁止非法操作时，可以进一步使用类型状态模式 Typestate。</p>
 
                     </main>
 

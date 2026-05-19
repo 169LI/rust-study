@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-a5556649.js";
+            window.path_to_searchindex_js = "../../searchindex-cc346656.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-173617b7.js"></script>
@@ -181,7 +181,7 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="11_外观模式-facade-pattern"><a class="header" href="#11_外观模式-facade-pattern">11_外观模式 Facade Pattern</a></h1>
+                        <h1 id="12_外观模式-facade-pattern"><a class="header" href="#12_外观模式-facade-pattern">12_外观模式 Facade Pattern</a></h1>
 <h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 外观模式</p>
 <p><strong>英文名称：</strong> Facade Pattern</p>
@@ -204,7 +204,7 @@
 <hr>
 <h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
 <p>在实际开发中，外观模式主要解决以下问题：</p>
-<pre><code class="language-text id=&quot;v9k8qp&quot;">系统内部存在多个复杂模块，调用方难以直接使用。
+<pre><code class="language-text">系统内部存在多个复杂模块，调用方难以直接使用。
 子系统接口复杂、调用顺序或参数多。
 希望提供简单统一的 API，隐藏内部实现。
 调用方不需要了解子系统细节即可完成任务。
@@ -219,7 +219,7 @@
 <hr>
 <h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用外观模式，可能出现：</p>
-<pre><code class="language-text id=&quot;f6m2rs&quot;">1. 调用方直接访问子系统，耦合度高。
+<pre><code class="language-text">1. 调用方直接访问子系统，耦合度高。
 2. 调用顺序和参数管理复杂。
 3. 多个模块组合逻辑分散，易出错。
 4. 系统修改时调用方也需调整。
@@ -227,7 +227,7 @@
 <hr>
 <h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，外观模式通常有以下角色：</p>
-<pre><code class="language-text id=&quot;q1k7sv&quot;">1. Subsystem：子系统类，提供具体功能。
+<pre><code class="language-text">1. Subsystem：子系统类，提供具体功能。
 2. Facade：外观类，组合子系统接口，提供高层次方法。
 3. Client：调用方，只依赖外观接口。
 </code></pre>
@@ -236,7 +236,7 @@
 <h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
 <h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
 <p>在 Rust 中，外观模式通常通过 <strong>结构体封装子模块 + impl 提供高层方法</strong> 实现：</p>
-<pre class="playground"><code class="language-rust id=&quot;a7f2jk&quot; edition2024">// 子系统 A
+<pre class="playground"><code class="language-rust edition2024">// 子系统 A
 struct FileSystem;
 impl FileSystem {
     fn read_file(&amp;self, path: &amp;str) { println!("读取文件 {}", path); }
@@ -290,7 +290,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
-<pre><code class="language-text id=&quot;v3k9rt&quot;">1. struct + impl
+<pre><code class="language-text">1. struct + impl
 2. trait（可选）
 3. 函数接口封装
 4. 模块系统
@@ -307,7 +307,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
-<pre><code class="language-text id=&quot;k2v7rh&quot;">1. 文件处理系统：读取 → 压缩 → 加密
+<pre><code class="language-text">1. 文件处理系统：读取 → 压缩 → 加密
 2. 网络请求系统：认证 → 请求 → 响应解析
 3. 游戏引擎：渲染 + 音频 + 物理
 4. 测试框架：初始化 → 配置 → 执行 → 清理
@@ -323,7 +323,7 @@ fn main() {
 </ul>
 <hr>
 <h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
-<pre><code class="language-text id=&quot;d7k9rv&quot;">1. 调用方使用简单接口，隐藏子系统复杂性
+<pre><code class="language-text">1. 调用方使用简单接口，隐藏子系统复杂性
 2. 减少调用方依赖和耦合
 3. 可以集中管理子系统操作顺序
 4. 易于扩展新的子系统操作
@@ -331,14 +331,14 @@ fn main() {
 </code></pre>
 <hr>
 <h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
-<pre><code class="language-text id=&quot;v8m3qp&quot;">1. 增加外观结构层级
+<pre><code class="language-text">1. 增加外观结构层级
 2. 外观方法需要维护内部子系统调用顺序
 3. 调用方无法直接访问子系统特殊方法
 4. 多层封装可能略增加调试难度
 </code></pre>
 <hr>
 <h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
-<pre><code class="language-text id=&quot;q6f2xd&quot;">1. 子系统本身简单，无需统一接口
+<pre><code class="language-text">1. 子系统本身简单，无需统一接口
 2. 调用方需要频繁访问子系统特殊方法
 3. 系统模块很少，外观结构冗余
 </code></pre>
