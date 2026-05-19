@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-cc346656.js";
+            window.path_to_searchindex_js = "searchindex-57756be3.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-173617b7.js"></script>
+        <script src="toc-3631dbdf.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -15643,9 +15643,590 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="leetcode"><a class="header" href="#leetcode">LeetCode</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="定长滑动窗口"><a class="header" href="#定长滑动窗口">定长滑动窗口</a></h1>
+<h1 id="数据结构与算法"><a class="header" href="#数据结构与算法">数据结构与算法</a></h1>
+<p>有一定数据结构的基础(可以学习[2])学这部分会简单一点,有些固定的词知道什么意思，</p>
+<p>这份笔记里不会过多的记录基础概念，更多的是去演示如何使用这些数据结构，使用现有封装好的API接口，或者重新去实现。</p>
+<h2 id="目录-1"><a class="header" href="#目录-1">目录</a></h2>
+<ul>
+<li><a href="#rust-数据结构的性能">Rust数据结构的性能</a></li>
+<li><a href="#基本数据结构">基本数据结构</a></li>
+<li><a href="#查找算法">查找算法</a></li>
+<li><a href="#排序">排序算法</a></li>
+<li><a href="#树">树</a></li>
+<li><a href="#图">图</a></li>
+</ul>
+<h2 id="参考文献-1"><a class="header" href="#参考文献-1">参考文献</a></h2>
+<p>[1]<a href="https://github.com/QMHTMY/RustBook/tree/main/books">Rust数据结构与算法（中文）. 梦寰.2021-02-11</a><a href="https://github.com/QMHTMY/RustBook/tree/main">随书代码仓库</a></p>
+<p>[2]<a href="https://www.hello-algo.com/chapter_hello_algo/">Hello算法. hello-algo (开源项目)</a></p>
+<p>[3]<a href="https://github.com/huangbqsky/rust-datastruct-and-algorithm?tab=readme-ov-file">用Rust语言实现常用的数据结构和算法.huangbqsky(开源项目)</a></p>
+<p>[4]<a href="https://algo.course.rs/">Rust算法教程(开源项目)</a></p>
+<p>[5]<a href="https://github.com/TheAlgorithms/Rust">The Algorithms - Rust库</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="定长滑动窗口-1"><a class="header" href="#定长滑动窗口-1">定长滑动窗口</a></h1>
+<h1 id="rust-数据结构的性能"><a class="header" href="#rust-数据结构的性能">Rust 数据结构的性能</a></h1>
+<h2 id="标量和复合类型"><a class="header" href="#标量和复合类型">标量和复合类型</a></h2>
+<p>标量类型代表一个单独的值，复合类型是标量类型的组合。</p>
+<ul>
+<li><code>Rust</code> 中有四种基本的标量类型：<strong>整型、浮点型、布尔型、字符型；</strong></li>
+<li>有两种复合类型：<strong>元组、数组</strong>。</li>
+</ul>
+<p>标量类型都是最基本的和内存结合最紧密的原生类型，运算效率非常高，可以视为 <code>O(1)</code>，而复合类型则复杂一些，
+复杂度随其数据规模而变化。</p>
+<pre class="playground"><code class="language-rust edition2024">  fn main() {
+    let a: i8 = -2;
+    let b: f32 = 2.34;
+    let c: bool = true;
+    let d: char = 'a';
+  
+    let x: (i32, f64, u8) = (200, 5.32, 1);
+    let xi32 = x.0;
+    let xf64 = x.1;
+    let xu8 = x.2;
+   }</code></pre>
+<p>元组是将多个各种类型的值组合成一个复合类型的数据结构。元组长度固定，一旦声明，
+其长度不能增加或缩小。元组的索引从<code> 0</code> 开始，直接用<code>“.”</code>号获取值。</p>
+<p>数组一旦声明，长度也不能增减，但与元组不同的是，数组中每个元素的类型必须相同。
+数组非常有用，基于数组的切片其实更灵活，所以也更常用。</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    let months = ["January", "February", "March", "April", 
+                "May", "June", "July", "August", "September", 
+                "October", "November", "December"];
+    let first_month = months[0];
+    let halfyear = &amp;months[..6];
+    
+    let mut monthsv = Vec::new();
+    for month in months { monthsv.push(month); }
+ }</code></pre>
+<p><code>Rust</code> 里的其他数据类型都是由标量和复合类型构成的集合类型，如 <code>Vec</code>、<code>HashMap</code> 等。
+<code>Vec</code> 类型是标准库提供的一个允许增加和缩小长度的类似数组的集合类型。</p>
+<h2 id="集合类型"><a class="header" href="#集合类型">集合类型</a></h2>
+<p>Rust 的集合类型是基于标量和复合类型构造的，其中又分为<strong>线性</strong>和<strong>非线性</strong>两类。</p>
+<ul>
+<li><strong>线性的集合类型有</strong>：<code>String、Vec、VecDeque、LinkedList</code></li>
+<li><strong>非线性集合类型的有</strong>：<code>HashMap、BTreeMap、HashSet、BTreeSet、BinaryHeap</code>。</li>
+</ul>
+<p><img src="LeetCode/数据结构/image/img.png" alt="img.png"></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="基本数据结构"><a class="header" href="#基本数据结构">基本数据结构</a></h1>
+<h2 id="目录-2"><a class="header" href="#目录-2">目录</a></h2>
+<ul>
+<li>1、<a href="#线性数据结构">线性数据结构</a></li>
+<li>2、<a href="#特殊类型结构">Rust特殊类型结构</a></li>
+</ul>
+<h2 id="线性数据结构"><a class="header" href="#线性数据结构">线性数据结构</a></h2>
+<p>Rust 中的线性数据结构如下：</p>
+<ul>
+<li><a href="#1数组">数组</a>（Array）：<code>[T; N]</code></li>
+<li><a href="#2向量">向量</a>（Vec）：<code>Vec&lt;T&gt;</code></li>
+<li><a href="#3队列">队列</a>（Queue）：<code>std::collections::VecDeque&lt;T&gt;</code></li>
+<li><a href="#4双端队列">双端队列</a>（VecDeque）：<code>VecDeque&lt;T&gt;</code></li>
+<li><a href="#5链表">链表</a>：<code>LinkedList&lt;T&gt;</code></li>
+<li><a href="#6栈">栈</a>（Stack）：<code>Vec&lt;T&gt;</code> 或 <code>VecDeque&lt;T&gt;</code></li>
+</ul>
+<h3 id="1数组"><a class="header" href="#1数组">1、数组</a></h3>
+<ul>
+<li><strong>定义</strong>：<code>Array</code> 是 <code>Rust</code> 中的一种基本数据结构，表示固定长度的同构元素集合，类型为<code> [T; N]</code>，其中 <code>T</code> 是元素类型，<code>N</code> 是长度，在编译时确定。</li>
+<li><strong>内存分配</strong>：存储在栈上，内存是连续的，分配大小在编译时已知。</li>
+<li><strong>所有权</strong>：<code>Array</code> 是值类型。如果其元素实现了 <code>Copy trait</code>（如 <code>i32</code>），则数组也实现 <code>Copy</code>，复制时不转移所有权；否则（如 <code>String</code>），会转移所有权。</li>
+<li><strong>可变性</strong>：长度不可变，但元素可以通过可变绑定（<code>mut</code>）修改。</li>
+<li><strong>使用场景</strong>：适合需要固定大小且数量已知的数据集合，例如坐标点、固定长度的缓冲区等。</li>
+<li><strong>性能</strong>：由于栈分配，访问和操作效率高，没有额外的内存管理开销。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/array_example.rs">用法示例</a></p>
+<h3 id="2向量"><a class="header" href="#2向量">2、向量</a></h3>
+<ul>
+<li><strong>定义</strong>：<code>Vec</code> 是 <code>Rust</code> 标准库（<code>std::vec</code>）提供的一种动态数组，类型为 <code>Vec&lt;T&gt;</code>，可以存储任意数量的同构元素。</li>
+<li><strong>内存分配</strong>：存储在堆上，通过 <code>Rust</code> 的内存分配器管理，内存是连续的，支持动态调整大小。</li>
+<li><strong>所有权</strong>：<code>Vec</code> 是拥有者类型，拥有其元素的所有权。移动时（如赋值给新变量），原 <code>Vec</code> 不可用，除非元素是 <code>Copy</code> 类型。</li>
+<li><strong>可变性</strong>：长度和元素都可变，支持动态扩展（<code>push</code>）和缩减（<code>pop</code>）等操作。</li>
+<li><strong>使用场景</strong>：适合需要运行时动态调整大小的数据集合，例如列表、队列或需要追加元素的场景。</li>
+<li><strong>性能</strong>：因堆分配，操作（如 <code>push</code>）平均时间复杂度为 <code>O(1)</code>，但当容量不足时需要重新分配内存，可能为 <code>O(n)</code>。</li>
+</ul>
+<p><strong>Vec 内部维护三个主要字段：</strong></p>
+<ul>
+<li><strong>指针</strong>：指向堆上分配的内存，存储实际元素。</li>
+<li><strong>长度</strong>：当前存储的元素数量（<code>len</code>）。</li>
+<li><strong>容量</strong>：分配的内存能容纳的元素数量（<code>capacity</code>）。
+当 <code>len</code> 接近或超过 <code>capacity</code> 时，<code>Vec</code> 会重新分配更大的内存（通常以 <code>2</code> 倍增长），并将现有元素复制到新内存。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现(还未实现)]</p>
+<h3 id="3队列"><a class="header" href="#3队列">3、队列</a></h3>
+<p><code>Rust</code> 的标准库提供了 <code>std::collections::VecDeque</code>，这是一个高效的双端队列（<code>double-ended queue</code>），既支持队列的 <code>FIFO</code> 操作，也支持栈的 <code>LIFO</code> 操作，非常适合实现队列。</p>
+<ul>
+<li><strong>先进先出（FIFO）</strong>：先入队的元素先出队。</li>
+<li><strong>线性结构</strong>：元素按顺序排列，尾部入队，头部出队。</li>
+<li><strong>高效首尾操作</strong>：入队（<code>push_back</code>）和出队（<code>pop_front</code>）通常为 <code>O(1)</code>。</li>
+<li><strong>单向访问</strong>：通常只访问头部（<code>front</code>）或尾部添加，不支持随机访问。</li>
+<li><strong>动态大小</strong>：可动态增长或缩小。</li>
+<li><strong>有限容量</strong>（可选）：可设置最大容量，超限需特殊处理。</li>
+<li><strong>线程安全性</strong>（视实现）：<code>VecDeque</code> 非线程安全，需 <code>Mutex</code> 或用 <code>std::sync::mpsc。</code></li>
+<li><strong>变体</strong>：支持双端队列（<code>VecDeque</code>）、优先级队列（<code>BinaryHeap</code>）等。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/queue_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/queue_achieve.rs">实现</a></p>
+<h3 id="4双端队列"><a class="header" href="#4双端队列">4、双端队列</a></h3>
+<ul>
+<li><strong>双端操作</strong>：支持在队列头部和尾部进行添加（<code>push</code>）和移除（<code>pop</code>）。</li>
+<li><strong>先进先出/后进先出</strong>：可实现 <code>FIFO</code>（队列）或<code> LIFO</code>（栈）行为。</li>
+<li><strong>高效首尾操作</strong>：头部和尾部操作（如 <code>push_front、pop_front、push_back、pop_back</code>）均摊复杂度为 <code>O(1)</code>。</li>
+<li><strong>动态大小</strong>：可动态增长或缩小，元素数量不固定。</li>
+<li><strong>随机访问</strong>：支持通过索引访问任意元素（<code>O(1)</code>）。</li>
+<li><strong>内存连续</strong>：元素通常存储在连续内存中，缓存友好。</li>
+<li><strong>非线程安全</strong>：标准实现（如 <code>VecDeque</code>）需配合锁用于多线程。</li>
+<li><strong>灵活变体</strong>：可作为队列、栈或双端队列使用。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/deque_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/deque_achieve.rs">实现</a></p>
+<h3 id="5链表"><a class="header" href="#5链表">5、链表</a></h3>
+<ul>
+<li><strong>动态结构</strong>：链表通过指针连接节点，允许动态分配和释放内存，适合大小不固定的数据。</li>
+<li><strong>非连续存储</strong>：节点在内存中不连续，插入和删除操作效率高（O(1)），但随机访问效率低（O(n)）。</li>
+<li><strong>灵活性</strong>：支持单向、双向、循环等多种形式，适应不同场景。</li>
+<li><strong>空间开销</strong>：每个节点需额外存储指针，占用更多内存。</li>
+<li><strong>顺序访问</strong>：遍历需从头或尾开始，无法直接跳跃到任意节点。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
+<h3 id="6栈"><a class="header" href="#6栈">6、栈</a></h3>
+<p><code>Rust</code> 没有专门的栈类型或 <code>API</code>，但 Vec<t> 的 <code>push、pop、last</code>等方法提供了高效、封装好的栈操作，足以满足 <code>LIFO</code> 需求。</t></p>
+<ul>
+<li><strong>LIFO 顺序</strong>：最后压入（<code>push</code>）的元素最先弹出（<code>pop</code>），类似堆叠的盘子。</li>
+<li><strong>高效操作</strong>：压入（<code>push</code>）和弹出（<code>pop</code>）操作通常为 <code>O(1)</code> 时间复杂度。</li>
+<li><strong>受限访问</strong>：只能操作栈顶元素，无法直接访问中间元素。</li>
+<li><strong>内存管理</strong>：栈通常在连续内存中实现（如数组）或通过链表实现，<code>Rust</code> 中常用 <code>Vec</code> 作为栈的底层结构。</li>
+<li><strong>用途</strong>：
+<ul>
+<li>函数调用管理（调用栈）。</li>
+<li>表达式求值（如中缀转后缀）。</li>
+<li>回溯算法（如深度优先搜索）。</li>
+<li>撤销/重做功能。</li>
+</ul>
+</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/stack_vec_achieve.rs">vec实现</a>+<a href="../example_code/data_struct/basic_data_structure/src/stack_deque_achieve.rs">队列实现</a></p>
+<p><a href="../example_code/data_struct/basic_data_structure/src/stack_base_conversion.rs">进制转换实现</a></p>
+<p><a href="../example_code/data_struct/basic_data_structure/src/stack_bracket_matching.rs">括号匹配实现</a></p>
+<p><a href="../example_code/data_struct/basic_data_structure/src/stack_infix_to_postfix.rs">栈的实现</a></p>
+<h2 id="特殊类型结构"><a class="header" href="#特殊类型结构">特殊类型结构</a></h2>
+<ul>
+<li><a href="#切片-1">切片</a>：<code>&amp;[T]</code></li>
+<li><a href="#字符串">字符串</a>：<code>String</code> 和 <code>&amp;str</code></li>
+</ul>
+<h3 id="切片-1"><a class="header" href="#切片-1">切片</a></h3>
+<ul>
+<li><strong>定义</strong>：切片是 <code>Rust</code> 中用于访问连续数据子集的引用类型，分为字符串切片（<code>&amp;str</code>）和数组切片（<code>&amp;[T]</code>）
+<ul>
+<li><strong>字符串切片</strong>（<code>&amp;str</code>）：专门用于 <code>UTF-8</code> 编码的字符串数据，引用 <code>String</code> 或字符串字面量的一部分。</li>
+<li><strong>数组切片</strong>（<code>&amp;[T]</code>）：引用数组、<code>Vec&lt;T&gt;</code> 或其他连续序列的一部分，<code>T</code> 是任意类型。</li>
+</ul>
+</li>
+<li><strong>特点</strong>：轻量、内存安全、不拥有数据，支持只读或可变访问。</li>
+<li><strong>使用场景</strong>：函数参数、字符串处理、数组操作、避免数据拷贝。</li>
+<li><strong>优势</strong>：结合 <code>Rust</code> 的借用规则，切片提供高效、灵活的数据访问方式。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/slice_example.rs">用法示例</a></p>
+<h3 id="字符串"><a class="header" href="#字符串">字符串</a></h3>
+<ul>
+<li><strong>定义</strong>：<code>String</code> 是 <code>Rust</code> 标准库中用于动态、可变字符串的拥有类型，基于堆分配，支持 <code>UTF-8</code> 编码。</li>
+<li><strong>特点</strong>：拥有所有权、可变、动态增长，与 <code>&amp;str</code> 配合灵活。</li>
+<li><strong>使用场景</strong>：动态字符串构建、 字符串修改、 与切片配合、 多语言支持、 临时缓冲。</li>
+</ul>
+<p><a href="../example_code/data_struct/basic_data_structure/src/string_example.rs">用法示例</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="查找算法"><a class="header" href="#查找算法">查找算法</a></h1>
+<h2 id="目录-3"><a class="header" href="#目录-3">目录</a></h2>
+<ul>
+<li><a href="#顺序查找">顺序查找</a>：简单，适合小数据或无序集合，使用 <code>find</code> 或 <code>position</code>-</li>
+<li><a href="#二分查找">二分查找</a>：高效，适合有序数据，使用 <code>binary_search</code>-</li>
+<li><a href="#哈希查找">哈希查找</a>：快速，适合键值对或存在性检查，使用 <code>HashMap</code>/<code>HashSet</code>-</li>
+<li><a href="#字符串查找">字符串查找</a> ：<code>KMP</code> 等算法适用于模式匹配</li>
+<li><a href="#并行查找">高级场景</a>：根据需求实现插值查找、并行查找等</li>
+</ul>
+<h2 id="顺序查找"><a class="header" href="#顺序查找">顺序查找</a></h2>
+<p>当数据项存储在诸如<code>Vec</code>，数组，切片这样的集合中时，数据具有线性关系，因为每个数据项都存储在相对于其他数据项的位置。
+在切片中，这些相对位置是数据项的索引值。由于索引值是有序的，可以按顺序访问，所以这样的数据结构也是线性的。
+回想前面学习的栈，队列，链表都是线性的。基于这种和物理世界相同的线性逻辑，一种很自然的查找技术就是<strong>线性查找</strong>，或者叫<strong>顺序查找</strong></p>
+<ul>
+<li><strong>原理</strong>：逐一比较集合元素与目标值，直到找到或遍历结束。</li>
+<li><strong>时间复杂度</strong>：平均/最坏 <code>O(n)</code>，最好 <code>O(1)</code>。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，仅需常数空间。</li>
+<li><strong>适用场景</strong>：无序数据、小规模数据、单次查找。</li>
+<li><strong>优点</strong>：实现简单、无需排序、支持任意数据类型。</li>
+<li><strong>缺点</strong>：效率低，不适合大数据或频繁查找。</li>
+<li><strong>Rust 实现</strong>：使用 <code>iter().position()</code> 或 <code>find()</code>，支持泛型，安全高效。</li>
+</ul>
+<p><a href="../example_code/data_struct/search_algorithm/src/sequential_search_example.rs">顺序查找演示</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/sequential_search_achieve.rs">顺序查找实现</a></p>
+<p><img src="LeetCode/数据结构/image/查找算法/img.png" alt="顺序查找复杂度.png"></p>
+<h2 id="二分查找"><a class="header" href="#二分查找">二分查找</a></h2>
+<p>二分查找是一种高效的查找算法，适用于<strong>有序数据集合</strong>。
+其基本思想是将查找区间不断减半，通过比较中间元素与目标值的大小，决定继续在左半部分还是右半部分查找，直到找到目标值或查找区间为空。</p>
+<ul>
+<li><strong>原理</strong>：在有序集合中，比较中间元素与目标值，根据大小关系排除一半元素，重复直到找到或范围为空。</li>
+<li><strong>时间复杂度</strong>：平均/最坏<code> O(log n)</code>，最好 <code>O(1)</code>。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>（迭代实现），<code>O(log n)</code>（递归实现）。</li>
+<li><strong>适用场景</strong>：有序数组或切片、大规模数据、频繁查找。</li>
+<li><strong>优点</strong>：高效，适合大数据量，时间复杂度低。</li>
+<li><strong>缺点</strong>：要求数据预先排序，不适用动态数据或无序集合。</li>
+<li><strong>Rust 特性</strong>：标准库提供 <code>binary_search</code> 等 <code>API</code>，泛型支持，安全高效。</li>
+</ul>
+<p><a href="../example_code/data_struct/search_algorithm/src/binary_search_example.rs">二分查找演示</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/binary_search_achieve.rs">二分查找实现</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/interpolation_search.rs">插值查找</a></p>
+<h2 id="哈希查找"><a class="header" href="#哈希查找">哈希查找</a></h2>
+<p>哈希查找是一种基于哈希表的数据结构（如 <code>HashMap</code> 或 <code>HashSet</code>）的查找算法，通过将键映射到哈希值实现快速定位</p>
+<p>（这里以<strong>线性探测法</strong>为例）</p>
+<ul>
+<li><strong>原理</strong>：通过哈希函数将键映射到索引，访问哈希表中的槽位查找值。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>平均：<code>O(1)</code>（假设哈希函数均匀，冲突少）。</li>
+<li>最坏：<code>O(n)</code>（冲突严重时，退化为线性查找）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(n)</code>，存储键值对或元素。</li>
+<li><strong>适用场景</strong>：快速键值映射、检查元素存在性、频繁查找。</li>
+<li><strong>优点</strong>：平均情况下极快，适合动态数据。</li>
+<li><strong>缺点</strong>：依赖哈希函数质量，冲突可能降低性能，空间开销较大。</li>
+<li><strong>Rust 特性</strong>：标准库提供 <code>HashMap</code> 和 <code>HashSet</code>，高效、安全，支持泛型</li>
+</ul>
+<p><a href="../example_code/data_struct/search_algorithm/src/hash_search_example.rs">哈希查找演示</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/hash_search_achieve.rs">哈希查找实现</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/chaining_hash_search.rs">基于拉链法的哈希查找</a></p>
+<h2 id="字符串查找"><a class="header" href="#字符串查找">字符串查找</a></h2>
+<p>字符串查找是计算机科学中的一个重要领域，涉及在文本中查找特定模式或子字符串的方法。
+其中，<code>KMP（Knuth-Morris-Pratt）</code>算法是一种高效的字符串查找算法，适用于模式匹配。</p>
+<p>以下是常用的字符串查找算法及其特点：</p>
+<ul>
+<li>朴素算法<code> (Naive String Matching)</code>：
+<ul>
+<li><strong>原理</strong>：逐位比较主串和模式串的所有可能位置。</li>
+<li><strong>时间复杂度</strong>：<code>O(m * n)</code>，<code>m</code> 为模式串长度，<code>n</code> 为主串长度。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>。</li>
+<li><strong>优点</strong>：简单，无需预处理。</li>
+<li><strong>缺点</strong>：效率低，尤其当主串和模式串长且匹配失败频繁时。</li>
+</ul>
+</li>
+<li><code>KMP</code> 算法 <code>(Knuth-Morris-Pratt)</code>：
+<ul>
+<li><strong>原理</strong>：利用模式串的前缀信息（部分匹配表），避免重复比较已匹配的部分。</li>
+<li><strong>时间复杂度</strong>：<code>O(m + n)</code>，预处理<code> O(m)</code>，查找 <code>O(n)</code>。</li>
+<li><strong>空间复杂度</strong>：<code>O(m)</code>，存储部分匹配表。</li>
+<li><strong>优点</strong>：高效，适合长字符串，避免回溯。</li>
+<li><strong>缺点</strong>：实现稍复杂，需预处理。</li>
+</ul>
+</li>
+</ul>
+<p><a href="../example_code/data_struct/search_algorithm/src/string_search_example.rs">字符串查找演示</a></p>
+<p><a href="../example_code/data_struct/search_algorithm/src/kmp_search.rs">KMP 实现</a></p>
+<p><img src="LeetCode/数据结构/image/查找算法/string_search.png" alt="常见字符串查找算法复杂度.png"></p>
+<h2 id="并行查找"><a class="header" href="#并行查找">并行查找</a></h2>
+<ul>
+<li><strong>原理</strong>：利用多线程并行搜索子区间，适合大规模数据或多核环境。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>平均：<code>O(n/p + log p)</code>，其中 p 是线程数。</li>
+<li>最好：<code>O(n/p)</code>（均匀分布）。</li>
+<li>最差：<code>O(n)</code>（单线程退化）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(p)</code>，存储线程和结果。</li>
+<li><strong>优点</strong>：利用多核加速，适合大数据查找。</li>
+<li><strong>缺点</strong>：线程开销大，小数据集性能可能不如单线程。</li>
+<li><strong>适用场景</strong>：大规模排序数组，多核处理器环境。</li>
+</ul>
+<p><a href="../example_code/data_struct/search_algorithm/src/parallel_search_example.rs">并行查找演示</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="排序"><a class="header" href="#排序">排序</a></h1>
+<p>排序算法排序算法是将一组数据按某种顺序排列的算法。
+常见的排序算法有：<strong>冒泡排序、选择排序、插入排序、归并排序、快速排序、堆排序、希尔排序、基数排序、桶排序和计数排序</strong>等。
+还有一些不常用的排序算法，如：<strong>鸡尾酒排序、梳排序、树排序</strong>等。</p>
+<h2 id="目录-4"><a class="header" href="#目录-4">目录</a></h2>
+<p><a href="#冒泡排序">冒泡排序</a></p>
+<p><a href="#选择排序">选择排序</a></p>
+<p><a href="#插入排序">插入排序</a></p>
+<p><a href="#归并排序">归并排序</a></p>
+<p><a href="#快速排序">快速排序</a></p>
+<p><a href="#堆排序">堆排序</a></p>
+<p><a href="#希尔排序">希尔排序</a></p>
+<p><a href="#基数排序">基数排序</a></p>
+<p><a href="#桶排序">桶排序</a></p>
+<p><a href="#计数排序">计数排序</a></p>
+<p><img src="LeetCode/数据结构/image/排序算法/十大排序算法复杂度.png" alt="img.png"></p>
+<h2 id="冒泡排序"><a class="header" href="#冒泡排序">冒泡排序</a></h2>
+<ul>
+<li><strong>原理</strong>：通过相邻元素两两比较并交换，将最大（或最小）元素逐步“冒泡”到数组一端，重复直到排序完成。</li>
+<li><strong>时间复杂度</strong>：最差/平均 <code>O(n²)</code>，最好<code> O(n)</code>（当数组已排序）。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，原地排序。</li>
+<li><strong>稳定性</strong>：稳定（相等元素相对顺序不变）。</li>
+<li><strong>优点</strong>：实现简单，易于理解，适合小规模数据。</li>
+<li><strong>缺点</strong>：效率低，交换操作频繁，不适合大数据量。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/bubble_sort.rs">冒泡排序</a></p>
+<h2 id="选择排序"><a class="header" href="#选择排序">选择排序</a></h2>
+<ul>
+<li><strong>原理</strong>：每次从未排序部分选择最小（或最大）元素，将其交换到已排序部分的末尾，逐步扩展已排序区域。</li>
+<li><strong>时间复杂度</strong>：最差/平均/最好 <code>O(n²)</code>，始终需比较所有元素。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，原地排序。</li>
+<li><strong>稳定性</strong>：不稳定（交换可能打乱相等元素的相对顺序）。</li>
+<li><strong>优点</strong>：实现简单，交换次数少（最多<code>n-1 </code>次）。</li>
+<li><strong>缺点</strong>：效率低，不适合大数据量，缺乏稳定性。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/selection_sort.rs">选择排序</a></p>
+<h2 id="插入排序"><a class="header" href="#插入排序">插入排序</a></h2>
+<ul>
+<li><strong>原理</strong>：将数组分为已排序和未排序两部分，逐一将未排序部分的元素插入到已排序部分的正确位置，类似整理扑克牌。</li>
+<li><strong>时间复杂度</strong>：最差/平均 <code>O(n²)</code>，最好 <code>O(n)</code>（当数组近乎有序）。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，原地排序。</li>
+<li><strong>稳定性</strong>：稳定（插入时保持相等元素相对顺序）。</li>
+<li><strong>优点</strong>：实现简单，适合部分有序或小规模数据，适应增量排序。</li>
+<li><strong>缺点</strong>：效率低，大规模数据性能差。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/insertion_sort.rs">插入排序</a></p>
+<h2 id="归并排序"><a class="header" href="#归并排序">归并排序</a></h2>
+<ul>
+<li><strong>原理</strong>：采用分治法，将数组递归拆分为小块，直到不可再分，然后合并有序子数组，最终完成排序。</li>
+<li><strong>时间复杂度</strong>：最差/平均/最好 <code>O(n log n)</code>，性能稳定。</li>
+<li><strong>空间复杂度</strong>：<code>O(n)</code>，需要额外空间存储临时数组。</li>
+<li><strong>稳定性</strong>：稳定（合并时保持相等元素的相对顺序）。</li>
+<li><strong>优点</strong>：性能稳定，适合大数据和链表排序，复杂度不随数据分布变化。</li>
+<li><strong>缺点</strong>：非原地排序，空间开销较大，合并过程需额外内存。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/merge_sort.rs">归并排序</a></p>
+<h2 id="快速排序"><a class="header" href="#快速排序">快速排序</a></h2>
+<ul>
+<li><strong>原理</strong>：采用<strong>分治法</strong>，选择一个基准（<code>pivot</code>），将数组分区为小于和大于基准的两部分，递归对子数组排序。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>平均：<code>O(n log n)</code>。</li>
+<li>最差：<code>O(n²)</code>（当数组已排序或基准选择极差）。</li>
+<li>最好：<code>O(n log n)</code>。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(n log n)</code>（递归栈空间，平均 <code>O(log n)</code>）。</li>
+<li><strong>稳定性</strong>：不稳定（分区交换可能打乱相等元素的相对顺序）。</li>
+<li><strong>优点</strong>：平均性能极佳，原地排序，适合内存排序，缓存友好。</li>
+<li><strong>缺点</strong>：最差情况性能差（需优化基准选择），不稳定。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/quick_sort.rs">快速排序</a></p>
+<h2 id="堆排序"><a class="header" href="#堆排序">堆排序</a></h2>
+<ul>
+<li><strong>原理</strong>：基于堆数据结构（通常是最大堆），先构建最大堆，然后反复提取堆顶（最大元素）并调整堆，直到所有元素有序。</li>
+<li><strong>时间复杂度</strong>：最差/平均/最好 <code>O(n log n)</code>，性能稳定。</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，原地排序。</li>
+<li><strong>稳定性</strong>：不稳定（堆调整可能打乱相等元素的相对顺序）。</li>
+<li><strong>优点</strong>：原地排序，时间复杂度稳定，适合固定内存场景。</li>
+<li><strong>缺点</strong>：不稳定，缓存不友好（堆操作跳跃式访问），实际性能可能不如快速排序。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/heap_sort.rs">堆排序</a></p>
+<h2 id="希尔排序"><a class="header" href="#希尔排序">希尔排序</a></h2>
+<ul>
+<li><strong>原理</strong>：一种改进的插入排序，通过设定增量（<code>gap</code>）将数组分组，逐步缩小增量进行插入排序，最终实现整体排序。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>最差：<code>O(n²)</code>（最差增量序列）。</li>
+<li>平均：<code>O(n^(4/3))</code> 或 <code>O(n log n)</code>（取决于增量序列）。</li>
+<li>最好：<code>O(n log n)</code>（优化增量序列）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(1)</code>，原地排序。</li>
+<li><strong>稳定性</strong>：不稳定（分组交换可能打乱相等元素的相对顺序）。</li>
+<li><strong>优点</strong>：比插入排序快，适合中等规模数据，逐步减少逆序对。</li>
+<li><strong>缺点</strong>：时间复杂度依赖增量序列选择，实际性能不如快速排序或归并排序。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/shell_sort.rs">希尔排序</a></p>
+<h2 id="基数排序"><a class="header" href="#基数排序">基数排序</a></h2>
+<ul>
+<li><strong>原理</strong>：非比较排序算法，按位（从低位到高位）分配元素到桶中，结合计数排序或桶排序，逐步完成排序。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>最差/平均/最好：<code>O(d * (n + k))</code>，其中 <code>d</code> 是数字的位数，<code>k</code> 是基数（通常为 10 或 256）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(n + k)</code>，需要额外空间存储桶。</li>
+<li><strong>稳定性</strong>：稳定（分配和收集过程保持相等元素顺序）。</li>
+<li><strong>优点</strong>：线性时间复杂度，适合多位数或字符串排序。</li>
+<li><strong>缺点</strong>：空间开销较大，依赖位数和基数，不适合浮点数或范围过大的数据。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/radix_sort.rs">基数排序</a></p>
+<h2 id="桶排序"><a class="header" href="#桶排序">桶排序</a></h2>
+<ul>
+<li><strong>原理</strong>：非比较排序算法，将元素按值范围分配到多个桶中，每个桶内单独排序（通常用插入排序），最后合并所有桶。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>最差：<code>O(n²)</code>（所有元素落入一个桶，退化为插入排序）。</li>
+<li>平均：<code>O(n + k)</code>（假设均匀分布，<code>k</code> 为桶数量）。</li>
+<li>最好：<code>O(n)</code>（元素均匀分布，桶内排序开销小）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(n + k)</code>，需要额外空间存储桶。</li>
+<li><strong>稳定性</strong>：稳定（桶内排序和收集保持相等元素顺序）。</li>
+<li><strong>优点</strong>：线性时间复杂度，适合均匀分布数据。</li>
+<li><strong>缺点</strong>：对数据分布敏感，空间开销较大，不适合范围过大的数据。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/bucket_sort.rs">桶排序</a></p>
+<h2 id="计数排序"><a class="header" href="#计数排序">计数排序</a></h2>
+<ul>
+<li><strong>原理</strong>：非比较排序算法，通过统计元素出现次数，计算每个元素的最终位置，直接赋值完成排序。</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>最差/平均/最好：<code>O(n + k)</code>，其中 <code>k</code> 是元素范围（最大值与最小值的差 + 1）。</li>
+</ul>
+</li>
+<li><strong>空间复杂度</strong>：<code>O(n + k)</code>，需要额外空间存储计数数组。</li>
+<li><strong>稳定性</strong>：稳定（按原始顺序处理相等元素）。</li>
+<li><strong>优点</strong>：线性时间复杂度，适合固定范围整数。</li>
+<li><strong>缺点</strong>：仅适用于有限范围数据，不适合浮点数或范围过大的数据。</li>
+</ul>
+<p><a href="../example_code/data_struct/sort_algorithm/src/count_sort.rs">计数排序</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="树"><a class="header" href="#树">树</a></h1>
+<h2 id="目录-5"><a class="header" href="#目录-5">目录</a></h2>
+<p><a href="#二叉树">二叉树</a></p>
+<p><a href="#二叉堆">二叉堆</a></p>
+<p><a href="#二叉查找树">二叉查找树</a></p>
+<p><a href="#平衡二叉树">平衡二叉树</a></p>
+<h2 id="二叉树"><a class="header" href="#二叉树">二叉树</a></h2>
+<ul>
+<li><strong>定义</strong>：二叉树是每个节点最多有两个子节点的树结构，子节点通常称为左子节点和右子节点。</li>
+<li><strong>节点结构</strong>：每个节点包含数据元素和指向左右子节点的指针。</li>
+<li><strong>类型</strong>：
+<ul>
+<li>满二叉树：每层节点都完全填充，叶节点在同一层。</li>
+<li>完全二叉树：除最后一层外，每层节点都完全填充，最后一层节点尽量靠左。</li>
+<li>平衡二叉树：左右子树高度差不超过1（如<code>AVL</code>树、红黑树）。</li>
+</ul>
+</li>
+<li><strong>遍历方式</strong>：前序（根-左-右）、中序（左-根-右）、后序（左-右-根）、层序（逐层遍历）。</li>
+<li><strong>应用</strong>：搜索、排序、表达式树、堆、哈夫曼编码等。</li>
+</ul>
+<p><a href="../example_code/data_struct/binary_tree/src/binary_tree.rs">简单的二叉树实现</a></p>
+<h2 id="二叉堆"><a class="header" href="#二叉堆">二叉堆</a></h2>
+<ul>
+<li><strong>定义</strong>：二叉堆是一种特殊的二叉树，满足堆序性质（父节点值小于或大于子节点值）和完全二叉树性质（除最后一层外全满，最后一层靠左）。</li>
+<li><strong>类型</strong>：
+<ul>
+<li><strong>最小堆</strong>：<code>父节点值 ≤ 子节点值</code>，根节点为最小值。</li>
+<li><strong>最大堆</strong>：<code>父节点值 ≥ 子节点值</code>，根节点为最大值。</li>
+</ul>
+</li>
+<li><strong>存储</strong>：用数组实现，节点 <code>i </code>的左子节点在 <code>2i+1</code>，右子节点在 <code>2i+2</code>，父节点在 <code>⌊(i-1)/2⌋</code>。</li>
+<li><strong>操作</strong>：
+<ul>
+<li>插入：添加元素到末尾，上滤（与父节点比较并交换）。</li>
+<li>删除（通常删根）：移除根，用末尾元素替换根，下滤（与较小的子节点交换）。</li>
+<li>构建堆：从最后一个非叶子节点开始下滤。</li>
+</ul>
+</li>
+<li><strong>时间复杂度</strong>：
+<ul>
+<li>插入：<code>O(log n)</code></li>
+<li>删除根：<code>O(log n)</code></li>
+<li>构建堆：<code>O(n)</code></li>
+</ul>
+</li>
+<li><strong>应用</strong>：优先队列、堆排序、<code>Dijkstra</code>算法等。</li>
+</ul>
+<p><a href="../example_code/data_struct/binary_tree/src/binary_heap_example.rs">二叉堆使用演示</a></p>
+<p><a href="../example_code/data_struct/binary_tree/src/binary_heap.rs">简单的二叉堆实现</a></p>
+<h2 id="二叉查找树"><a class="header" href="#二叉查找树">二叉查找树</a></h2>
+<ul>
+<li><strong>定义</strong>：二叉查找树（<code>BST</code>）是二叉树，每个节点最多有两个子节点，满足：左子树所有节点值 &lt; 当前节点值 &lt; 右子树所有节点值。</li>
+<li><strong>结构</strong>：节点包含值和左右子节点指针，可能是空的（<code>None</code>）。</li>
+<li><strong>操作</strong>：
+<ul>
+<li>插入：根据值大小递归插入到左或右子树。</li>
+<li>查找：从根开始比较，值小去左子树，大去右子树，相等则找到。</li>
+<li>删除：分三种情况（无子节点、一个子节点、两个子节点），需维护 <code>BST</code> 性质。</li>
+<li>遍历：中序遍历得到升序序列。</li>
+</ul>
+</li>
+<li><strong>时间复杂度</strong>（平均）：
+<ul>
+<li>插入、查找、删除：<code>O(log n)</code>（平衡时）</li>
+<li>最坏情况：<code>O(n)</code>（退化为链表）</li>
+</ul>
+</li>
+</ul>
+<p><a href="../example_code/data_struct/binary_tree/src/binary_search_tree.rs">简单的二叉查找树实现</a></p>
+<h2 id="平衡二叉树"><a class="header" href="#平衡二叉树">平衡二叉树</a></h2>
+<ul>
+<li><strong>定义</strong>：平衡二叉树是二叉查找树（<code>BST</code>），其左右子树高度差绝对值不超过1，且左右子树也是平衡的。</li>
+<li><strong>类型</strong>：
+<ul>
+<li>AVL树：最早的平衡二叉树，插入/删除后通过旋转恢复平衡。</li>
+<li>红黑树：通过节点着色和旋转维持“近似平衡”，广泛用于标准库。</li>
+</ul>
+</li>
+<li><strong>性质</strong>：
+<ul>
+<li>高度平衡：保证树高<code>O(log n)</code>，确保操作效率。</li>
+<li>查找、插入、删除时间复杂度：<code>O(log n)</code>。</li>
+</ul>
+</li>
+<li><strong>操作</strong>：
+<ul>
+<li><strong>插入</strong>：插入后检查平衡因子，必要时通过旋转（左旋、右旋）调整。</li>
+<li><strong>删除</strong>：删除后类似插入，调整平衡。</li>
+<li><strong>旋转</strong>：左旋、右旋、左右旋、右左旋，用于恢复平衡。</li>
+</ul>
+</li>
+</ul>
+<p><a href="../example_code/data_struct/binary_tree/src/balanced_binary_tree.rs">简单的平衡二叉树实现</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="图"><a class="header" href="#图">图</a></h1>
+<h2 id="目录-6"><a class="header" href="#目录-6">目录</a></h2>
+<p><a href="#图的基本实现">图的基本实现</a></p>
+<p><a href="#广度优先搜索">广度优先搜索</a></p>
+<p><a href="#深度优先搜索">深度优先搜索</a></p>
+<p><a href="#dijkstra算法">Dijkstra算法</a></p>
+<h2 id="图的基本实现"><a class="header" href="#图的基本实现">图的基本实现</a></h2>
+<ul>
+<li><strong>邻接表</strong>:
+<ul>
+<li><strong>空间效率</strong>：<code>O(V + E)</code>，适合稀疏图（边数远小于<code> V²</code>）。</li>
+<li><strong>查询效率</strong>：查找邻居 <code>O(1)</code>，但检查边是否存在 <code>O(E)</code>。</li>
+<li><strong>动态性</strong>：易于添加/删除边，适合动态图。</li>
+</ul>
+</li>
+<li><strong>邻接矩阵</strong>：
+<ul>
+<li><strong>空间效率</strong>：<code>O(V²)</code>，适合稠密图（边数接近<code> V²</code>）。</li>
+<li><strong>查询效率</strong>：检查边是否存在<code> O(1)</code>，但遍历邻居 <code>O(V)</code>。</li>
+<li><strong>动态性</strong>：添加/删除边需更新整个矩阵，适合静态图。</li>
+</ul>
+</li>
+</ul>
+<p><a href="../example_code/data_struct/graph/src/adj_list_graph_achieve.rs">基于邻接表图的实现</a></p>
+<p><a href="../example_code/data_struct/graph/src/adj_matrix_graph_achieve.rs">基于邻接矩阵图的实现</a></p>
+<h2 id="广度优先搜索"><a class="header" href="#广度优先搜索">广度优先搜索</a></h2>
+<ul>
+<li><strong>原理</strong>：从起点开始，逐层访问所有邻居节点，基于队列实现，优先扩展距离最近的节点。</li>
+<li><strong>时间复杂度</strong>：<code>O(V + E)</code>，其中 <code>V</code> 是顶点数，<code>E</code> 是边数。</li>
+<li><strong>空间复杂度</strong>：<code>O(V)</code>，用于存储队列和访问标记。</li>
+<li><strong>优点</strong>：适合求最短路径（无权图）、层次遍历。</li>
+<li><strong>缺点</strong>：不适合深度优先探索（如递归路径）。</li>
+<li><strong>适用场景</strong>：最短路径、连通性检测、层次遍历。</li>
+</ul>
+<p><a href="../example_code/data_struct/graph/src/bfs.rs">广度优先搜索BFS的实现</a></p>
+<h2 id="深度优先搜索"><a class="header" href="#深度优先搜索">深度优先搜索</a></h2>
+<ul>
+<li><strong>原理</strong>：从起点开始，沿着一条路径深入探索，直到无法继续，然后回溯，基于栈（递归或显式栈）实现。</li>
+<li><strong>时间复杂度</strong>：<code>O(V + E)</code>，其中 <code>V</code> 是顶点数，<code>E</code> 是边数。</li>
+<li><strong>空间复杂度</strong>：<code>O(V)</code>，用于递归栈或显式栈。</li>
+<li><strong>优点</strong>：适合路径搜索、检测连通性、拓扑排序。</li>
+<li><strong>缺点</strong>：不保证最短路径，可能陷入无限循环（需标记访问）。</li>
+<li><strong>适用场景</strong>：迷宫问题、拓扑排序、检测环。</li>
+</ul>
+<p><a href="../example_code/data_struct/graph/src/dfs.rs">深度优先搜索DFS的实现</a></p>
+<h2 id="dijkstra算法"><a class="header" href="#dijkstra算法">Dijkstra算法</a></h2>
+<ul>
+<li><strong>原理</strong>：贪心算法，从起点开始，逐步选择当前未访问节点中距离最小的节点，更新其邻居的距离，直到所有节点被访问目标节点距离确定。</li>
+<li><strong>时间复杂度</strong>：使用优先队列优化后为 <code>O((V + E) log V)</code>，其中 <code>V</code> 是顶点数，<code>E</code> 是边数；未优化为 <code>O(V²)</code>。</li>
+<li><strong>空间复杂度</strong>：<code>O(V)</code>，存储距离数组和优先队列。</li>
+<li><strong>优点</strong>：适合单源最短路径，适用于非负权图。</li>
+<li><strong>缺点</strong>：不能处理负权边。</li>
+<li><strong>适用场景</strong>：网络路由、路径规划。</li>
+</ul>
+<p><a href="../example_code/data_struct/graph/src/dijkstra.rs">Dijkstra 算法</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="算法刷题"><a class="header" href="#算法刷题">算法刷题</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="contributors"><a class="header" href="#contributors">Contributors</a></h1>
 
