@@ -4,18 +4,17 @@
 
 **中文名称：** 原型模式
 
-
 **英文名称：** Prototype Pattern
 
-
 **模式类型：** 创建型设计模式
-
 
 **Rust 中常见实现方式：** `Clone` trait、`clone()`、`clone_from()`、`#[derive(Clone)]`、手动实现 `Clone`
 
 原型模式的核心是：**通过复制已有对象来创建新对象，而不是每次都从零开始构造对象。**
 
 在 Rust 中，原型模式通常和 `Clone` 机制直接对应。只要一个类型实现了 `Clone`，就可以基于已有实例创建出一个新的实例。
+
+[示例代码](https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/prototype_pattern/src/main.rs)
 
 ---
 

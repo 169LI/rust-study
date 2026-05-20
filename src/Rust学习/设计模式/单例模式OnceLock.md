@@ -13,6 +13,8 @@
 单例模式的核心是：**保证某个类型在整个程序中只有一个实例，并提供全局访问点。**
 在 Rust 中，单例模式通常结合静态初始化和线程安全机制实现，避免全局可变状态带来的安全问题。
 
+[示例代码](https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/singleton_pattern/src/main.rs)
+
 ***
 
 ## 2. 模式核心思想
