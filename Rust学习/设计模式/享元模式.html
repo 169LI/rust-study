@@ -15,8 +15,8 @@
         <link rel="icon" href="../../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../../css/general-2459343d.css">
-        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cfab9861.js";
+            window.path_to_searchindex_js = "../../searchindex-f773f06c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-3631dbdf.js"></script>
+        <script src="../../toc-bf95e44b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,7 +181,502 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="享元模式"><a class="header" href="#享元模式">享元模式</a></h1>
+                        <h1 id="15_享元模式-flyweight-pattern"><a class="header" href="#15_享元模式-flyweight-pattern">15_享元模式 Flyweight Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 享元模式</p>
+<p><strong>英文名称：</strong> Flyweight Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>Rc</code>、<code>Arc</code>、缓存池、对象池、<code>HashMap</code>、字符串驻留、共享不可变数据</p>
+<p>享元模式的核心是：<strong>通过共享大量相同或相似对象中的公共部分，减少重复对象创建和内存占用。</strong></p>
+<p>在 Rust 中，享元模式通常通过：</p>
+<pre><code class="language-text">Rc&lt;T&gt;
+Arc&lt;T&gt;
+HashMap 缓存
+对象池
+字符串驻留
+共享不可变数据
+</code></pre>
+<p>来实现。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>享元模式的核心思想是：</p>
+<pre><code class="language-text">把对象中可以共享的部分抽离出来，只保存一份，然后让多个对象共同引用它。
+</code></pre>
+<p>也就是说，享元模式关注的是：</p>
+<pre><code class="language-text">哪些数据是重复的？
+哪些数据可以共享？
+哪些数据必须每个对象单独保存？
+</code></pre>
+<p>例如游戏中有 10000 棵树：</p>
+<pre><code class="language-text">树的模型
+树的纹理
+树的种类
+</code></pre>
+<p>这些信息可能是相同的，可以共享。</p>
+<p>但每棵树的位置不同：</p>
+<pre><code class="language-text">x 坐标
+y 坐标
+高度
+旋转角度
+</code></pre>
+<p>这些信息不能共享，需要每个对象自己保存。</p>
+<p>享元模式就是把对象拆成两部分：</p>
+<pre><code class="language-text">内部状态：可以共享的、不随具体对象变化的部分
+外部状态：不能共享的、每个对象独有的部分
+</code></pre>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>享元模式主要解决的是：<strong>大量对象中存在重复数据时，如何减少内存浪费。</strong></p>
+<p>在实际开发中，如果系统中存在大量相似对象，每个对象都完整保存一份数据，就会造成明显的内存浪费。</p>
+<p>常见情况包括：</p>
+<pre><code class="language-text">1. 大量相同字符串
+2. 大量相同图标、纹理、模型
+3. 大量相同配置对象
+4. 大量相同格式的节点
+5. 大量共享只读元数据
+6. 大量重复的词法 token
+</code></pre>
+<p>例如文本编辑器中，每个字符如果都保存字体对象、颜色对象、字号对象，那么内存会非常浪费。</p>
+<p>更合理的做法是：</p>
+<pre><code class="language-text">字符本身保存位置和内容；
+字体、颜色、字号这些样式对象共享。
+</code></pre>
+<p>享元模式的目标是：</p>
+<pre><code class="language-text">减少重复对象
+共享公共状态
+降低内存占用
+提升对象创建效率
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用享元模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 大量重复对象占用过多内存。
+2. 相同数据被反复创建，造成资源浪费。
+3. 对象创建成本高，影响性能。
+4. 缓存命中率低，系统运行效率下降。
+5. 修改共享逻辑时，需要维护多个重复副本。
+</code></pre>
+<p>例如有 100 万个文本字符，每个字符都保存一份完整字体信息：</p>
+<pre><code class="language-text">font_name
+font_size
+font_weight
+font_color
+line_height
+</code></pre>
+<p>如果这些样式大部分是重复的，那么每个字符都保存一份就没有必要。</p>
+<p>享元模式的作用就是：<strong>把重复的部分抽出来共享，只让对象保存真正独有的数据。</strong></p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，享元模式通常包含几个角色：</p>
+<pre><code class="language-text">1. Flyweight：享元接口，定义共享对象的行为。
+2. ConcreteFlyweight：具体享元对象，保存可共享的内部状态。
+3. FlyweightFactory：享元工厂，负责创建和复用享元对象。
+4. Client：客户端，保存外部状态，并通过享元对象完成操作。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">FlyweightFactory
+ └── pool: HashMap&lt;Key, Flyweight&gt;
+
+Flyweight
+ └── operation(external_state)
+
+ConcreteFlyweight
+ └── intrinsic_state
+</code></pre>
+<p>这里最关键的是：</p>
+<pre><code class="language-text">享元对象保存内部状态；
+客户端传入外部状态；
+工厂负责复用已有享元对象。
+</code></pre>
+<p>例如树对象：</p>
+<pre><code class="language-text">TreeType：树的种类、贴图、模型，可以共享
+Tree：位置、大小、旋转角度，每棵树独有
+TreeFactory：缓存 TreeType，避免重复创建
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中享元模式通常通过 <strong>共享所有权 + 缓存池</strong> 实现。</p>
+<p>例如游戏中有大量树，每棵树共享同一种树的模型和纹理。</p>
+<pre class="playground"><code class="language-rust edition2024">use std::collections::HashMap;
+use std::sync::Arc;
+
+#[derive(Debug)]
+struct TreeType {
+    name: String,
+    texture: String,
+    model: String,
+}
+
+#[derive(Debug)]
+struct Tree {
+    x: f32,
+    y: f32,
+    height: f32,
+    tree_type: Arc&lt;TreeType&gt;,
+}
+
+struct TreeFactory {
+    types: HashMap&lt;String, Arc&lt;TreeType&gt;&gt;,
+}
+
+impl TreeFactory {
+    fn new() -&gt; Self {
+        Self {
+            types: HashMap::new(),
+        }
+    }
+
+    fn get_tree_type(&amp;mut self, name: &amp;str, texture: &amp;str, model: &amp;str) -&gt; Arc&lt;TreeType&gt; {
+        if let Some(tree_type) = self.types.get(name) {
+            return Arc::clone(tree_type);
+        }
+
+        let tree_type = Arc::new(TreeType {
+            name: name.to_string(),
+            texture: texture.to_string(),
+            model: model.to_string(),
+        });
+
+        self.types.insert(name.to_string(), Arc::clone(&amp;tree_type));
+        tree_type
+    }
+}
+
+fn main() {
+    let mut factory = TreeFactory::new();
+
+    let oak_type = factory.get_tree_type("Oak", "oak.png", "oak.obj");
+    let pine_type = factory.get_tree_type("Pine", "pine.png", "pine.obj");
+
+    let trees = vec![
+        Tree {
+            x: 10.0,
+            y: 20.0,
+            height: 5.0,
+            tree_type: Arc::clone(&amp;oak_type),
+        },
+        Tree {
+            x: 15.0,
+            y: 25.0,
+            height: 6.0,
+            tree_type: Arc::clone(&amp;oak_type),
+        },
+        Tree {
+            x: 30.0,
+            y: 40.0,
+            height: 8.0,
+            tree_type: Arc::clone(&amp;pine_type),
+        },
+    ];
+
+    for tree in trees {
+        println!("{:?}", tree);
+    }
+}</code></pre>
+<p>这个例子中：</p>
+<pre><code class="language-text">TreeType 是享元对象，保存共享的内部状态。
+Tree 是具体对象，保存每棵树独有的外部状态。
+TreeFactory 是享元工厂，负责复用 TreeType。
+Arc&lt;TreeType&gt; 让多个 Tree 共享同一个 TreeType。
+</code></pre>
+<p>如果是单线程场景，可以使用：</p>
+<pre><code class="language-text">Rc&lt;T&gt;
+</code></pre>
+<p>如果是多线程场景，可以使用：</p>
+<pre><code class="language-text">Arc&lt;T&gt;
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的享元模式有几个明显特点。</p>
+<p>第一，Rust 更强调共享数据的所有权关系。
+传统 OOP 中可能直接共享对象引用，而 Rust 中需要明确使用 <code>Rc</code> 或 <code>Arc</code> 来表达共享所有权。</p>
+<p>第二，Rust 区分单线程共享和多线程共享。</p>
+<pre><code class="language-text">Rc&lt;T&gt;：单线程共享
+Arc&lt;T&gt;：多线程共享
+</code></pre>
+<p>这让共享对象的线程安全边界更加清楚。</p>
+<p>第三，Rust 中享元对象通常应该设计为不可变。
+如果共享对象是可变的，就需要引入 <code>RefCell</code>、<code>Mutex</code> 或 <code>RwLock</code>，复杂度会明显增加。</p>
+<p>第四，Rust 中的 <code>clone</code> 不一定表示复制底层数据。
+例如：</p>
+<pre><code class="language-text">Arc::clone(&amp;value)
+</code></pre>
+<p>只是增加引用计数，并不会复制 <code>TreeType</code> 本身。</p>
+<p>第五，Rust 可以通过 <code>HashMap</code> 实现显式缓存池。
+享元工厂通常就是一个缓存表，负责复用已经创建过的对象。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，享元模式不一定非要写成传统的 <code>FlyweightFactory</code>。</p>
+<p>如果只是共享只读配置，可以直接使用：</p>
+<pre><code class="language-text">Arc&lt;Config&gt;
+Rc&lt;Config&gt;
+</code></pre>
+<p>如果是全局共享常量，可以考虑：</p>
+<pre><code class="language-text">static
+OnceLock
+LazyLock
+</code></pre>
+<p>如果是字符串重复，可以考虑：</p>
+<pre><code class="language-text">字符串驻留 string interning
+</code></pre>
+<p>如果是大量对象重复创建，可以考虑：</p>
+<pre><code class="language-text">对象池
+缓存池
+arena 分配器
+</code></pre>
+<p>如果共享对象需要频繁查询，可以使用：</p>
+<pre><code class="language-text">HashMap&lt;Key, Rc&lt;T&gt;&gt;
+HashMap&lt;Key, Arc&lt;T&gt;&gt;
+</code></pre>
+<p>所以 Rust 中享元模式的本质不是“必须有一个 Flyweight 类”，而是：</p>
+<pre><code class="language-text">识别重复数据；
+把共享部分抽离出来；
+用 Rc / Arc / 缓存池复用它。
+</code></pre>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<p>享元模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. Rc
+2. Arc
+3. HashMap
+4. Clone
+5. 所有权
+6. 借用
+7. static
+8. OnceLock / LazyLock
+9. RefCell / Mutex / RwLock
+10. 生命周期
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">Rc：单线程共享享元对象
+Arc：多线程共享享元对象
+HashMap：根据 key 缓存和复用对象
+Clone：复制共享指针，而不是复制对象本身
+static：保存全局共享数据
+OnceLock / LazyLock：惰性初始化全局共享对象
+Mutex / RwLock：共享对象需要可变时保证线程安全
+所有权和借用：明确谁拥有对象，谁只是共享使用
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">Rc / Arc + HashMap
+</code></pre>
+<p>也就是：</p>
+<pre><code class="language-text">用 HashMap 找到已有对象；
+用 Rc 或 Arc 共享这个对象。
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<p>享元模式的主要收益是减少内存占用和对象创建成本。</p>
+<p>如果大量对象共享相同内部状态，享元模式可以明显降低内存使用。</p>
+<p>例如：</p>
+<pre><code class="language-text">10000 棵树如果共享 10 种 TreeType，
+就只需要保存 10 份模型和纹理信息，
+而不是每棵树都保存一份。
+</code></pre>
+<p>但是享元模式也有代价。</p>
+<p>如果使用 <code>Rc</code> 或 <code>Arc</code>：</p>
+<pre><code class="language-text">1. Rc 有引用计数开销。
+2. Arc 有原子引用计数开销。
+3. Arc 比 Rc 更适合多线程，但成本也更高。
+</code></pre>
+<p>如果使用 <code>HashMap</code> 缓存：</p>
+<pre><code class="language-text">1. 查询享元对象需要哈希查找。
+2. 缓存池需要维护。
+3. key 设计不合理会导致重复缓存或错误复用。
+</code></pre>
+<p>如果共享对象需要修改：</p>
+<pre><code class="language-text">1. RefCell 会把借用检查推迟到运行时。
+2. Mutex / RwLock 会引入锁开销。
+3. 共享可变状态会增加并发复杂度。
+</code></pre>
+<p>所以享元模式适合：</p>
+<pre><code class="language-text">对象数量大
+重复数据多
+共享部分基本不变
+内存压力明显
+</code></pre>
+<p>不适合：</p>
+<pre><code class="language-text">对象数量少
+重复数据不多
+共享对象经常修改
+HashMap 查询成本大于节省收益
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">享元模式用一次共享查找和引用计数成本，换取大量重复对象的内存节省。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<p>享元模式适合用于大量重复对象场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 游戏中的树、草、子弹、粒子对象
+2. 文本编辑器中的字符样式共享
+3. GUI 中的图标、字体、颜色资源
+4. 编译器中的符号表和字符串驻留
+5. 数据库连接池或对象池
+6. 图形渲染中的纹理和模型共享
+7. Web 服务中的共享配置对象
+8. 日志系统中的格式模板共享
+9. 权限系统中的角色元数据共享
+10. 大规模 AST 节点中的共享字符串
+</code></pre>
+<p>在 Rust 项目中，享元模式可能出现在：</p>
+<pre><code class="language-text">编译器和解释器
+游戏开发
+图形渲染
+缓存系统
+配置管理
+大规模文本处理
+对象池设计
+资源管理器
+</code></pre>
+<p>例如 Rust 编译器或解析器中，大量重复的标识符字符串可以通过字符串驻留减少内存占用。</p>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<p>享元模式容易和单例模式、原型模式、对象池模式、缓存模式混淆。</p>
+<h3 id="101-享元模式和单例模式"><a class="header" href="#101-享元模式和单例模式">10.1 享元模式和单例模式</a></h3>
+<p>二者都可能涉及共享对象，但关注点不同。</p>
+<pre><code class="language-text">单例模式：保证某个对象在全局只有一个实例。
+享元模式：共享大量相似对象中的公共部分，减少重复存储。
+</code></pre>
+<p>单例模式关注：</p>
+<pre><code class="language-text">唯一性。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">复用性和内存节省。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">全局日志器只有一个：单例模式
+10000 个字符共享同一种字体对象：享元模式
+</code></pre>
+<p>享元模式不要求整个系统只有一个对象，它可能会有很多个享元对象，只是每种共享状态只保存一份。</p>
+<hr>
+<h3 id="102-享元模式和原型模式"><a class="header" href="#102-享元模式和原型模式">10.2 享元模式和原型模式</a></h3>
+<p>二者都和对象创建有关，但方向相反。</p>
+<pre><code class="language-text">原型模式：复制已有对象，创建新对象。
+享元模式：共享已有对象，避免重复创建。
+</code></pre>
+<p>原型模式强调：</p>
+<pre><code class="language-text">通过 clone 快速生成相似对象。
+</code></pre>
+<p>享元模式强调：</p>
+<pre><code class="language-text">不要复制重复部分，而是共享它。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">复制一个默认配置生成新配置：原型模式
+多个配置对象共享同一套只读元数据：享元模式
+</code></pre>
+<hr>
+<h3 id="103-享元模式和对象池模式"><a class="header" href="#103-享元模式和对象池模式">10.3 享元模式和对象池模式</a></h3>
+<p>对象池模式和享元模式都能减少对象创建成本，但目的不同。</p>
+<pre><code class="language-text">对象池模式：复用可重复使用的对象实例，避免频繁创建和销毁。
+享元模式：共享对象中的不变部分，减少内存重复。
+</code></pre>
+<p>对象池关注：</p>
+<pre><code class="language-text">对象生命周期管理。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">对象状态共享。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">复用数据库连接：对象池模式
+多个对象共享数据库连接配置：享元模式
+</code></pre>
+<hr>
+<h3 id="104-享元模式和缓存模式"><a class="header" href="#104-享元模式和缓存模式">10.4 享元模式和缓存模式</a></h3>
+<p>享元模式通常会用缓存实现，但缓存模式范围更广。</p>
+<pre><code class="language-text">缓存模式：保存计算结果或对象，避免重复计算或重复访问。
+享元模式：缓存并共享对象的内部状态，减少重复存储。
+</code></pre>
+<p>缓存模式关注：</p>
+<pre><code class="language-text">提高访问速度。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">共享重复状态，减少内存。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">缓存一次查询结果：缓存模式
+共享同一种字体对象：享元模式
+</code></pre>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<p>享元模式的优点主要有：</p>
+<pre><code class="language-text">1. 减少大量重复对象带来的内存占用。
+2. 降低对象创建成本。
+3. 提高共享资源的复用率。
+4. 适合资源较大的只读对象。
+5. 在 Rust 中可以用 Rc / Arc 明确表达共享所有权。
+6. 可以结合 HashMap 实现统一缓存管理。
+</code></pre>
+<p>从工程角度看，享元模式的价值在于：</p>
+<pre><code class="language-text">把重复数据变成共享数据，
+让大量对象只保存自己真正独有的状态。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<p>享元模式的代价主要包括：</p>
+<pre><code class="language-text">1. 需要区分内部状态和外部状态。
+2. 需要维护享元工厂或缓存池。
+3. Rc / Arc 会有引用计数开销。
+4. Arc 在多线程下有原子操作成本。
+5. HashMap 查找有一定开销。
+6. 共享可变对象会增加复杂度。
+7. 设计不当可能造成错误共享。
+</code></pre>
+<p>尤其要注意：</p>
+<pre><code class="language-text">享元对象最好是不可变的。
+</code></pre>
+<p>如果多个对象共享一个可变享元对象，那么修改它会影响所有使用者。
+如果这种影响不是你想要的，就会产生隐蔽 bug。</p>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用享元模式：</p>
+<pre><code class="language-text">1. 对象数量不多。
+2. 对象之间重复数据很少。
+3. 对象创建成本很低。
+4. 共享对象经常需要修改。
+5. 内存压力不明显。
+6. 引入缓存池后反而让代码更复杂。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">重复对象多、共享部分大、共享数据基本不可变，再考虑享元模式。
+</code></pre>
+<p>如果只是少量对象，直接创建更简单。</p>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 游戏地图中的树对象</p>
+<p>需求：</p>
+<pre><code class="language-text">地图中有大量树。
+每棵树的位置、高度不同。
+但相同种类的树共享模型、纹理、名称等数据。
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 TreeType 保存共享数据，例如 name、texture、model。
+2. 定义 Tree 保存外部状态，例如 x、y、height。
+3. Tree 内部持有 Rc&lt;TreeType&gt; 或 Arc&lt;TreeType&gt;。
+4. TreeFactory 使用 HashMap 缓存 TreeType。
+5. 创建树时，先从工厂中查找已有 TreeType。
+6. 如果存在，复用；如果不存在，创建并缓存。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">Rc
+Arc
+HashMap
+Clone
+所有权
+不可变共享
+结构体组合
+</code></pre>
+<p>这个例子可以体现享元模式的核心：</p>
+<pre><code class="language-text">树的种类信息共享；
+树的位置和大小独立保存。
+</code></pre>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<p>享元模式的本质是：</p>
+<pre><code class="language-text">把大量对象中重复的、可共享的内部状态抽离出来，只保存一份，让多个对象共同复用。
+</code></pre>
+<p>在 Rust 中，享元模式通常通过 <code>Rc</code>、<code>Arc</code> 和 <code>HashMap</code> 缓存池实现。使用时要重点区分内部状态和外部状态，并尽量让享元对象保持不可变，以避免共享可变状态带来的复杂问题。</p>
 
                     </main>
 
@@ -232,11 +727,11 @@
 
         <script src="../../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../../mark-09e88c2c.min.js"></script>
-        <script src="../../searcher-c2a407aa.js"></script>
+        <script src="../../searcher-09f2665d.js"></script>
 
         <script src="../../clipboard-1626706a.min.js"></script>
         <script src="../../highlight-abc7f01d.js"></script>
-        <script src="../../book-a0b12cfe.js"></script>
+        <script src="../../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

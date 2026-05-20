@@ -15,8 +15,8 @@
         <link rel="icon" href="../../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../../css/general-2459343d.css">
-        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cfab9861.js";
+            window.path_to_searchindex_js = "../../searchindex-f773f06c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-3631dbdf.js"></script>
+        <script src="../../toc-bf95e44b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,7 +181,511 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="桥接模式"><a class="header" href="#桥接模式">桥接模式</a></h1>
+                        <h1 id="14_桥接模式-bridge-pattern"><a class="header" href="#14_桥接模式-bridge-pattern">14_桥接模式 Bridge Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 桥接模式</p>
+<p><strong>英文名称：</strong> Bridge Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>trait</code>、结构体组合、泛型、<code>Box&lt;dyn Trait&gt;</code>、关联类型</p>
+<p>桥接模式的核心是：<strong>将抽象部分和实现部分分离，使它们可以独立变化。</strong></p>
+<p>在 Rust 中，桥接模式通常不是通过继承实现，而是通过：</p>
+<pre><code class="language-text">trait 定义实现接口
+struct 持有实现对象
+泛型或 dyn Trait 连接抽象和实现
+</code></pre>
+<p>来完成。</p>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>桥接模式的核心思想是：</p>
+<pre><code class="language-text">把两个容易一起变化的维度拆开，让它们通过组合关系连接，而不是通过继承关系绑定。
+</code></pre>
+<p>也就是说，桥接模式解决的是：</p>
+<pre><code class="language-text">抽象层要变化
+实现层也要变化
+如果两者直接绑定，类型数量会迅速膨胀
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">图形类型：圆形、矩形、三角形
+绘制平台：Windows、Linux、Web
+</code></pre>
+<p>如果不用桥接模式，可能会出现：</p>
+<pre><code class="language-text">WindowsCircle
+LinuxCircle
+WebCircle
+WindowsRectangle
+LinuxRectangle
+WebRectangle
+WindowsTriangle
+LinuxTriangle
+WebTriangle
+</code></pre>
+<p>类型数量会随着两个维度相乘增长。</p>
+<p>桥接模式的思路是：</p>
+<pre><code class="language-text">图形是一套抽象
+绘制平台是一套实现
+图形内部持有绘制平台接口
+</code></pre>
+<p>这样图形和平台可以独立扩展。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>桥接模式主要解决的是：<strong>抽象和实现存在多个变化维度时，如何避免它们强绑定。</strong></p>
+<p>在实际开发中，经常会遇到这种情况：</p>
+<pre><code class="language-text">1. 一个业务抽象有多种类型。
+2. 每种业务抽象又可以对应多种底层实现。
+3. 抽象和实现都可能独立扩展。
+4. 不希望为每种组合都创建一个新类型。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">消息类型：普通消息、加急消息、广播消息
+发送方式：邮件、短信、微信、MQTT
+
+图形类型：圆形、矩形、线段
+渲染后端：OpenGL、Vulkan、Canvas
+
+日志类型：文本日志、JSON 日志
+输出方式：控制台、文件、远程服务器
+</code></pre>
+<p>桥接模式的价值在于：</p>
+<pre><code class="language-text">让抽象和实现分离，
+避免继承层级或类型组合爆炸。
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用桥接模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 抽象类型和实现类型强耦合。
+2. 每新增一种抽象或实现，都需要创建大量组合类型。
+3. 代码结构变成多层继承或大量重复结构。
+4. 修改实现层可能影响抽象层。
+5. 扩展新功能时容易牵连多个模块。
+</code></pre>
+<p>例如消息系统中，如果直接把消息类型和发送方式绑定，可能会写出：</p>
+<pre><code class="language-text">EmailNormalMessage
+SmsNormalMessage
+WechatNormalMessage
+EmailUrgentMessage
+SmsUrgentMessage
+WechatUrgentMessage
+</code></pre>
+<p>如果后续新增一种消息类型或发送方式，组合数量继续增长。</p>
+<p>桥接模式就是要把这种结构拆成：</p>
+<pre><code class="language-text">消息抽象
+发送实现
+</code></pre>
+<p>然后通过组合连接。</p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，桥接模式通常包含两个层次：</p>
+<pre><code class="language-text">1. Abstraction：抽象部分，定义高层业务接口。
+2. RefinedAbstraction：扩展抽象。
+3. Implementor：实现部分接口。
+4. ConcreteImplementor：具体实现。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Abstraction
+ ├── implementor: Implementor
+ └── operation()
+
+Implementor
+ └── operation_impl()
+
+ConcreteImplementorA
+ └── operation_impl()
+
+ConcreteImplementorB
+ └── operation_impl()
+</code></pre>
+<p>抽象对象内部持有实现接口，然后把具体实现委托给实现对象。</p>
+<p>桥接模式的关键是：</p>
+<pre><code class="language-text">抽象不直接继承具体实现，
+而是通过组合持有实现接口。
+</code></pre>
+<p>这和“组合优于继承”的思想非常接近。</p>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中通常通过 <strong>trait + 结构体组合</strong> 实现桥接模式。</p>
+<p>下面以“消息发送”为例。</p>
+<p>发送方式是一套实现维度：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait MessageSender {
+    fn send(&amp;self, content: &amp;str);
+}
+
+struct EmailSender;
+
+impl MessageSender for EmailSender {
+    fn send(&amp;self, content: &amp;str) {
+        println!("通过邮件发送：{}", content);
+    }
+}
+
+struct SmsSender;
+
+impl MessageSender for SmsSender {
+    fn send(&amp;self, content: &amp;str) {
+        println!("通过短信发送：{}", content);
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>消息类型是一套抽象维度：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct NormalMessage&lt;S: MessageSender&gt; {
+    sender: S,
+}
+
+impl&lt;S: MessageSender&gt; NormalMessage&lt;S&gt; {
+    fn new(sender: S) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        self.sender.send(content);
+    }
+}
+
+struct UrgentMessage&lt;S: MessageSender&gt; {
+    sender: S,
+}
+
+impl&lt;S: MessageSender&gt; UrgentMessage&lt;S&gt; {
+    fn new(sender: S) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        let content = format!("[加急] {}", content);
+        self.sender.send(&amp;content);
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>使用：</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    let normal_email = NormalMessage::new(EmailSender);
+    normal_email.send("系统通知");
+
+    let urgent_sms = UrgentMessage::new(SmsSender);
+    urgent_sms.send("服务器异常");
+}</code></pre>
+<p>这里有两个独立变化维度：</p>
+<pre><code class="language-text">消息类型：NormalMessage / UrgentMessage
+发送方式：EmailSender / SmsSender
+</code></pre>
+<p>它们没有互相继承，而是通过 <code>sender: S</code> 组合起来。</p>
+<hr>
+<p>如果需要运行时动态选择实现，可以使用 <code>Box&lt;dyn MessageSender&gt;</code>：</p>
+<pre class="playground"><code class="language-rust edition2024">struct DynamicMessage {
+    sender: Box&lt;dyn MessageSender&gt;,
+}
+
+impl DynamicMessage {
+    fn new(sender: Box&lt;dyn MessageSender&gt;) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        self.sender.send(content);
+    }
+}
+
+fn main() {
+    let sender: Box&lt;dyn MessageSender&gt; = Box::new(EmailSender);
+    let message = DynamicMessage::new(sender);
+
+    message.send("动态选择发送方式");
+}</code></pre>
+<p>这种写法更灵活，但有动态分发开销。</p>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的桥接模式有几个明显特点。</p>
+<p>第一，Rust 不依赖继承体系。
+传统 OOP 中常通过抽象类和实现接口来分离层次，Rust 中通常通过 <code>trait + struct 组合</code> 完成。</p>
+<p>第二，Rust 可以用泛型实现静态桥接。
+例如：</p>
+<pre><code class="language-text">struct NormalMessage&lt;S: MessageSender&gt;
+</code></pre>
+<p>这种写法在编译期确定具体实现，性能较好。</p>
+<p>第三，Rust 可以用 <code>Box&lt;dyn Trait&gt;</code> 实现动态桥接。
+如果需要运行时切换实现，可以用 trait object。</p>
+<p>第四，Rust 更强调组合关系。
+桥接模式本质上就是组合，而 Rust 本身也更鼓励用组合替代继承。</p>
+<p>第五，Rust 中需要考虑所有权。
+抽象对象持有实现对象时，要明确：</p>
+<pre><code class="language-text">是拥有实现对象？
+是借用实现对象？
+是共享实现对象？
+是否需要多线程共享？
+</code></pre>
+<p>根据不同情况，可以选择：</p>
+<pre><code class="language-text">S
+&amp;S
+Box&lt;dyn Trait&gt;
+Rc&lt;dyn Trait&gt;
+Arc&lt;dyn Trait&gt;
+</code></pre>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，桥接模式不一定要写成传统的 Abstraction / Implementor 结构。</p>
+<p>如果实现类型在编译期确定，推荐：</p>
+<pre><code class="language-text">泛型 + trait bound
+</code></pre>
+<p>如果实现类型要运行时切换，推荐：</p>
+<pre><code class="language-text">Box&lt;dyn Trait&gt;
+</code></pre>
+<p>如果实现对象需要共享，推荐：</p>
+<pre><code class="language-text">Rc&lt;dyn Trait&gt;
+Arc&lt;dyn Trait&gt;
+</code></pre>
+<p>如果两个维度都很简单，直接用 <code>enum + match</code> 可能更清楚。</p>
+<p>例如发送方式只有两三种，而且不需要扩展时：</p>
+<pre><code class="language-text">enum SenderKind {
+    Email,
+    Sms,
+}
+</code></pre>
+<p>就可能已经足够。</p>
+<p>所以在 Rust 中使用桥接模式时，关键不是套结构，而是先判断：</p>
+<pre><code class="language-text">是否真的存在两个独立变化维度？
+这两个维度是否都需要扩展？
+是否需要运行时选择实现？
+</code></pre>
+<p>如果答案是肯定的，桥接模式才更有价值。</p>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<p>桥接模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. trait
+2. struct
+3. impl
+4. 泛型
+5. trait bound
+6. Box&lt;dyn Trait&gt;
+7. Rc / Arc
+8. 所有权与借用
+9. 关联类型
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">trait：定义实现层接口
+struct：定义抽象层对象
+泛型：静态连接抽象和实现
+Box&lt;dyn Trait&gt;：动态连接抽象和实现
+Rc / Arc：共享实现对象
+所有权：管理抽象对象和实现对象之间的关系
+关联类型：在复杂桥接结构中约束实现类型
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">trait + 结构体组合
+</code></pre>
+<p>也就是：</p>
+<pre><code class="language-text">抽象对象内部持有一个实现接口。
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<p>桥接模式的性能取决于使用静态分发还是动态分发。</p>
+<p>如果使用泛型桥接：</p>
+<pre><code class="language-text">1. 编译期确定具体实现。
+2. 没有虚函数调用。
+3. 编译器可以内联优化。
+4. 性能通常接近直接调用。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn Trait&gt;</code>：</p>
+<pre><code class="language-text">1. 支持运行时选择实现。
+2. 有动态分发开销。
+3. 通常涉及堆分配。
+4. 灵活性更强，但性能略低。
+</code></pre>
+<p>如果使用 <code>Arc&lt;dyn Trait&gt;</code>：</p>
+<pre><code class="language-text">1. 支持多线程共享实现对象。
+2. 有原子引用计数开销。
+3. 适合跨线程场景。
+</code></pre>
+<p>工程代价方面，桥接模式会增加一层抽象：</p>
+<pre><code class="language-text">1. 需要设计抽象层和实现层。
+2. 简单场景下可能显得复杂。
+3. 过度桥接会让代码绕。
+4. 泛型版本可能增加类型复杂度。
+5. 动态版本可能增加运行时开销。
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">桥接模式用结构复杂度换取两个维度的独立扩展能力。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<p>桥接模式适合用于两个维度都可能变化的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 图形类型 × 绘制平台
+2. 消息类型 × 发送方式
+3. 日志格式 × 输出目标
+4. 数据库操作 × 数据库类型
+5. UI 控件 × 平台实现
+6. 文件格式 × 存储后端
+7. 报表类型 × 导出格式
+8. 支付业务 × 支付渠道
+9. 设备控制命令 × 设备驱动实现
+</code></pre>
+<p>在 Rust 项目中，桥接模式可能出现在：</p>
+<pre><code class="language-text">日志库设计
+跨平台 GUI 抽象
+数据库访问层
+消息通知系统
+图形渲染后端
+嵌入式设备抽象层
+插件化后端系统
+</code></pre>
+<p>例如日志系统可以拆成两个维度：</p>
+<pre><code class="language-text">日志格式：PlainText / Json / Compact
+输出目标：Console / File / Remote
+</code></pre>
+<p>桥接后就不需要写：</p>
+<pre><code class="language-text">ConsoleJsonLogger
+FileJsonLogger
+RemoteJsonLogger
+ConsoleTextLogger
+FileTextLogger
+RemoteTextLogger
+</code></pre>
+<p>而是让格式和输出目标独立组合。</p>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<p>桥接模式容易和适配器模式、策略模式、装饰器模式、代理模式混淆。</p>
+<h3 id="101-桥接模式和适配器模式"><a class="header" href="#101-桥接模式和适配器模式">10.1 桥接模式和适配器模式</a></h3>
+<p>二者都可能使用包装和 trait，但目的不同。</p>
+<pre><code class="language-text">桥接模式：提前设计抽象和实现的分离，使两个维度可以独立变化。
+适配器模式：事后解决接口不兼容问题，让已有接口适配新接口。
+</code></pre>
+<p>桥接模式更像是：</p>
+<pre><code class="language-text">系统设计时就把两个变化维度拆开。
+</code></pre>
+<p>适配器模式更像是：</p>
+<pre><code class="language-text">已经有两个接口不兼容，现在加一层转换。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">消息类型和发送方式独立扩展：桥接模式
+把旧打印机接口适配成新打印接口：适配器模式
+</code></pre>
+<hr>
+<h3 id="102-桥接模式和策略模式"><a class="header" href="#102-桥接模式和策略模式">10.2 桥接模式和策略模式</a></h3>
+<p>二者都可能用 <code>trait</code> 表示可替换实现，但关注点不同。</p>
+<pre><code class="language-text">策略模式：关注算法或行为的替换。
+桥接模式：关注抽象层和实现层两个维度的分离。
+</code></pre>
+<p>策略模式通常只有一个变化点：</p>
+<pre><code class="language-text">排序算法可以换。
+</code></pre>
+<p>桥接模式通常有两个变化维度：</p>
+<pre><code class="language-text">消息类型可以变，发送方式也可以变。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">选择 zip 或 gzip 压缩：策略模式
+普通消息/加急消息 × 邮件/短信发送：桥接模式
+</code></pre>
+<hr>
+<h3 id="103-桥接模式和装饰器模式"><a class="header" href="#103-桥接模式和装饰器模式">10.3 桥接模式和装饰器模式</a></h3>
+<p>二者都使用组合，但目的不同。</p>
+<pre><code class="language-text">桥接模式：分离抽象和实现，使二者独立变化。
+装饰器模式：在不修改原对象的情况下增强功能。
+</code></pre>
+<p>桥接模式解决的是：</p>
+<pre><code class="language-text">两个维度如何独立扩展。
+</code></pre>
+<p>装饰器模式解决的是：</p>
+<pre><code class="language-text">如何给对象叠加额外功能。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">图形对象选择不同渲染后端：桥接模式
+给文件读取器增加缓存、压缩、加密：装饰器模式
+</code></pre>
+<hr>
+<h3 id="104-桥接模式和代理模式"><a class="header" href="#104-桥接模式和代理模式">10.4 桥接模式和代理模式</a></h3>
+<p>二者都可能持有另一个对象，但目的不同。</p>
+<pre><code class="language-text">桥接模式：连接抽象和实现两个层次。
+代理模式：控制对原对象的访问。
+</code></pre>
+<p>代理模式更强调：</p>
+<pre><code class="language-text">权限检查
+延迟加载
+远程调用
+缓存访问
+</code></pre>
+<p>桥接模式更强调：</p>
+<pre><code class="language-text">抽象和实现解耦
+两个维度独立扩展
+</code></pre>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<p>桥接模式的优点主要有：</p>
+<pre><code class="language-text">1. 分离抽象和实现，降低耦合。
+2. 避免多维度组合导致类型数量爆炸。
+3. 抽象层和实现层可以独立扩展。
+4. 更符合组合优于继承的思想。
+5. 在 Rust 中可以通过 trait 和泛型获得较好性能。
+6. 可以根据需要选择静态分发或动态分发。
+</code></pre>
+<p>从工程角度看，桥接模式的价值在于：</p>
+<pre><code class="language-text">让系统面对多个变化维度时，结构仍然保持清晰。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<p>桥接模式的代价主要包括：</p>
+<pre><code class="language-text">1. 增加抽象层，代码结构更复杂。
+2. 需要提前识别系统中的变化维度。
+3. 对简单场景来说可能过度设计。
+4. 使用 Box&lt;dyn Trait&gt; 会有动态分发和堆分配开销。
+5. 泛型桥接可能让类型定义变长。
+6. 抽象层设计不好时，反而会增加理解成本。
+</code></pre>
+<p>特别是在 Rust 中，不要为了“显得设计高级”而强行桥接。</p>
+<p>如果一个系统只有一个变化维度，策略模式可能就够了。</p>
+<p>如果只是接口不兼容，适配器模式更合适。</p>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用桥接模式：</p>
+<pre><code class="language-text">1. 只有一个变化维度。
+2. 抽象和实现不会独立变化。
+3. 类型数量很少，直接实现更清楚。
+4. 系统不需要运行时切换实现。
+5. enum + match 已经足够表达。
+6. 为了套模式而人为拆分结构。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">如果只是替换算法，考虑策略模式。
+如果是接口不兼容，考虑适配器模式。
+如果是两个维度都要独立扩展，再考虑桥接模式。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 消息系统</p>
+<p>需求：</p>
+<pre><code class="language-text">消息类型有普通消息和加急消息。
+发送方式有邮件发送和短信发送。
+消息类型和发送方式都可能继续扩展。
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 MessageSender trait 作为实现层接口。
+2. EmailSender 和 SmsSender 实现 MessageSender。
+3. NormalMessage 和 UrgentMessage 作为抽象层对象。
+4. 消息对象内部持有 sender。
+5. 调用 send() 时，消息对象处理自己的抽象逻辑，再委托 sender 发送。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">trait
+泛型
+trait bound
+Box&lt;dyn Trait&gt;
+struct 组合
+所有权
+动态分发和静态分发对比
+</code></pre>
+<p>这个例子可以体现桥接模式的核心：</p>
+<pre><code class="language-text">消息类型和发送方式是两个独立变化维度。
+桥接模式让它们可以自由组合。
+</code></pre>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<p>桥接模式的本质是：</p>
+<pre><code class="language-text">把抽象部分和实现部分拆开，通过组合连接，使二者可以独立变化。
+</code></pre>
+<p>在 Rust 中，桥接模式通常通过 <code>trait + 结构体组合</code> 实现；如果实现类型在编译期确定，可以使用泛型和 trait bound；如果需要运行时切换实现，可以使用 <code>Box&lt;dyn Trait&gt;</code>。桥接模式适合两个维度都可能扩展的场景，不适合简单对象或只有单一变化点的场景。</p>
 
                     </main>
 
@@ -232,11 +736,11 @@
 
         <script src="../../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../../mark-09e88c2c.min.js"></script>
-        <script src="../../searcher-c2a407aa.js"></script>
+        <script src="../../searcher-09f2665d.js"></script>
 
         <script src="../../clipboard-1626706a.min.js"></script>
         <script src="../../highlight-abc7f01d.js"></script>
-        <script src="../../book-a0b12cfe.js"></script>
+        <script src="../../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

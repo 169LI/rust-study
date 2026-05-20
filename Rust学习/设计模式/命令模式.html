@@ -15,8 +15,8 @@
         <link rel="icon" href="../../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../../css/general-2459343d.css">
-        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/general-0392ca55.css">
+        <link rel="stylesheet" href="../../css/chrome-fc474251.css">
         <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-cfab9861.js";
+            window.path_to_searchindex_js = "../../searchindex-f773f06c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-3631dbdf.js"></script>
+        <script src="../../toc-bf95e44b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -181,7 +181,500 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="命令模式"><a class="header" href="#命令模式">命令模式</a></h1>
+                        <h1 id="16_命令模式-command-pattern"><a class="header" href="#16_命令模式-command-pattern">16_命令模式 Command Pattern</a></h1>
+<h2 id="1-基本信息"><a class="header" href="#1-基本信息">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 命令模式</p>
+<p><strong>英文名称：</strong> Command Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>enum</code> 命令、<code>trait Command</code>、<code>Box&lt;dyn Command&gt;</code>、闭包、函数指针、任务队列</p>
+<p>命令模式的核心是：<strong>把一次操作封装成一个独立对象，使操作可以被保存、传递、排队、撤销或延迟执行。</strong></p>
+<p>在 Rust 中，命令模式常见有两种写法：</p>
+<pre><code class="language-text">1. enum + match：适合命令种类固定的场景
+2. trait + Box&lt;dyn Command&gt;：适合命令种类需要动态扩展的场景
+</code></pre>
+<hr>
+<h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
+<p>命令模式的核心思想是：</p>
+<pre><code class="language-text">把“请求执行某个操作”这件事封装起来，
+让调用方不直接执行具体逻辑，而是把命令交给执行器处理。
+</code></pre>
+<p>也就是说，命令模式关注的是：</p>
+<pre><code class="language-text">谁发起命令？
+命令代表什么操作？
+谁执行命令？
+命令能不能保存、撤销、排队、重放？
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">点击按钮
+执行菜单操作
+提交任务
+发送请求
+撤销编辑
+运行 CLI 子命令
+</code></pre>
+<p>这些都可以看成“命令”。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题"><a class="header" href="#3-这个模式解决什么问题">3. 这个模式解决什么问题</a></h2>
+<p>命令模式主要解决的是：<strong>如何把操作本身从调用方中抽离出来，使操作可以像数据一样被管理。</strong></p>
+<p>在实际开发中，经常会遇到：</p>
+<pre><code class="language-text">1. 一个操作不想立即执行，而是之后执行。
+2. 操作需要放入任务队列。
+3. 操作需要记录日志。
+4. 操作需要支持撤销和重做。
+5. 调用方不想直接依赖具体执行逻辑。
+6. 多个操作需要统一调度。
+</code></pre>
+<p>如果没有命令模式，调用方可能会直接调用各种业务函数：</p>
+<pre><code class="language-text">create_file()
+delete_file()
+rename_file()
+copy_file()
+</code></pre>
+<p>当这些操作需要排队、撤销、记录、重放时，直接函数调用就不够灵活。</p>
+<p>命令模式的价值在于：</p>
+<pre><code class="language-text">把操作封装成命令对象，
+使操作可以被保存、传递、组合和统一执行。
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样"><a class="header" href="#4-不使用这个模式会怎样">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用命令模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 调用方直接依赖具体操作函数。
+2. 操作逻辑和触发逻辑耦合在一起。
+3. 很难实现撤销、重做、日志记录。
+4. 很难把操作放入队列延迟执行。
+5. 新增操作时，需要修改调用方大量代码。
+6. 多种操作缺少统一表示方式。
+</code></pre>
+<p>例如 GUI 按钮直接调用具体函数：</p>
+<pre><code class="language-text">保存按钮 → save_file()
+删除按钮 → delete_file()
+复制按钮 → copy_file()
+</code></pre>
+<p>短期看很简单，但如果以后要增加：</p>
+<pre><code class="language-text">快捷键
+菜单栏
+撤销功能
+操作记录
+脚本化执行
+</code></pre>
+<p>就会发现每个入口都要重复绑定具体逻辑。</p>
+<p>命令模式可以让这些入口都只产生“命令”，再由统一执行器处理。</p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路"><a class="header" href="#5-传统面向对象中的实现思路">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，命令模式通常包含几个角色：</p>
+<pre><code class="language-text">1. Command：命令接口，定义 execute() 方法。
+2. ConcreteCommand：具体命令，实现具体操作。
+3. Receiver：真正执行业务逻辑的对象。
+4. Invoker：命令调用者，负责触发命令。
+5. Client：创建命令并绑定接收者。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Command
+ └── execute()
+
+CreateFileCommand
+ ├── receiver: FileSystem
+ └── execute() { receiver.create_file() }
+
+Invoker
+ └── command.execute()
+</code></pre>
+<p>这里有一个关键点：</p>
+<pre><code class="language-text">命令对象本身不一定真正完成所有业务逻辑，
+它通常只是封装“调用哪个接收者的哪个方法”。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">按钮 Button 不知道怎么保存文件。
+按钮只知道执行一个 Command。
+真正保存文件的是 FileSystem。
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路"><a class="header" href="#6-rust-中的实现思路">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现"><a class="header" href="#61-rust-中通常怎么实现">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中命令模式有两种常见实现方式。</p>
+<p>第一种是 <strong>enum + match</strong>。</p>
+<p>如果命令种类是固定的，Rust 更推荐用 <code>enum</code> 表达命令：</p>
+<pre class="playground"><code class="language-rust edition2024">enum Command {
+    CreateFile { name: String },
+    DeleteFile { name: String },
+    RenameFile { old: String, new: String },
+}
+
+struct FileSystem;
+
+impl FileSystem {
+    fn execute(&amp;self, command: Command) {
+        match command {
+            Command::CreateFile { name } =&gt; {
+                println!("创建文件：{}", name);
+            }
+            Command::DeleteFile { name } =&gt; {
+                println!("删除文件：{}", name);
+            }
+            Command::RenameFile { old, new } =&gt; {
+                println!("重命名文件：{} -&gt; {}", old, new);
+            }
+        }
+    }
+}
+
+fn main() {
+    let fs = FileSystem;
+
+    let cmd = Command::CreateFile {
+        name: "test.txt".to_string(),
+    };
+
+    fs.execute(cmd);
+}</code></pre>
+<p>这种写法的优点是：</p>
+<pre><code class="language-text">1. 命令类型明确。
+2. match 可以穷尽检查。
+3. 不需要动态分发。
+4. 适合 CLI、任务类型固定的系统。
+</code></pre>
+<hr>
+<p>第二种是 <strong>trait + <code>Box&lt;dyn Command&gt;</code></strong>。</p>
+<p>如果命令类型需要动态扩展，可以定义 <code>Command</code> trait：</p>
+<pre class="playground"><code class="language-rust edition2024">trait Command {
+    fn execute(&amp;self);
+}
+
+struct CreateFileCommand {
+    name: String,
+}
+
+impl Command for CreateFileCommand {
+    fn execute(&amp;self) {
+        println!("创建文件：{}", self.name);
+    }
+}
+
+struct DeleteFileCommand {
+    name: String,
+}
+
+impl Command for DeleteFileCommand {
+    fn execute(&amp;self) {
+        println!("删除文件：{}", self.name);
+    }
+}
+
+struct Invoker {
+    commands: Vec&lt;Box&lt;dyn Command&gt;&gt;,
+}
+
+impl Invoker {
+    fn new() -&gt; Self {
+        Self {
+            commands: Vec::new(),
+        }
+    }
+
+    fn add_command(&amp;mut self, command: Box&lt;dyn Command&gt;) {
+        self.commands.push(command);
+    }
+
+    fn run(&amp;self) {
+        for command in &amp;self.commands {
+            command.execute();
+        }
+    }
+}
+
+fn main() {
+    let mut invoker = Invoker::new();
+
+    invoker.add_command(Box::new(CreateFileCommand {
+        name: "a.txt".to_string(),
+    }));
+
+    invoker.add_command(Box::new(DeleteFileCommand {
+        name: "b.txt".to_string(),
+    }));
+
+    invoker.run();
+}</code></pre>
+<p>这种写法的优点是：</p>
+<pre><code class="language-text">1. 可以把不同命令放入同一个队列。
+2. 可以运行时决定执行哪些命令。
+3. 可以扩展新的命令类型。
+4. 适合任务队列、插件化系统、GUI 事件系统。
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同"><a class="header" href="#62-和传统-oop-写法相比有什么不同">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的命令模式有几个明显特点。</p>
+<p>第一，Rust 可以直接用 <code>enum</code> 表达命令集合。
+传统 OOP 中往往一个命令一个类；Rust 中如果命令种类有限，用 <code>enum</code> 会更简洁。</p>
+<p>第二，Rust 的 <code>match</code> 可以进行穷尽性检查。
+当新增命令类型时，编译器会提示哪些地方没有处理。</p>
+<p>第三，Rust 也可以用 trait object 实现传统命令对象。
+例如 <code>Box&lt;dyn Command&gt;</code> 可以把不同命令放到同一个 <code>Vec</code> 中统一执行。</p>
+<p>第四，Rust 中命令对象要考虑所有权。
+命令如果携带数据，比如文件名、参数、请求体，需要明确这些数据是移动进命令、借用，还是共享。</p>
+<p>第五，Rust 中闭包也可以作为轻量命令。
+如果命令逻辑很简单，不一定要定义结构体，可以直接保存闭包。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法"><a class="header" href="#63-rust-中是否有更自然的替代写法">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，命令模式可以根据场景选择不同写法。</p>
+<p>如果命令集合固定，推荐：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>如果命令集合需要扩展，推荐：</p>
+<pre><code class="language-text">trait Command + Box&lt;dyn Command&gt;
+</code></pre>
+<p>如果命令只是简单回调，推荐：</p>
+<pre><code class="language-text">闭包
+</code></pre>
+<p>例如：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let commands: Vec&lt;Box&lt;dyn Fn()&gt;&gt; = vec![
+    Box::new(|| println!("执行命令 A")),
+    Box::new(|| println!("执行命令 B")),
+];
+
+for command in commands {
+    command();
+}
+<span class="boring">}</span></code></pre>
+<p>如果需要撤销操作，可以让命令同时支持：</p>
+<pre><code class="language-text">execute()
+undo()
+</code></pre>
+<p>如果需要异步任务队列，可以考虑：</p>
+<pre><code class="language-text">channel
+async task
+tokio::spawn
+</code></pre>
+<p>所以 Rust 中的命令模式不一定非要写成复杂的“命令类体系”，而是要根据命令是否固定、是否需要扩展、是否需要撤销来选择实现方式。</p>
+<hr>
+<h2 id="7-rust-中涉及的语言特性"><a class="header" href="#7-rust-中涉及的语言特性">7. Rust 中涉及的语言特性</a></h2>
+<p>命令模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. enum
+2. match
+3. trait
+4. `Box&lt;dyn Trait&gt;`
+5. Vec
+6. 闭包
+7. 所有权移动
+8. Result
+9. channel
+10. async / await
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">enum：表达固定命令集合
+match：根据命令类型分发执行逻辑
+trait：抽象命令接口
+Box&lt;dyn Trait&gt;：保存不同类型命令
+Vec：管理命令队列或历史记录
+闭包：表达轻量命令
+所有权：管理命令携带的数据
+Result：表达命令执行成功或失败
+channel：实现跨线程命令传递
+async：实现异步命令执行
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">enum + match
+trait Command + Box&lt;dyn Command&gt;
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价"><a class="header" href="#8-性能与工程代价">8. 性能与工程代价</a></h2>
+<p>命令模式的性能取决于具体实现方式。</p>
+<p>如果使用 <code>enum + match</code>：</p>
+<pre><code class="language-text">1. 没有动态分发。
+2. 没有额外堆分配。
+3. 编译器容易优化。
+4. 适合命令类型固定的高性能场景。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn Command&gt;</code>：</p>
+<pre><code class="language-text">1. 可以统一保存不同命令类型。
+2. 有动态分发开销。
+3. 通常会产生堆分配。
+4. 灵活性更强，但性能略低。
+</code></pre>
+<p>如果使用闭包：</p>
+<pre><code class="language-text">1. 简单灵活。
+2. 可以捕获环境变量。
+3. 使用 Box&lt;dyn Fn()&gt; 时同样可能有动态分发和堆分配。
+</code></pre>
+<p>工程代价方面，命令模式会引入额外结构：</p>
+<pre><code class="language-text">1. 需要定义命令类型。
+2. 需要设计执行器或调度器。
+3. 如果支持 undo，需要额外保存历史。
+4. 如果命令携带资源，需要处理所有权和生命周期。
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">命令模式提升了操作管理能力，但会增加一层命令封装。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景"><a class="header" href="#9-典型应用场景">9. 典型应用场景</a></h2>
+<p>命令模式适合用于“操作需要被管理”的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. GUI 按钮事件
+2. 菜单操作
+3. 命令行子命令
+4. 任务队列
+5. 撤销和重做系统
+6. 操作日志
+7. 宏命令
+8. 消息队列
+9. 异步任务调度
+10. 游戏输入控制
+</code></pre>
+<p>在 Rust 项目中，命令模式可能出现在：</p>
+<pre><code class="language-text">CLI 工具
+Web 请求任务处理
+批量编译任务调度
+文件操作工具
+编辑器撤销系统
+异步 worker 队列
+测试任务执行器
+</code></pre>
+<p>例如批量编译 crate 时，可以把每个任务封装成命令：</p>
+<pre><code class="language-text">CompileCommand
+TestCommand
+CleanCommand
+UpdateDependencyCommand
+</code></pre>
+<p>然后统一放入队列执行。</p>
+<hr>
+<h2 id="10-和相似模式的区别"><a class="header" href="#10-和相似模式的区别">10. 和相似模式的区别</a></h2>
+<p>命令模式容易和策略模式、责任链模式、备忘录模式、观察者模式混淆。</p>
+<h3 id="101-命令模式和策略模式"><a class="header" href="#101-命令模式和策略模式">10.1 命令模式和策略模式</a></h3>
+<p>二者都可能把行为封装起来，但关注点不同。</p>
+<pre><code class="language-text">策略模式：关注算法或行为的替换。
+命令模式：关注操作的封装、传递、排队、撤销和延迟执行。
+</code></pre>
+<p>策略模式更像是：</p>
+<pre><code class="language-text">我选择哪种算法来完成这个任务。
+</code></pre>
+<p>命令模式更像是：</p>
+<pre><code class="language-text">我把这个任务封装成一个命令，交给别人执行。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">选择 zip 或 gzip 压缩：策略模式
+把“压缩这个文件”放进任务队列：命令模式
+</code></pre>
+<hr>
+<h3 id="102-命令模式和责任链模式"><a class="header" href="#102-命令模式和责任链模式">10.2 命令模式和责任链模式</a></h3>
+<p>二者都可能处理请求，但结构不同。</p>
+<pre><code class="language-text">命令模式：把请求封装成对象，由执行器执行。
+责任链模式：请求沿着多个处理者传递。
+</code></pre>
+<p>命令模式关注：</p>
+<pre><code class="language-text">请求本身如何被表示和管理。
+</code></pre>
+<p>责任链模式关注：</p>
+<pre><code class="language-text">请求应该由链上的哪个处理者处理。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">保存文件命令加入操作队列：命令模式
+HTTP 请求经过认证、日志、路由处理：责任链模式
+</code></pre>
+<hr>
+<h3 id="103-命令模式和备忘录模式"><a class="header" href="#103-命令模式和备忘录模式">10.3 命令模式和备忘录模式</a></h3>
+<p>二者都可以实现撤销，但方式不同。</p>
+<pre><code class="language-text">命令模式：保存操作，通过反向操作 undo。
+备忘录模式：保存状态，通过恢复快照 undo。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">删除字符命令的 undo 是重新插入字符：命令模式
+保存整个文档历史状态再恢复：备忘录模式
+</code></pre>
+<p>如果操作很容易反向执行，命令模式更合适。
+如果操作难以反向计算，备忘录模式更合适。</p>
+<hr>
+<h3 id="104-命令模式和观察者模式"><a class="header" href="#104-命令模式和观察者模式">10.4 命令模式和观察者模式</a></h3>
+<p>二者都可能和事件系统有关，但关注点不同。</p>
+<pre><code class="language-text">命令模式：事件发生后要执行什么操作。
+观察者模式：状态变化后要通知哪些对象。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">按钮点击后执行 SaveCommand：命令模式
+文档变化后通知多个视图刷新：观察者模式
+</code></pre>
+<p>观察者模式更强调通知关系，命令模式更强调操作封装。</p>
+<hr>
+<h2 id="11-使用该模式的优点"><a class="header" href="#11-使用该模式的优点">11. 使用该模式的优点</a></h2>
+<p>命令模式的优点主要有：</p>
+<pre><code class="language-text">1. 将操作请求和执行逻辑解耦。
+2. 命令可以被保存、排队、延迟执行。
+3. 可以支持撤销和重做。
+4. 可以统一管理不同操作。
+5. 可以记录操作日志或实现重放。
+6. 在 Rust 中可以用 enum 或 trait 灵活实现。
+</code></pre>
+<p>从工程角度看，命令模式的价值在于：</p>
+<pre><code class="language-text">把“行为”变成可以管理的数据。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价"><a class="header" href="#12-使用该模式的代价">12. 使用该模式的代价</a></h2>
+<p>命令模式的代价主要包括：</p>
+<pre><code class="language-text">1. 简单操作使用命令模式可能过度设计。
+2. 需要额外定义命令类型或命令 trait。
+3. 动态命令可能带来堆分配和动态分发开销。
+4. 支持 undo 时需要额外保存上下文。
+5. 命令数量过多时，结构可能变复杂。
+</code></pre>
+<p>特别是在 Rust 中，如果命令携带大量数据，要注意：</p>
+<pre><code class="language-text">1. 数据是移动进命令，还是借用？
+2. 命令需要执行一次，还是可以多次执行？
+3. 命令执行失败怎么处理？
+4. 命令是否需要线程安全？
+</code></pre>
+<p>这些都会影响命令结构设计。</p>
+<hr>
+<h2 id="13-什么时候不应该使用"><a class="header" href="#13-什么时候不应该使用">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用命令模式：</p>
+<pre><code class="language-text">1. 操作非常简单，直接调用函数即可。
+2. 不需要撤销、队列、延迟执行或日志记录。
+3. 操作数量很少，也不会扩展。
+4. 调用方和执行方没有解耦需求。
+5. 命令对象反而让代码更难理解。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">只是立即执行一次的简单函数，不需要命令模式。
+需要把操作保存、传递、排队、撤销时，再考虑命令模式。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路"><a class="header" href="#14-一个简单例子思路">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文本编辑器撤销操作</p>
+<p>需求：</p>
+<pre><code class="language-text">支持插入文本
+支持删除文本
+支持撤销上一步操作
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 Command trait。
+2. 每个命令实现 execute()。
+3. 如果支持撤销，再实现 undo()。
+4. Editor 作为 Receiver，真正修改文本。
+5. Invoker 保存命令历史栈。
+6. 执行命令后，把命令放入 history。
+7. undo 时，从 history 弹出命令并执行 undo()。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">trait
+Box&lt;dyn Trait&gt;
+Vec 历史栈
+所有权
+可变借用
+Result
+</code></pre>
+<p>也可以设计一个 CLI 场景：</p>
+<pre><code class="language-text">Command::Add
+Command::Remove
+Command::List
+Command::Run
+</code></pre>
+<p>这种情况下更适合用 <code>enum + match</code>。</p>
+<hr>
+<h2 id="15-总结一句话"><a class="header" href="#15-总结一句话">15. 总结一句话</a></h2>
+<p>命令模式的本质是：</p>
+<pre><code class="language-text">把一次操作封装成一个可保存、可传递、可排队、可撤销或可延迟执行的命令对象。
+</code></pre>
+<p>在 Rust 中，如果命令集合固定，通常优先使用 <code>enum + match</code>；如果命令需要动态扩展，可以使用 <code>trait Command + Box&lt;dyn Command&gt;</code>；如果只是简单回调，也可以直接使用闭包。命令模式适合任务队列、撤销重做、CLI 子命令、GUI 事件和异步任务调度等场景。</p>
 
                     </main>
 
@@ -232,11 +725,11 @@
 
         <script src="../../elasticlunr-ef4e11c1.min.js"></script>
         <script src="../../mark-09e88c2c.min.js"></script>
-        <script src="../../searcher-c2a407aa.js"></script>
+        <script src="../../searcher-09f2665d.js"></script>
 
         <script src="../../clipboard-1626706a.min.js"></script>
         <script src="../../highlight-abc7f01d.js"></script>
-        <script src="../../book-a0b12cfe.js"></script>
+        <script src="../../book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 

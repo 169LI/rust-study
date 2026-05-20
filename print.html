@@ -16,8 +16,8 @@
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/general-0392ca55.css">
+        <link rel="stylesheet" href="css/chrome-fc474251.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-cfab9861.js";
+            window.path_to_searchindex_js = "searchindex-f773f06c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-3631dbdf.js"></script>
+        <script src="toc-bf95e44b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -8827,13 +8827,13 @@ Rust 中常用到的语法：
 <p>第 3 组：结构组织</p>
 <ol>
 <li><a href="#12_外观模式-facade-pattern">外观模式</a></li>
-<li><a href="#组合模式">组合模式</a></li>
-<li><a href="#桥接模式">桥接模式</a></li>
-<li><a href="#享元模式">享元模式</a></li>
+<li><a href="#13_组合模式-composite-pattern">组合模式</a></li>
+<li><a href="#14_桥接模式-bridge-pattern">桥接模式</a></li>
+<li><a href="#15_享元模式-flyweight-pattern">享元模式</a></li>
 </ol>
 <p>第 4 组：行为协作</p>
 <ol>
-<li><a href="#命令模式">命令模式</a></li>
+<li><a href="#16_命令模式-command-pattern">命令模式</a></li>
 <li><a href="#17_观察者模式-observer-pattern">观察者模式</a></li>
 <li><a href="#18_责任链模式-chain-of-responsibility-pattern">责任链模式</a></li>
 <li><a href="#19_中介者模式-mediator-pattern">中介者模式</a></li>
@@ -11396,23 +11396,2030 @@ fn main() {
 <p>外观模式的本质是：<strong>提供统一高层接口，将多个子系统操作组合在一起，简化调用方使用，同时隐藏内部复杂性。在 Rust 中，通过结构体封装、trait 或函数接口即可高效实现外观模式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="组合模式"><a class="header" href="#组合模式">组合模式</a></h1>
+<h1 id="13_组合模式-composite-pattern"><a class="header" href="#13_组合模式-composite-pattern">13_组合模式 Composite Pattern</a></h1>
+<h2 id="1-基本信息-12"><a class="header" href="#1-基本信息-12">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 组合模式</p>
+<p><strong>英文名称：</strong> Composite Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>enum</code> 递归结构、<code>Box</code>、<code>Vec</code>、trait object、<code>Rc&lt;RefCell&lt;T&gt;&gt;</code></p>
+<p>组合模式的核心是：<strong>将对象组织成树形结构，使调用方可以用统一方式处理单个对象和组合对象。</strong></p>
+<p>在 Rust 中，组合模式最常见的实现方式是：</p>
+<pre><code class="language-text">1. enum + Box / Vec 表达树形结构
+2. trait + Box&lt;dyn Trait&gt; 表达统一接口
+3. Rc / RefCell 处理共享和可变树结构
+</code></pre>
+<hr>
+<h2 id="2-模式核心思想-11"><a class="header" href="#2-模式核心思想-11">2. 模式核心思想</a></h2>
+<p>组合模式的核心思想是：</p>
+<pre><code class="language-text">把“单个对象”和“由多个对象组成的复合对象”统一看待。
+</code></pre>
+<p>也就是说，调用方不需要区分：</p>
+<pre><code class="language-text">这是一个单独节点？
+还是一个包含多个子节点的节点？
+</code></pre>
+<p>它只需要通过统一接口进行操作。</p>
+<p>例如文件系统中：</p>
+<pre><code class="language-text">文件：单个对象
+文件夹：组合对象，里面可以包含文件和其他文件夹
+</code></pre>
+<p>但是调用方希望统一调用：</p>
+<pre><code class="language-text">计算大小
+打印名称
+遍历结构
+删除节点
+搜索节点
+</code></pre>
+<p>组合模式就是用来处理这种“整体—部分”关系的。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题-11"><a class="header" href="#3-这个模式解决什么问题-11">3. 这个模式解决什么问题</a></h2>
+<p>组合模式主要解决的是：<strong>树形结构中，如何统一处理叶子节点和组合节点。</strong></p>
+<p>在实际开发中，经常会遇到层级结构：</p>
+<pre><code class="language-text">1. 文件系统：文件和文件夹
+2. UI 界面：按钮、文本框、面板、窗口
+3. 组织结构：员工、部门、公司
+4. 表达式树：数字、加法、乘法
+5. 文档结构：段落、章节、整篇文档
+6. 菜单系统：菜单项、子菜单
+</code></pre>
+<p>这些结构共同特点是：</p>
+<pre><code class="language-text">一个对象可以是单独元素；
+也可以是包含多个元素的容器；
+容器里面还可以继续包含容器。
+</code></pre>
+<p>如果没有组合模式，调用方可能要反复判断：</p>
+<pre><code class="language-text">如果是文件，就直接处理；
+如果是文件夹，就递归处理里面的内容；
+如果是子文件夹，还要继续递归。
+</code></pre>
+<p>组合模式的目标是：<strong>让叶子对象和组合对象对外表现出一致的接口。</strong></p>
+<hr>
+<h2 id="4-不使用这个模式会怎样-11"><a class="header" href="#4-不使用这个模式会怎样-11">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用组合模式，可能出现以下问题：</p>
+<pre><code class="language-text">1. 调用方需要区分叶子节点和组合节点。
+2. 树形结构的递归处理逻辑分散在多个地方。
+3. 新增节点类型时，调用方需要修改很多判断逻辑。
+4. 整体和部分的接口不统一。
+5. 树结构越复杂，代码越难维护。
+</code></pre>
+<p>例如文件系统中，如果没有统一抽象，可能会写很多类似逻辑：</p>
+<pre><code class="language-text">如果是文件，打印文件名；
+如果是目录，打印目录名，然后遍历子节点；
+如果子节点还是目录，继续递归。
+</code></pre>
+<p>这些逻辑如果散落在多个函数中，后续维护会很麻烦。</p>
+<p>组合模式的作用就是：<strong>把层级结构本身组织起来，并让调用方用统一方式处理它。</strong></p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-11"><a class="header" href="#5-传统面向对象中的实现思路-11">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，组合模式通常包含三个角色：</p>
+<pre><code class="language-text">1. Component：抽象组件，定义叶子和组合对象的统一接口。
+2. Leaf：叶子节点，表示没有子节点的对象。
+3. Composite：组合节点，内部包含多个 Component。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Component
+ ├── operation()
+ └── add/remove/get_child()
+
+Leaf
+ └── operation()
+
+Composite
+ ├── children: Vec&lt;Component&gt;
+ └── operation() { 遍历 children 并调用 operation() }
+</code></pre>
+<p>例如文件系统：</p>
+<pre><code class="language-text">FileSystemNode
+ ├── size()
+ └── print()
+
+File
+ └── size()
+
+Directory
+ ├── children
+ └── size() = 子节点 size 总和
+</code></pre>
+<p>调用方只依赖 <code>Component</code> 接口，不需要关心当前对象到底是叶子还是组合对象。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-11"><a class="header" href="#6-rust-中的实现思路-11">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-11"><a class="header" href="#61-rust-中通常怎么实现-11">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中组合模式有两种常见写法。</p>
+<p>第一种是 <strong>enum + 递归结构</strong>。
+如果节点类型是固定的，这种方式最自然。</p>
+<pre class="playground"><code class="language-rust edition2024">enum FileNode {
+    File {
+        name: String,
+        size: u64,
+    },
+    Directory {
+        name: String,
+        children: Vec&lt;FileNode&gt;,
+    },
+}
+
+impl FileNode {
+    fn total_size(&amp;self) -&gt; u64 {
+        match self {
+            FileNode::File { size, .. } =&gt; *size,
+            FileNode::Directory { children, .. } =&gt; {
+                children.iter().map(|child| child.total_size()).sum()
+            }
+        }
+    }
+
+    fn print(&amp;self, depth: usize) {
+        let indent = "  ".repeat(depth);
+
+        match self {
+            FileNode::File { name, size } =&gt; {
+                println!("{}文件: {} ({} bytes)", indent, name, size);
+            }
+            FileNode::Directory { name, children } =&gt; {
+                println!("{}目录: {}", indent, name);
+
+                for child in children {
+                    child.print(depth + 1);
+                }
+            }
+        }
+    }
+}
+
+fn main() {
+    let root = FileNode::Directory {
+        name: "root".to_string(),
+        children: vec![
+            FileNode::File {
+                name: "a.txt".to_string(),
+                size: 100,
+            },
+            FileNode::Directory {
+                name: "src".to_string(),
+                children: vec![
+                    FileNode::File {
+                        name: "main.rs".to_string(),
+                        size: 300,
+                    },
+                ],
+            },
+        ],
+    };
+
+    root.print(0);
+    println!("总大小: {}", root.total_size());
+}</code></pre>
+<p>这个例子中：</p>
+<pre><code class="language-text">File 是叶子节点。
+Directory 是组合节点。
+FileNode 统一表达两者。
+</code></pre>
+<p>调用方只需要调用：</p>
+<pre><code class="language-text">print()
+total_size()
+</code></pre>
+<p>不需要自己在外部区分文件和目录。</p>
+<hr>
+<p>第二种是 <strong><code>trait + Box&lt;dyn Trait&gt;</code></strong>。
+如果节点类型需要动态扩展，可以用 trait object。</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait Component {
+    fn name(&amp;self) -&gt; &amp;str;
+    fn size(&amp;self) -&gt; u64;
+    fn print(&amp;self, depth: usize);
+}
+
+struct File {
+    name: String,
+    size: u64,
+}
+
+impl Component for File {
+    fn name(&amp;self) -&gt; &amp;str {
+        &amp;self.name
+    }
+
+    fn size(&amp;self) -&gt; u64 {
+        self.size
+    }
+
+    fn print(&amp;self, depth: usize) {
+        let indent = "  ".repeat(depth);
+        println!("{}文件: {} ({} bytes)", indent, self.name, self.size);
+    }
+}
+
+struct Directory {
+    name: String,
+    children: Vec&lt;Box&lt;dyn Component&gt;&gt;,
+}
+
+impl Component for Directory {
+    fn name(&amp;self) -&gt; &amp;str {
+        &amp;self.name
+    }
+
+    fn size(&amp;self) -&gt; u64 {
+        self.children.iter().map(|child| child.size()).sum()
+    }
+
+    fn print(&amp;self, depth: usize) {
+        let indent = "  ".repeat(depth);
+        println!("{}目录: {}", indent, self.name);
+
+        for child in &amp;self.children {
+            child.print(depth + 1);
+        }
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>这种写法更接近传统组合模式：</p>
+<pre><code class="language-text">Component trait 是统一接口。
+File 是 Leaf。
+Directory 是 Composite。
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-11"><a class="header" href="#62-和传统-oop-写法相比有什么不同-11">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的组合模式有几个明显特点。</p>
+<p>第一，Rust 可以直接用 <code>enum</code> 表达固定类型的树。
+传统 OOP 中通常需要抽象类或接口；Rust 中如果节点类型有限，用 <code>enum</code> 更直接。</p>
+<p>第二，Rust 的 <code>match</code> 可以清楚地区分不同节点。
+例如文件和目录可以作为不同枚举变体，编译器会检查是否处理完整。</p>
+<p>第三，递归结构通常需要 <code>Box</code> 或 <code>Vec</code>。
+因为 Rust 需要在编译期知道类型大小，如果一个类型直接包含自己，会导致无限大小。
+所以树形结构通常写成：</p>
+<pre><code class="language-text">Box&lt;Node&gt;
+Vec&lt;Node&gt;
+Vec&lt;Box&lt;dyn Trait&gt;&gt;
+</code></pre>
+<p>第四，Rust 中共享可变树结构需要更谨慎。
+如果一个节点可能被多个地方引用，并且还需要修改，就可能涉及：</p>
+<pre><code class="language-text">Rc&lt;RefCell&lt;T&gt;&gt;
+Arc&lt;Mutex&lt;T&gt;&gt;
+</code></pre>
+<p>第五，Rust 不鼓励为了模拟继承而过度使用 trait object。
+如果节点类型固定，<code>enum + match</code> 往往更简单、更符合 Rust 风格。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-11"><a class="header" href="#63-rust-中是否有更自然的替代写法-11">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中选择组合模式写法时，可以这样判断。</p>
+<p>如果节点类型固定，例如只有文件和目录：</p>
+<pre><code class="language-text">优先使用 enum + Vec
+</code></pre>
+<p>如果节点类型可能扩展，例如 UI 组件有很多种，并且未来不断新增：</p>
+<pre><code class="language-text">可以使用 trait + Box&lt;dyn Trait&gt;
+</code></pre>
+<p>如果树结构只读：</p>
+<pre><code class="language-text">普通 Box / Vec 就够了
+</code></pre>
+<p>如果树节点需要共享所有权：</p>
+<pre><code class="language-text">Rc&lt;T&gt; 或 Arc&lt;T&gt;
+</code></pre>
+<p>如果树节点既要共享又要修改：</p>
+<pre><code class="language-text">Rc&lt;RefCell&lt;T&gt;&gt; 或 Arc&lt;Mutex&lt;T&gt;&gt;
+</code></pre>
+<p>所以 Rust 中组合模式不一定要照搬 OOP 的 Component / Leaf / Composite 类结构。
+更自然的思路是：</p>
+<pre><code class="language-text">先判断节点类型是否固定；
+再决定用 enum 还是 trait；
+最后根据所有权关系决定 Box、Rc、Arc、RefCell 或 Mutex。
+</code></pre>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-11"><a class="header" href="#7-rust-中涉及的语言特性-11">7. Rust 中涉及的语言特性</a></h2>
+<p>组合模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. enum
+2. match
+3. struct
+4. trait
+5. Box
+6. Vec
+7. 递归数据结构
+8. Rc
+9. RefCell
+10. Arc
+11. Mutex
+12. 所有权和借用
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">enum：表达有限节点类型
+match：根据节点类型执行不同逻辑
+trait：定义统一组件接口
+Box：处理递归结构或动态分发
+Vec：保存多个子节点
+Rc / Arc：多个地方共享节点
+RefCell / Mutex：在共享情况下修改节点
+所有权：管理树中节点归属关系
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">enum + Vec
+trait + Box&lt;dyn Trait&gt;
+递归结构
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-11"><a class="header" href="#8-性能与工程代价-11">8. 性能与工程代价</a></h2>
+<p>组合模式的性能主要取决于树结构的表示方式。</p>
+<p>如果使用 <code>enum + Vec</code>：</p>
+<pre><code class="language-text">1. 不需要动态分发。
+2. 节点结构清晰。
+3. 编译器容易优化。
+4. 适合节点类型固定的树结构。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn Trait&gt;</code>：</p>
+<pre><code class="language-text">1. 支持不同类型节点放在同一个集合中。
+2. 有动态分发开销。
+3. 通常涉及堆分配。
+4. 扩展性更强，但性能略低。
+</code></pre>
+<p>如果使用 <code>Rc&lt;RefCell&lt;T&gt;&gt;</code>：</p>
+<pre><code class="language-text">1. 支持共享和内部可变性。
+2. 会有引用计数成本。
+3. RefCell 的借用检查发生在运行时。
+4. 设计不当可能导致运行时 borrow panic。
+</code></pre>
+<p>如果使用 <code>Arc&lt;Mutex&lt;T&gt;&gt;</code>：</p>
+<pre><code class="language-text">1. 支持多线程共享。
+2. 有原子引用计数和锁开销。
+3. 可能出现锁竞争。
+4. 结构更复杂。
+</code></pre>
+<p>工程代价方面，组合模式会引入递归结构和层级遍历逻辑。</p>
+<p>需要注意：</p>
+<pre><code class="language-text">树的深度是否可能过深？
+是否需要避免递归栈溢出？
+节点是否需要父指针？
+是否存在循环引用？
+是否需要修改树结构？
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">组合模式适合表达树形结构，但在 Rust 中需要认真设计所有权、共享和可变性。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景-11"><a class="header" href="#9-典型应用场景-11">9. 典型应用场景</a></h2>
+<p>组合模式适合用于整体和部分具有层级关系的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 文件系统：文件和目录
+2. UI 组件树：按钮、面板、窗口
+3. 文档结构：章节、段落、文本
+4. 组织结构：员工、部门、公司
+5. 菜单系统：菜单项和子菜单
+6. 表达式树：数字、运算符、表达式
+7. JSON / XML 树结构
+8. 游戏场景树
+9. 编译器 AST
+10. 权限树或分类树
+</code></pre>
+<p>在 Rust 项目中，组合模式可能出现在：</p>
+<pre><code class="language-text">编译器或解释器
+命令行工具的命令树
+配置文件解析
+文件扫描工具
+UI 框架
+规则引擎
+文档转换工具
+</code></pre>
+<p>例如 Rust 中表达 AST 时：</p>
+<pre><code class="language-text">Expr::Number
+Expr::Add
+Expr::Mul
+Expr::Call
+</code></pre>
+<p>本质上就是组合模式和解释器模式的结合。</p>
+<hr>
+<h2 id="10-和相似模式的区别-11"><a class="header" href="#10-和相似模式的区别-11">10. 和相似模式的区别</a></h2>
+<p>组合模式容易和解释器模式、访问者模式、迭代器模式、装饰器模式混淆。</p>
+<h3 id="101-组合模式和解释器模式"><a class="header" href="#101-组合模式和解释器模式">10.1 组合模式和解释器模式</a></h3>
+<p>二者都可能使用树形结构，但关注点不同。</p>
+<pre><code class="language-text">组合模式：关注如何把对象组织成整体—部分结构。
+解释器模式：关注如何解释和执行这个树形结构。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">文件夹包含文件和子文件夹：组合模式
+数学表达式树递归求值：解释器模式
+</code></pre>
+<p>解释器模式经常会用到组合结构，但它的重点不是“组织结构”，而是“解释执行”。</p>
+<hr>
+<h3 id="102-组合模式和访问者模式"><a class="header" href="#102-组合模式和访问者模式">10.2 组合模式和访问者模式</a></h3>
+<p>组合模式关注结构，访问者模式关注操作。</p>
+<pre><code class="language-text">组合模式：如何构造树。
+访问者模式：如何遍历树并对不同节点执行操作。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">UI 组件树：组合模式
+对 UI 树统计组件数量或生成布局：访问者模式
+</code></pre>
+<p>一个系统中可以同时使用组合模式和访问者模式。</p>
+<hr>
+<h3 id="103-组合模式和迭代器模式"><a class="header" href="#103-组合模式和迭代器模式">10.3 组合模式和迭代器模式</a></h3>
+<p>组合模式关注层级结构。</p>
+<p>迭代器模式关注遍历方式。</p>
+<pre><code class="language-text">组合模式：树里有哪些节点，节点之间如何包含。
+迭代器模式：如何按顺序访问这些节点。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">目录树本身是组合模式。
+深度优先遍历目录树可以用迭代器模式。
+</code></pre>
+<hr>
+<h3 id="104-组合模式和装饰器模式"><a class="header" href="#104-组合模式和装饰器模式">10.4 组合模式和装饰器模式</a></h3>
+<p>二者都可能表现为“对象包含对象”，但目的不同。</p>
+<pre><code class="language-text">组合模式：表示整体和部分的层级关系。
+装饰器模式：通过包装对象增强功能。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">窗口中包含按钮、文本框、面板：组合模式
+给按钮增加边框、阴影、日志：装饰器模式
+</code></pre>
+<p>组合模式强调“包含关系”，装饰器模式强调“功能增强”。</p>
+<hr>
+<h2 id="11-使用该模式的优点-11"><a class="header" href="#11-使用该模式的优点-11">11. 使用该模式的优点</a></h2>
+<p>组合模式的优点主要有：</p>
+<pre><code class="language-text">1. 可以清晰表达树形层级结构。
+2. 统一处理叶子节点和组合节点。
+3. 调用方不需要频繁区分单个对象和组合对象。
+4. 适合递归处理整体—部分关系。
+5. 易于扩展复杂层级结构。
+6. 在 Rust 中可以通过 enum 获得良好的类型安全。
+</code></pre>
+<p>从工程角度看，组合模式的价值在于：</p>
+<pre><code class="language-text">把层级结构显式表达出来，
+并让调用方以统一方式处理这个结构。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-11"><a class="header" href="#12-使用该模式的代价-11">12. 使用该模式的代价</a></h2>
+<p>组合模式的代价主要包括：</p>
+<pre><code class="language-text">1. 树结构会引入递归设计复杂度。
+2. 如果使用 trait object，会有动态分发和堆分配开销。
+3. 如果使用 Rc/RefCell，可能增加运行时借用检查成本。
+4. 父子双向引用容易引入循环引用。
+5. 树结构过深时递归遍历可能有栈风险。
+6. 对简单扁平结构使用组合模式可能过度设计。
+</code></pre>
+<p>在 Rust 中尤其要注意：</p>
+<pre><code class="language-text">不要为了方便修改树结构，随意使用 Rc&lt;RefCell&lt;T&gt;&gt;。
+</code></pre>
+<p>这类结构虽然灵活，但会把一部分借用检查推迟到运行时。</p>
+<hr>
+<h2 id="13-什么时候不应该使用-11"><a class="header" href="#13-什么时候不应该使用-11">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用组合模式：</p>
+<pre><code class="language-text">1. 数据结构不是层级结构。
+2. 对象之间没有整体—部分关系。
+3. 节点类型很少，且不会递归嵌套。
+4. 普通 Vec 或 HashMap 已经足够。
+5. 树结构需要频繁复杂修改，但所有权关系没有设计清楚。
+6. 为了套设计模式而强行把简单对象组织成树。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">有明显树形结构，再考虑组合模式。
+节点类型固定，优先 enum。
+节点类型开放扩展，再考虑 trait object。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-11"><a class="header" href="#14-一个简单例子思路-11">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文件系统目录树</p>
+<p>需求：</p>
+<pre><code class="language-text">文件有名称和大小。
+目录有名称和多个子节点。
+子节点可以是文件，也可以是目录。
+需要计算整个目录树的总大小。
+需要打印目录结构。
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 FileNode enum。
+2. FileNode::File 表示叶子节点。
+3. FileNode::Directory 表示组合节点。
+4. Directory 内部保存 Vec&lt;FileNode&gt;。
+5. total_size() 递归计算大小。
+6. print() 递归打印树形结构。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">enum
+match
+Vec
+递归结构
+impl
+所有权
+借用
+Box
+</code></pre>
+<p>如果想练习传统组合模式，可以改成：</p>
+<pre><code class="language-text">trait Component
+File impl Component
+Directory impl Component
+Vec&lt;Box&lt;dyn Component&gt;&gt;
+</code></pre>
+<hr>
+<h2 id="15-总结一句话-11"><a class="header" href="#15-总结一句话-11">15. 总结一句话</a></h2>
+<p>组合模式的本质是：</p>
+<pre><code class="language-text">把对象组织成树形结构，使调用方可以用统一方式处理单个对象和组合对象。
+</code></pre>
+<p>在 Rust 中，如果节点类型固定，组合模式通常优先使用 <code>enum + Vec</code>；如果节点类型需要动态扩展，可以使用 <code>trait + Box&lt;dyn Trait&gt;</code>。使用时要重点关注递归结构、所有权、共享可变性和树形遍历的复杂度。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="桥接模式"><a class="header" href="#桥接模式">桥接模式</a></h1>
+<h1 id="14_桥接模式-bridge-pattern"><a class="header" href="#14_桥接模式-bridge-pattern">14_桥接模式 Bridge Pattern</a></h1>
+<h2 id="1-基本信息-13"><a class="header" href="#1-基本信息-13">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 桥接模式</p>
+<p><strong>英文名称：</strong> Bridge Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>trait</code>、结构体组合、泛型、<code>Box&lt;dyn Trait&gt;</code>、关联类型</p>
+<p>桥接模式的核心是：<strong>将抽象部分和实现部分分离，使它们可以独立变化。</strong></p>
+<p>在 Rust 中，桥接模式通常不是通过继承实现，而是通过：</p>
+<pre><code class="language-text">trait 定义实现接口
+struct 持有实现对象
+泛型或 dyn Trait 连接抽象和实现
+</code></pre>
+<p>来完成。</p>
+<hr>
+<h2 id="2-模式核心思想-12"><a class="header" href="#2-模式核心思想-12">2. 模式核心思想</a></h2>
+<p>桥接模式的核心思想是：</p>
+<pre><code class="language-text">把两个容易一起变化的维度拆开，让它们通过组合关系连接，而不是通过继承关系绑定。
+</code></pre>
+<p>也就是说，桥接模式解决的是：</p>
+<pre><code class="language-text">抽象层要变化
+实现层也要变化
+如果两者直接绑定，类型数量会迅速膨胀
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">图形类型：圆形、矩形、三角形
+绘制平台：Windows、Linux、Web
+</code></pre>
+<p>如果不用桥接模式，可能会出现：</p>
+<pre><code class="language-text">WindowsCircle
+LinuxCircle
+WebCircle
+WindowsRectangle
+LinuxRectangle
+WebRectangle
+WindowsTriangle
+LinuxTriangle
+WebTriangle
+</code></pre>
+<p>类型数量会随着两个维度相乘增长。</p>
+<p>桥接模式的思路是：</p>
+<pre><code class="language-text">图形是一套抽象
+绘制平台是一套实现
+图形内部持有绘制平台接口
+</code></pre>
+<p>这样图形和平台可以独立扩展。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题-12"><a class="header" href="#3-这个模式解决什么问题-12">3. 这个模式解决什么问题</a></h2>
+<p>桥接模式主要解决的是：<strong>抽象和实现存在多个变化维度时，如何避免它们强绑定。</strong></p>
+<p>在实际开发中，经常会遇到这种情况：</p>
+<pre><code class="language-text">1. 一个业务抽象有多种类型。
+2. 每种业务抽象又可以对应多种底层实现。
+3. 抽象和实现都可能独立扩展。
+4. 不希望为每种组合都创建一个新类型。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">消息类型：普通消息、加急消息、广播消息
+发送方式：邮件、短信、微信、MQTT
+
+图形类型：圆形、矩形、线段
+渲染后端：OpenGL、Vulkan、Canvas
+
+日志类型：文本日志、JSON 日志
+输出方式：控制台、文件、远程服务器
+</code></pre>
+<p>桥接模式的价值在于：</p>
+<pre><code class="language-text">让抽象和实现分离，
+避免继承层级或类型组合爆炸。
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样-12"><a class="header" href="#4-不使用这个模式会怎样-12">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用桥接模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 抽象类型和实现类型强耦合。
+2. 每新增一种抽象或实现，都需要创建大量组合类型。
+3. 代码结构变成多层继承或大量重复结构。
+4. 修改实现层可能影响抽象层。
+5. 扩展新功能时容易牵连多个模块。
+</code></pre>
+<p>例如消息系统中，如果直接把消息类型和发送方式绑定，可能会写出：</p>
+<pre><code class="language-text">EmailNormalMessage
+SmsNormalMessage
+WechatNormalMessage
+EmailUrgentMessage
+SmsUrgentMessage
+WechatUrgentMessage
+</code></pre>
+<p>如果后续新增一种消息类型或发送方式，组合数量继续增长。</p>
+<p>桥接模式就是要把这种结构拆成：</p>
+<pre><code class="language-text">消息抽象
+发送实现
+</code></pre>
+<p>然后通过组合连接。</p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-12"><a class="header" href="#5-传统面向对象中的实现思路-12">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，桥接模式通常包含两个层次：</p>
+<pre><code class="language-text">1. Abstraction：抽象部分，定义高层业务接口。
+2. RefinedAbstraction：扩展抽象。
+3. Implementor：实现部分接口。
+4. ConcreteImplementor：具体实现。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Abstraction
+ ├── implementor: Implementor
+ └── operation()
+
+Implementor
+ └── operation_impl()
+
+ConcreteImplementorA
+ └── operation_impl()
+
+ConcreteImplementorB
+ └── operation_impl()
+</code></pre>
+<p>抽象对象内部持有实现接口，然后把具体实现委托给实现对象。</p>
+<p>桥接模式的关键是：</p>
+<pre><code class="language-text">抽象不直接继承具体实现，
+而是通过组合持有实现接口。
+</code></pre>
+<p>这和“组合优于继承”的思想非常接近。</p>
+<hr>
+<h2 id="6-rust-中的实现思路-12"><a class="header" href="#6-rust-中的实现思路-12">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-12"><a class="header" href="#61-rust-中通常怎么实现-12">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中通常通过 <strong>trait + 结构体组合</strong> 实现桥接模式。</p>
+<p>下面以“消息发送”为例。</p>
+<p>发送方式是一套实现维度：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>trait MessageSender {
+    fn send(&amp;self, content: &amp;str);
+}
+
+struct EmailSender;
+
+impl MessageSender for EmailSender {
+    fn send(&amp;self, content: &amp;str) {
+        println!("通过邮件发送：{}", content);
+    }
+}
+
+struct SmsSender;
+
+impl MessageSender for SmsSender {
+    fn send(&amp;self, content: &amp;str) {
+        println!("通过短信发送：{}", content);
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>消息类型是一套抽象维度：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>struct NormalMessage&lt;S: MessageSender&gt; {
+    sender: S,
+}
+
+impl&lt;S: MessageSender&gt; NormalMessage&lt;S&gt; {
+    fn new(sender: S) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        self.sender.send(content);
+    }
+}
+
+struct UrgentMessage&lt;S: MessageSender&gt; {
+    sender: S,
+}
+
+impl&lt;S: MessageSender&gt; UrgentMessage&lt;S&gt; {
+    fn new(sender: S) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        let content = format!("[加急] {}", content);
+        self.sender.send(&amp;content);
+    }
+}
+<span class="boring">}</span></code></pre>
+<p>使用：</p>
+<pre class="playground"><code class="language-rust edition2024">fn main() {
+    let normal_email = NormalMessage::new(EmailSender);
+    normal_email.send("系统通知");
+
+    let urgent_sms = UrgentMessage::new(SmsSender);
+    urgent_sms.send("服务器异常");
+}</code></pre>
+<p>这里有两个独立变化维度：</p>
+<pre><code class="language-text">消息类型：NormalMessage / UrgentMessage
+发送方式：EmailSender / SmsSender
+</code></pre>
+<p>它们没有互相继承，而是通过 <code>sender: S</code> 组合起来。</p>
+<hr>
+<p>如果需要运行时动态选择实现，可以使用 <code>Box&lt;dyn MessageSender&gt;</code>：</p>
+<pre class="playground"><code class="language-rust edition2024">struct DynamicMessage {
+    sender: Box&lt;dyn MessageSender&gt;,
+}
+
+impl DynamicMessage {
+    fn new(sender: Box&lt;dyn MessageSender&gt;) -&gt; Self {
+        Self { sender }
+    }
+
+    fn send(&amp;self, content: &amp;str) {
+        self.sender.send(content);
+    }
+}
+
+fn main() {
+    let sender: Box&lt;dyn MessageSender&gt; = Box::new(EmailSender);
+    let message = DynamicMessage::new(sender);
+
+    message.send("动态选择发送方式");
+}</code></pre>
+<p>这种写法更灵活，但有动态分发开销。</p>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-12"><a class="header" href="#62-和传统-oop-写法相比有什么不同-12">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的桥接模式有几个明显特点。</p>
+<p>第一，Rust 不依赖继承体系。
+传统 OOP 中常通过抽象类和实现接口来分离层次，Rust 中通常通过 <code>trait + struct 组合</code> 完成。</p>
+<p>第二，Rust 可以用泛型实现静态桥接。
+例如：</p>
+<pre><code class="language-text">struct NormalMessage&lt;S: MessageSender&gt;
+</code></pre>
+<p>这种写法在编译期确定具体实现，性能较好。</p>
+<p>第三，Rust 可以用 <code>Box&lt;dyn Trait&gt;</code> 实现动态桥接。
+如果需要运行时切换实现，可以用 trait object。</p>
+<p>第四，Rust 更强调组合关系。
+桥接模式本质上就是组合，而 Rust 本身也更鼓励用组合替代继承。</p>
+<p>第五，Rust 中需要考虑所有权。
+抽象对象持有实现对象时，要明确：</p>
+<pre><code class="language-text">是拥有实现对象？
+是借用实现对象？
+是共享实现对象？
+是否需要多线程共享？
+</code></pre>
+<p>根据不同情况，可以选择：</p>
+<pre><code class="language-text">S
+&amp;S
+Box&lt;dyn Trait&gt;
+Rc&lt;dyn Trait&gt;
+Arc&lt;dyn Trait&gt;
+</code></pre>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-12"><a class="header" href="#63-rust-中是否有更自然的替代写法-12">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，桥接模式不一定要写成传统的 Abstraction / Implementor 结构。</p>
+<p>如果实现类型在编译期确定，推荐：</p>
+<pre><code class="language-text">泛型 + trait bound
+</code></pre>
+<p>如果实现类型要运行时切换，推荐：</p>
+<pre><code class="language-text">Box&lt;dyn Trait&gt;
+</code></pre>
+<p>如果实现对象需要共享，推荐：</p>
+<pre><code class="language-text">Rc&lt;dyn Trait&gt;
+Arc&lt;dyn Trait&gt;
+</code></pre>
+<p>如果两个维度都很简单，直接用 <code>enum + match</code> 可能更清楚。</p>
+<p>例如发送方式只有两三种，而且不需要扩展时：</p>
+<pre><code class="language-text">enum SenderKind {
+    Email,
+    Sms,
+}
+</code></pre>
+<p>就可能已经足够。</p>
+<p>所以在 Rust 中使用桥接模式时，关键不是套结构，而是先判断：</p>
+<pre><code class="language-text">是否真的存在两个独立变化维度？
+这两个维度是否都需要扩展？
+是否需要运行时选择实现？
+</code></pre>
+<p>如果答案是肯定的，桥接模式才更有价值。</p>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-12"><a class="header" href="#7-rust-中涉及的语言特性-12">7. Rust 中涉及的语言特性</a></h2>
+<p>桥接模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. trait
+2. struct
+3. impl
+4. 泛型
+5. trait bound
+6. Box&lt;dyn Trait&gt;
+7. Rc / Arc
+8. 所有权与借用
+9. 关联类型
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">trait：定义实现层接口
+struct：定义抽象层对象
+泛型：静态连接抽象和实现
+Box&lt;dyn Trait&gt;：动态连接抽象和实现
+Rc / Arc：共享实现对象
+所有权：管理抽象对象和实现对象之间的关系
+关联类型：在复杂桥接结构中约束实现类型
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">trait + 结构体组合
+</code></pre>
+<p>也就是：</p>
+<pre><code class="language-text">抽象对象内部持有一个实现接口。
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-12"><a class="header" href="#8-性能与工程代价-12">8. 性能与工程代价</a></h2>
+<p>桥接模式的性能取决于使用静态分发还是动态分发。</p>
+<p>如果使用泛型桥接：</p>
+<pre><code class="language-text">1. 编译期确定具体实现。
+2. 没有虚函数调用。
+3. 编译器可以内联优化。
+4. 性能通常接近直接调用。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn Trait&gt;</code>：</p>
+<pre><code class="language-text">1. 支持运行时选择实现。
+2. 有动态分发开销。
+3. 通常涉及堆分配。
+4. 灵活性更强，但性能略低。
+</code></pre>
+<p>如果使用 <code>Arc&lt;dyn Trait&gt;</code>：</p>
+<pre><code class="language-text">1. 支持多线程共享实现对象。
+2. 有原子引用计数开销。
+3. 适合跨线程场景。
+</code></pre>
+<p>工程代价方面，桥接模式会增加一层抽象：</p>
+<pre><code class="language-text">1. 需要设计抽象层和实现层。
+2. 简单场景下可能显得复杂。
+3. 过度桥接会让代码绕。
+4. 泛型版本可能增加类型复杂度。
+5. 动态版本可能增加运行时开销。
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">桥接模式用结构复杂度换取两个维度的独立扩展能力。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景-12"><a class="header" href="#9-典型应用场景-12">9. 典型应用场景</a></h2>
+<p>桥接模式适合用于两个维度都可能变化的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 图形类型 × 绘制平台
+2. 消息类型 × 发送方式
+3. 日志格式 × 输出目标
+4. 数据库操作 × 数据库类型
+5. UI 控件 × 平台实现
+6. 文件格式 × 存储后端
+7. 报表类型 × 导出格式
+8. 支付业务 × 支付渠道
+9. 设备控制命令 × 设备驱动实现
+</code></pre>
+<p>在 Rust 项目中，桥接模式可能出现在：</p>
+<pre><code class="language-text">日志库设计
+跨平台 GUI 抽象
+数据库访问层
+消息通知系统
+图形渲染后端
+嵌入式设备抽象层
+插件化后端系统
+</code></pre>
+<p>例如日志系统可以拆成两个维度：</p>
+<pre><code class="language-text">日志格式：PlainText / Json / Compact
+输出目标：Console / File / Remote
+</code></pre>
+<p>桥接后就不需要写：</p>
+<pre><code class="language-text">ConsoleJsonLogger
+FileJsonLogger
+RemoteJsonLogger
+ConsoleTextLogger
+FileTextLogger
+RemoteTextLogger
+</code></pre>
+<p>而是让格式和输出目标独立组合。</p>
+<hr>
+<h2 id="10-和相似模式的区别-12"><a class="header" href="#10-和相似模式的区别-12">10. 和相似模式的区别</a></h2>
+<p>桥接模式容易和适配器模式、策略模式、装饰器模式、代理模式混淆。</p>
+<h3 id="101-桥接模式和适配器模式"><a class="header" href="#101-桥接模式和适配器模式">10.1 桥接模式和适配器模式</a></h3>
+<p>二者都可能使用包装和 trait，但目的不同。</p>
+<pre><code class="language-text">桥接模式：提前设计抽象和实现的分离，使两个维度可以独立变化。
+适配器模式：事后解决接口不兼容问题，让已有接口适配新接口。
+</code></pre>
+<p>桥接模式更像是：</p>
+<pre><code class="language-text">系统设计时就把两个变化维度拆开。
+</code></pre>
+<p>适配器模式更像是：</p>
+<pre><code class="language-text">已经有两个接口不兼容，现在加一层转换。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">消息类型和发送方式独立扩展：桥接模式
+把旧打印机接口适配成新打印接口：适配器模式
+</code></pre>
+<hr>
+<h3 id="102-桥接模式和策略模式"><a class="header" href="#102-桥接模式和策略模式">10.2 桥接模式和策略模式</a></h3>
+<p>二者都可能用 <code>trait</code> 表示可替换实现，但关注点不同。</p>
+<pre><code class="language-text">策略模式：关注算法或行为的替换。
+桥接模式：关注抽象层和实现层两个维度的分离。
+</code></pre>
+<p>策略模式通常只有一个变化点：</p>
+<pre><code class="language-text">排序算法可以换。
+</code></pre>
+<p>桥接模式通常有两个变化维度：</p>
+<pre><code class="language-text">消息类型可以变，发送方式也可以变。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">选择 zip 或 gzip 压缩：策略模式
+普通消息/加急消息 × 邮件/短信发送：桥接模式
+</code></pre>
+<hr>
+<h3 id="103-桥接模式和装饰器模式"><a class="header" href="#103-桥接模式和装饰器模式">10.3 桥接模式和装饰器模式</a></h3>
+<p>二者都使用组合，但目的不同。</p>
+<pre><code class="language-text">桥接模式：分离抽象和实现，使二者独立变化。
+装饰器模式：在不修改原对象的情况下增强功能。
+</code></pre>
+<p>桥接模式解决的是：</p>
+<pre><code class="language-text">两个维度如何独立扩展。
+</code></pre>
+<p>装饰器模式解决的是：</p>
+<pre><code class="language-text">如何给对象叠加额外功能。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">图形对象选择不同渲染后端：桥接模式
+给文件读取器增加缓存、压缩、加密：装饰器模式
+</code></pre>
+<hr>
+<h3 id="104-桥接模式和代理模式"><a class="header" href="#104-桥接模式和代理模式">10.4 桥接模式和代理模式</a></h3>
+<p>二者都可能持有另一个对象，但目的不同。</p>
+<pre><code class="language-text">桥接模式：连接抽象和实现两个层次。
+代理模式：控制对原对象的访问。
+</code></pre>
+<p>代理模式更强调：</p>
+<pre><code class="language-text">权限检查
+延迟加载
+远程调用
+缓存访问
+</code></pre>
+<p>桥接模式更强调：</p>
+<pre><code class="language-text">抽象和实现解耦
+两个维度独立扩展
+</code></pre>
+<hr>
+<h2 id="11-使用该模式的优点-12"><a class="header" href="#11-使用该模式的优点-12">11. 使用该模式的优点</a></h2>
+<p>桥接模式的优点主要有：</p>
+<pre><code class="language-text">1. 分离抽象和实现，降低耦合。
+2. 避免多维度组合导致类型数量爆炸。
+3. 抽象层和实现层可以独立扩展。
+4. 更符合组合优于继承的思想。
+5. 在 Rust 中可以通过 trait 和泛型获得较好性能。
+6. 可以根据需要选择静态分发或动态分发。
+</code></pre>
+<p>从工程角度看，桥接模式的价值在于：</p>
+<pre><code class="language-text">让系统面对多个变化维度时，结构仍然保持清晰。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-12"><a class="header" href="#12-使用该模式的代价-12">12. 使用该模式的代价</a></h2>
+<p>桥接模式的代价主要包括：</p>
+<pre><code class="language-text">1. 增加抽象层，代码结构更复杂。
+2. 需要提前识别系统中的变化维度。
+3. 对简单场景来说可能过度设计。
+4. 使用 Box&lt;dyn Trait&gt; 会有动态分发和堆分配开销。
+5. 泛型桥接可能让类型定义变长。
+6. 抽象层设计不好时，反而会增加理解成本。
+</code></pre>
+<p>特别是在 Rust 中，不要为了“显得设计高级”而强行桥接。</p>
+<p>如果一个系统只有一个变化维度，策略模式可能就够了。</p>
+<p>如果只是接口不兼容，适配器模式更合适。</p>
+<hr>
+<h2 id="13-什么时候不应该使用-12"><a class="header" href="#13-什么时候不应该使用-12">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用桥接模式：</p>
+<pre><code class="language-text">1. 只有一个变化维度。
+2. 抽象和实现不会独立变化。
+3. 类型数量很少，直接实现更清楚。
+4. 系统不需要运行时切换实现。
+5. enum + match 已经足够表达。
+6. 为了套模式而人为拆分结构。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">如果只是替换算法，考虑策略模式。
+如果是接口不兼容，考虑适配器模式。
+如果是两个维度都要独立扩展，再考虑桥接模式。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-12"><a class="header" href="#14-一个简单例子思路-12">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 消息系统</p>
+<p>需求：</p>
+<pre><code class="language-text">消息类型有普通消息和加急消息。
+发送方式有邮件发送和短信发送。
+消息类型和发送方式都可能继续扩展。
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 MessageSender trait 作为实现层接口。
+2. EmailSender 和 SmsSender 实现 MessageSender。
+3. NormalMessage 和 UrgentMessage 作为抽象层对象。
+4. 消息对象内部持有 sender。
+5. 调用 send() 时，消息对象处理自己的抽象逻辑，再委托 sender 发送。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">trait
+泛型
+trait bound
+Box&lt;dyn Trait&gt;
+struct 组合
+所有权
+动态分发和静态分发对比
+</code></pre>
+<p>这个例子可以体现桥接模式的核心：</p>
+<pre><code class="language-text">消息类型和发送方式是两个独立变化维度。
+桥接模式让它们可以自由组合。
+</code></pre>
+<hr>
+<h2 id="15-总结一句话-12"><a class="header" href="#15-总结一句话-12">15. 总结一句话</a></h2>
+<p>桥接模式的本质是：</p>
+<pre><code class="language-text">把抽象部分和实现部分拆开，通过组合连接，使二者可以独立变化。
+</code></pre>
+<p>在 Rust 中，桥接模式通常通过 <code>trait + 结构体组合</code> 实现；如果实现类型在编译期确定，可以使用泛型和 trait bound；如果需要运行时切换实现，可以使用 <code>Box&lt;dyn Trait&gt;</code>。桥接模式适合两个维度都可能扩展的场景，不适合简单对象或只有单一变化点的场景。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="享元模式"><a class="header" href="#享元模式">享元模式</a></h1>
+<h1 id="15_享元模式-flyweight-pattern"><a class="header" href="#15_享元模式-flyweight-pattern">15_享元模式 Flyweight Pattern</a></h1>
+<h2 id="1-基本信息-14"><a class="header" href="#1-基本信息-14">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 享元模式</p>
+<p><strong>英文名称：</strong> Flyweight Pattern</p>
+<p><strong>模式类型：</strong> 结构型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>Rc</code>、<code>Arc</code>、缓存池、对象池、<code>HashMap</code>、字符串驻留、共享不可变数据</p>
+<p>享元模式的核心是：<strong>通过共享大量相同或相似对象中的公共部分，减少重复对象创建和内存占用。</strong></p>
+<p>在 Rust 中，享元模式通常通过：</p>
+<pre><code class="language-text">Rc&lt;T&gt;
+Arc&lt;T&gt;
+HashMap 缓存
+对象池
+字符串驻留
+共享不可变数据
+</code></pre>
+<p>来实现。</p>
+<hr>
+<h2 id="2-模式核心思想-13"><a class="header" href="#2-模式核心思想-13">2. 模式核心思想</a></h2>
+<p>享元模式的核心思想是：</p>
+<pre><code class="language-text">把对象中可以共享的部分抽离出来，只保存一份，然后让多个对象共同引用它。
+</code></pre>
+<p>也就是说，享元模式关注的是：</p>
+<pre><code class="language-text">哪些数据是重复的？
+哪些数据可以共享？
+哪些数据必须每个对象单独保存？
+</code></pre>
+<p>例如游戏中有 10000 棵树：</p>
+<pre><code class="language-text">树的模型
+树的纹理
+树的种类
+</code></pre>
+<p>这些信息可能是相同的，可以共享。</p>
+<p>但每棵树的位置不同：</p>
+<pre><code class="language-text">x 坐标
+y 坐标
+高度
+旋转角度
+</code></pre>
+<p>这些信息不能共享，需要每个对象自己保存。</p>
+<p>享元模式就是把对象拆成两部分：</p>
+<pre><code class="language-text">内部状态：可以共享的、不随具体对象变化的部分
+外部状态：不能共享的、每个对象独有的部分
+</code></pre>
+<hr>
+<h2 id="3-这个模式解决什么问题-13"><a class="header" href="#3-这个模式解决什么问题-13">3. 这个模式解决什么问题</a></h2>
+<p>享元模式主要解决的是：<strong>大量对象中存在重复数据时，如何减少内存浪费。</strong></p>
+<p>在实际开发中，如果系统中存在大量相似对象，每个对象都完整保存一份数据，就会造成明显的内存浪费。</p>
+<p>常见情况包括：</p>
+<pre><code class="language-text">1. 大量相同字符串
+2. 大量相同图标、纹理、模型
+3. 大量相同配置对象
+4. 大量相同格式的节点
+5. 大量共享只读元数据
+6. 大量重复的词法 token
+</code></pre>
+<p>例如文本编辑器中，每个字符如果都保存字体对象、颜色对象、字号对象，那么内存会非常浪费。</p>
+<p>更合理的做法是：</p>
+<pre><code class="language-text">字符本身保存位置和内容；
+字体、颜色、字号这些样式对象共享。
+</code></pre>
+<p>享元模式的目标是：</p>
+<pre><code class="language-text">减少重复对象
+共享公共状态
+降低内存占用
+提升对象创建效率
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样-13"><a class="header" href="#4-不使用这个模式会怎样-13">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用享元模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 大量重复对象占用过多内存。
+2. 相同数据被反复创建，造成资源浪费。
+3. 对象创建成本高，影响性能。
+4. 缓存命中率低，系统运行效率下降。
+5. 修改共享逻辑时，需要维护多个重复副本。
+</code></pre>
+<p>例如有 100 万个文本字符，每个字符都保存一份完整字体信息：</p>
+<pre><code class="language-text">font_name
+font_size
+font_weight
+font_color
+line_height
+</code></pre>
+<p>如果这些样式大部分是重复的，那么每个字符都保存一份就没有必要。</p>
+<p>享元模式的作用就是：<strong>把重复的部分抽出来共享，只让对象保存真正独有的数据。</strong></p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-13"><a class="header" href="#5-传统面向对象中的实现思路-13">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，享元模式通常包含几个角色：</p>
+<pre><code class="language-text">1. Flyweight：享元接口，定义共享对象的行为。
+2. ConcreteFlyweight：具体享元对象，保存可共享的内部状态。
+3. FlyweightFactory：享元工厂，负责创建和复用享元对象。
+4. Client：客户端，保存外部状态，并通过享元对象完成操作。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">FlyweightFactory
+ └── pool: HashMap&lt;Key, Flyweight&gt;
+
+Flyweight
+ └── operation(external_state)
+
+ConcreteFlyweight
+ └── intrinsic_state
+</code></pre>
+<p>这里最关键的是：</p>
+<pre><code class="language-text">享元对象保存内部状态；
+客户端传入外部状态；
+工厂负责复用已有享元对象。
+</code></pre>
+<p>例如树对象：</p>
+<pre><code class="language-text">TreeType：树的种类、贴图、模型，可以共享
+Tree：位置、大小、旋转角度，每棵树独有
+TreeFactory：缓存 TreeType，避免重复创建
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-13"><a class="header" href="#6-rust-中的实现思路-13">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-13"><a class="header" href="#61-rust-中通常怎么实现-13">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中享元模式通常通过 <strong>共享所有权 + 缓存池</strong> 实现。</p>
+<p>例如游戏中有大量树，每棵树共享同一种树的模型和纹理。</p>
+<pre class="playground"><code class="language-rust edition2024">use std::collections::HashMap;
+use std::sync::Arc;
+
+#[derive(Debug)]
+struct TreeType {
+    name: String,
+    texture: String,
+    model: String,
+}
+
+#[derive(Debug)]
+struct Tree {
+    x: f32,
+    y: f32,
+    height: f32,
+    tree_type: Arc&lt;TreeType&gt;,
+}
+
+struct TreeFactory {
+    types: HashMap&lt;String, Arc&lt;TreeType&gt;&gt;,
+}
+
+impl TreeFactory {
+    fn new() -&gt; Self {
+        Self {
+            types: HashMap::new(),
+        }
+    }
+
+    fn get_tree_type(&amp;mut self, name: &amp;str, texture: &amp;str, model: &amp;str) -&gt; Arc&lt;TreeType&gt; {
+        if let Some(tree_type) = self.types.get(name) {
+            return Arc::clone(tree_type);
+        }
+
+        let tree_type = Arc::new(TreeType {
+            name: name.to_string(),
+            texture: texture.to_string(),
+            model: model.to_string(),
+        });
+
+        self.types.insert(name.to_string(), Arc::clone(&amp;tree_type));
+        tree_type
+    }
+}
+
+fn main() {
+    let mut factory = TreeFactory::new();
+
+    let oak_type = factory.get_tree_type("Oak", "oak.png", "oak.obj");
+    let pine_type = factory.get_tree_type("Pine", "pine.png", "pine.obj");
+
+    let trees = vec![
+        Tree {
+            x: 10.0,
+            y: 20.0,
+            height: 5.0,
+            tree_type: Arc::clone(&amp;oak_type),
+        },
+        Tree {
+            x: 15.0,
+            y: 25.0,
+            height: 6.0,
+            tree_type: Arc::clone(&amp;oak_type),
+        },
+        Tree {
+            x: 30.0,
+            y: 40.0,
+            height: 8.0,
+            tree_type: Arc::clone(&amp;pine_type),
+        },
+    ];
+
+    for tree in trees {
+        println!("{:?}", tree);
+    }
+}</code></pre>
+<p>这个例子中：</p>
+<pre><code class="language-text">TreeType 是享元对象，保存共享的内部状态。
+Tree 是具体对象，保存每棵树独有的外部状态。
+TreeFactory 是享元工厂，负责复用 TreeType。
+Arc&lt;TreeType&gt; 让多个 Tree 共享同一个 TreeType。
+</code></pre>
+<p>如果是单线程场景，可以使用：</p>
+<pre><code class="language-text">Rc&lt;T&gt;
+</code></pre>
+<p>如果是多线程场景，可以使用：</p>
+<pre><code class="language-text">Arc&lt;T&gt;
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-13"><a class="header" href="#62-和传统-oop-写法相比有什么不同-13">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的享元模式有几个明显特点。</p>
+<p>第一，Rust 更强调共享数据的所有权关系。
+传统 OOP 中可能直接共享对象引用，而 Rust 中需要明确使用 <code>Rc</code> 或 <code>Arc</code> 来表达共享所有权。</p>
+<p>第二，Rust 区分单线程共享和多线程共享。</p>
+<pre><code class="language-text">Rc&lt;T&gt;：单线程共享
+Arc&lt;T&gt;：多线程共享
+</code></pre>
+<p>这让共享对象的线程安全边界更加清楚。</p>
+<p>第三，Rust 中享元对象通常应该设计为不可变。
+如果共享对象是可变的，就需要引入 <code>RefCell</code>、<code>Mutex</code> 或 <code>RwLock</code>，复杂度会明显增加。</p>
+<p>第四，Rust 中的 <code>clone</code> 不一定表示复制底层数据。
+例如：</p>
+<pre><code class="language-text">Arc::clone(&amp;value)
+</code></pre>
+<p>只是增加引用计数，并不会复制 <code>TreeType</code> 本身。</p>
+<p>第五，Rust 可以通过 <code>HashMap</code> 实现显式缓存池。
+享元工厂通常就是一个缓存表，负责复用已经创建过的对象。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-13"><a class="header" href="#63-rust-中是否有更自然的替代写法-13">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，享元模式不一定非要写成传统的 <code>FlyweightFactory</code>。</p>
+<p>如果只是共享只读配置，可以直接使用：</p>
+<pre><code class="language-text">Arc&lt;Config&gt;
+Rc&lt;Config&gt;
+</code></pre>
+<p>如果是全局共享常量，可以考虑：</p>
+<pre><code class="language-text">static
+OnceLock
+LazyLock
+</code></pre>
+<p>如果是字符串重复，可以考虑：</p>
+<pre><code class="language-text">字符串驻留 string interning
+</code></pre>
+<p>如果是大量对象重复创建，可以考虑：</p>
+<pre><code class="language-text">对象池
+缓存池
+arena 分配器
+</code></pre>
+<p>如果共享对象需要频繁查询，可以使用：</p>
+<pre><code class="language-text">HashMap&lt;Key, Rc&lt;T&gt;&gt;
+HashMap&lt;Key, Arc&lt;T&gt;&gt;
+</code></pre>
+<p>所以 Rust 中享元模式的本质不是“必须有一个 Flyweight 类”，而是：</p>
+<pre><code class="language-text">识别重复数据；
+把共享部分抽离出来；
+用 Rc / Arc / 缓存池复用它。
+</code></pre>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-13"><a class="header" href="#7-rust-中涉及的语言特性-13">7. Rust 中涉及的语言特性</a></h2>
+<p>享元模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. Rc
+2. Arc
+3. HashMap
+4. Clone
+5. 所有权
+6. 借用
+7. static
+8. OnceLock / LazyLock
+9. RefCell / Mutex / RwLock
+10. 生命周期
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">Rc：单线程共享享元对象
+Arc：多线程共享享元对象
+HashMap：根据 key 缓存和复用对象
+Clone：复制共享指针，而不是复制对象本身
+static：保存全局共享数据
+OnceLock / LazyLock：惰性初始化全局共享对象
+Mutex / RwLock：共享对象需要可变时保证线程安全
+所有权和借用：明确谁拥有对象，谁只是共享使用
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">Rc / Arc + HashMap
+</code></pre>
+<p>也就是：</p>
+<pre><code class="language-text">用 HashMap 找到已有对象；
+用 Rc 或 Arc 共享这个对象。
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-13"><a class="header" href="#8-性能与工程代价-13">8. 性能与工程代价</a></h2>
+<p>享元模式的主要收益是减少内存占用和对象创建成本。</p>
+<p>如果大量对象共享相同内部状态，享元模式可以明显降低内存使用。</p>
+<p>例如：</p>
+<pre><code class="language-text">10000 棵树如果共享 10 种 TreeType，
+就只需要保存 10 份模型和纹理信息，
+而不是每棵树都保存一份。
+</code></pre>
+<p>但是享元模式也有代价。</p>
+<p>如果使用 <code>Rc</code> 或 <code>Arc</code>：</p>
+<pre><code class="language-text">1. Rc 有引用计数开销。
+2. Arc 有原子引用计数开销。
+3. Arc 比 Rc 更适合多线程，但成本也更高。
+</code></pre>
+<p>如果使用 <code>HashMap</code> 缓存：</p>
+<pre><code class="language-text">1. 查询享元对象需要哈希查找。
+2. 缓存池需要维护。
+3. key 设计不合理会导致重复缓存或错误复用。
+</code></pre>
+<p>如果共享对象需要修改：</p>
+<pre><code class="language-text">1. RefCell 会把借用检查推迟到运行时。
+2. Mutex / RwLock 会引入锁开销。
+3. 共享可变状态会增加并发复杂度。
+</code></pre>
+<p>所以享元模式适合：</p>
+<pre><code class="language-text">对象数量大
+重复数据多
+共享部分基本不变
+内存压力明显
+</code></pre>
+<p>不适合：</p>
+<pre><code class="language-text">对象数量少
+重复数据不多
+共享对象经常修改
+HashMap 查询成本大于节省收益
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">享元模式用一次共享查找和引用计数成本，换取大量重复对象的内存节省。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景-13"><a class="header" href="#9-典型应用场景-13">9. 典型应用场景</a></h2>
+<p>享元模式适合用于大量重复对象场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. 游戏中的树、草、子弹、粒子对象
+2. 文本编辑器中的字符样式共享
+3. GUI 中的图标、字体、颜色资源
+4. 编译器中的符号表和字符串驻留
+5. 数据库连接池或对象池
+6. 图形渲染中的纹理和模型共享
+7. Web 服务中的共享配置对象
+8. 日志系统中的格式模板共享
+9. 权限系统中的角色元数据共享
+10. 大规模 AST 节点中的共享字符串
+</code></pre>
+<p>在 Rust 项目中，享元模式可能出现在：</p>
+<pre><code class="language-text">编译器和解释器
+游戏开发
+图形渲染
+缓存系统
+配置管理
+大规模文本处理
+对象池设计
+资源管理器
+</code></pre>
+<p>例如 Rust 编译器或解析器中，大量重复的标识符字符串可以通过字符串驻留减少内存占用。</p>
+<hr>
+<h2 id="10-和相似模式的区别-13"><a class="header" href="#10-和相似模式的区别-13">10. 和相似模式的区别</a></h2>
+<p>享元模式容易和单例模式、原型模式、对象池模式、缓存模式混淆。</p>
+<h3 id="101-享元模式和单例模式"><a class="header" href="#101-享元模式和单例模式">10.1 享元模式和单例模式</a></h3>
+<p>二者都可能涉及共享对象，但关注点不同。</p>
+<pre><code class="language-text">单例模式：保证某个对象在全局只有一个实例。
+享元模式：共享大量相似对象中的公共部分，减少重复存储。
+</code></pre>
+<p>单例模式关注：</p>
+<pre><code class="language-text">唯一性。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">复用性和内存节省。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">全局日志器只有一个：单例模式
+10000 个字符共享同一种字体对象：享元模式
+</code></pre>
+<p>享元模式不要求整个系统只有一个对象，它可能会有很多个享元对象，只是每种共享状态只保存一份。</p>
+<hr>
+<h3 id="102-享元模式和原型模式"><a class="header" href="#102-享元模式和原型模式">10.2 享元模式和原型模式</a></h3>
+<p>二者都和对象创建有关，但方向相反。</p>
+<pre><code class="language-text">原型模式：复制已有对象，创建新对象。
+享元模式：共享已有对象，避免重复创建。
+</code></pre>
+<p>原型模式强调：</p>
+<pre><code class="language-text">通过 clone 快速生成相似对象。
+</code></pre>
+<p>享元模式强调：</p>
+<pre><code class="language-text">不要复制重复部分，而是共享它。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">复制一个默认配置生成新配置：原型模式
+多个配置对象共享同一套只读元数据：享元模式
+</code></pre>
+<hr>
+<h3 id="103-享元模式和对象池模式"><a class="header" href="#103-享元模式和对象池模式">10.3 享元模式和对象池模式</a></h3>
+<p>对象池模式和享元模式都能减少对象创建成本，但目的不同。</p>
+<pre><code class="language-text">对象池模式：复用可重复使用的对象实例，避免频繁创建和销毁。
+享元模式：共享对象中的不变部分，减少内存重复。
+</code></pre>
+<p>对象池关注：</p>
+<pre><code class="language-text">对象生命周期管理。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">对象状态共享。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">复用数据库连接：对象池模式
+多个对象共享数据库连接配置：享元模式
+</code></pre>
+<hr>
+<h3 id="104-享元模式和缓存模式"><a class="header" href="#104-享元模式和缓存模式">10.4 享元模式和缓存模式</a></h3>
+<p>享元模式通常会用缓存实现，但缓存模式范围更广。</p>
+<pre><code class="language-text">缓存模式：保存计算结果或对象，避免重复计算或重复访问。
+享元模式：缓存并共享对象的内部状态，减少重复存储。
+</code></pre>
+<p>缓存模式关注：</p>
+<pre><code class="language-text">提高访问速度。
+</code></pre>
+<p>享元模式关注：</p>
+<pre><code class="language-text">共享重复状态，减少内存。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">缓存一次查询结果：缓存模式
+共享同一种字体对象：享元模式
+</code></pre>
+<hr>
+<h2 id="11-使用该模式的优点-13"><a class="header" href="#11-使用该模式的优点-13">11. 使用该模式的优点</a></h2>
+<p>享元模式的优点主要有：</p>
+<pre><code class="language-text">1. 减少大量重复对象带来的内存占用。
+2. 降低对象创建成本。
+3. 提高共享资源的复用率。
+4. 适合资源较大的只读对象。
+5. 在 Rust 中可以用 Rc / Arc 明确表达共享所有权。
+6. 可以结合 HashMap 实现统一缓存管理。
+</code></pre>
+<p>从工程角度看，享元模式的价值在于：</p>
+<pre><code class="language-text">把重复数据变成共享数据，
+让大量对象只保存自己真正独有的状态。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-13"><a class="header" href="#12-使用该模式的代价-13">12. 使用该模式的代价</a></h2>
+<p>享元模式的代价主要包括：</p>
+<pre><code class="language-text">1. 需要区分内部状态和外部状态。
+2. 需要维护享元工厂或缓存池。
+3. Rc / Arc 会有引用计数开销。
+4. Arc 在多线程下有原子操作成本。
+5. HashMap 查找有一定开销。
+6. 共享可变对象会增加复杂度。
+7. 设计不当可能造成错误共享。
+</code></pre>
+<p>尤其要注意：</p>
+<pre><code class="language-text">享元对象最好是不可变的。
+</code></pre>
+<p>如果多个对象共享一个可变享元对象，那么修改它会影响所有使用者。
+如果这种影响不是你想要的，就会产生隐蔽 bug。</p>
+<hr>
+<h2 id="13-什么时候不应该使用-13"><a class="header" href="#13-什么时候不应该使用-13">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用享元模式：</p>
+<pre><code class="language-text">1. 对象数量不多。
+2. 对象之间重复数据很少。
+3. 对象创建成本很低。
+4. 共享对象经常需要修改。
+5. 内存压力不明显。
+6. 引入缓存池后反而让代码更复杂。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">重复对象多、共享部分大、共享数据基本不可变，再考虑享元模式。
+</code></pre>
+<p>如果只是少量对象，直接创建更简单。</p>
+<hr>
+<h2 id="14-一个简单例子思路-13"><a class="header" href="#14-一个简单例子思路-13">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 游戏地图中的树对象</p>
+<p>需求：</p>
+<pre><code class="language-text">地图中有大量树。
+每棵树的位置、高度不同。
+但相同种类的树共享模型、纹理、名称等数据。
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 TreeType 保存共享数据，例如 name、texture、model。
+2. 定义 Tree 保存外部状态，例如 x、y、height。
+3. Tree 内部持有 Rc&lt;TreeType&gt; 或 Arc&lt;TreeType&gt;。
+4. TreeFactory 使用 HashMap 缓存 TreeType。
+5. 创建树时，先从工厂中查找已有 TreeType。
+6. 如果存在，复用；如果不存在，创建并缓存。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">Rc
+Arc
+HashMap
+Clone
+所有权
+不可变共享
+结构体组合
+</code></pre>
+<p>这个例子可以体现享元模式的核心：</p>
+<pre><code class="language-text">树的种类信息共享；
+树的位置和大小独立保存。
+</code></pre>
+<hr>
+<h2 id="15-总结一句话-13"><a class="header" href="#15-总结一句话-13">15. 总结一句话</a></h2>
+<p>享元模式的本质是：</p>
+<pre><code class="language-text">把大量对象中重复的、可共享的内部状态抽离出来，只保存一份，让多个对象共同复用。
+</code></pre>
+<p>在 Rust 中，享元模式通常通过 <code>Rc</code>、<code>Arc</code> 和 <code>HashMap</code> 缓存池实现。使用时要重点区分内部状态和外部状态，并尽量让享元对象保持不可变，以避免共享可变状态带来的复杂问题。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="命令模式"><a class="header" href="#命令模式">命令模式</a></h1>
+<h1 id="16_命令模式-command-pattern"><a class="header" href="#16_命令模式-command-pattern">16_命令模式 Command Pattern</a></h1>
+<h2 id="1-基本信息-15"><a class="header" href="#1-基本信息-15">1. 基本信息</a></h2>
+<p><strong>中文名称：</strong> 命令模式</p>
+<p><strong>英文名称：</strong> Command Pattern</p>
+<p><strong>模式类型：</strong> 行为型设计模式</p>
+<p><strong>Rust 中常见实现方式：</strong> <code>enum</code> 命令、<code>trait Command</code>、<code>Box&lt;dyn Command&gt;</code>、闭包、函数指针、任务队列</p>
+<p>命令模式的核心是：<strong>把一次操作封装成一个独立对象，使操作可以被保存、传递、排队、撤销或延迟执行。</strong></p>
+<p>在 Rust 中，命令模式常见有两种写法：</p>
+<pre><code class="language-text">1. enum + match：适合命令种类固定的场景
+2. trait + Box&lt;dyn Command&gt;：适合命令种类需要动态扩展的场景
+</code></pre>
+<hr>
+<h2 id="2-模式核心思想-14"><a class="header" href="#2-模式核心思想-14">2. 模式核心思想</a></h2>
+<p>命令模式的核心思想是：</p>
+<pre><code class="language-text">把“请求执行某个操作”这件事封装起来，
+让调用方不直接执行具体逻辑，而是把命令交给执行器处理。
+</code></pre>
+<p>也就是说，命令模式关注的是：</p>
+<pre><code class="language-text">谁发起命令？
+命令代表什么操作？
+谁执行命令？
+命令能不能保存、撤销、排队、重放？
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">点击按钮
+执行菜单操作
+提交任务
+发送请求
+撤销编辑
+运行 CLI 子命令
+</code></pre>
+<p>这些都可以看成“命令”。</p>
+<hr>
+<h2 id="3-这个模式解决什么问题-14"><a class="header" href="#3-这个模式解决什么问题-14">3. 这个模式解决什么问题</a></h2>
+<p>命令模式主要解决的是：<strong>如何把操作本身从调用方中抽离出来，使操作可以像数据一样被管理。</strong></p>
+<p>在实际开发中，经常会遇到：</p>
+<pre><code class="language-text">1. 一个操作不想立即执行，而是之后执行。
+2. 操作需要放入任务队列。
+3. 操作需要记录日志。
+4. 操作需要支持撤销和重做。
+5. 调用方不想直接依赖具体执行逻辑。
+6. 多个操作需要统一调度。
+</code></pre>
+<p>如果没有命令模式，调用方可能会直接调用各种业务函数：</p>
+<pre><code class="language-text">create_file()
+delete_file()
+rename_file()
+copy_file()
+</code></pre>
+<p>当这些操作需要排队、撤销、记录、重放时，直接函数调用就不够灵活。</p>
+<p>命令模式的价值在于：</p>
+<pre><code class="language-text">把操作封装成命令对象，
+使操作可以被保存、传递、组合和统一执行。
+</code></pre>
+<hr>
+<h2 id="4-不使用这个模式会怎样-14"><a class="header" href="#4-不使用这个模式会怎样-14">4. 不使用这个模式会怎样</a></h2>
+<p>如果不使用命令模式，可能会出现以下问题：</p>
+<pre><code class="language-text">1. 调用方直接依赖具体操作函数。
+2. 操作逻辑和触发逻辑耦合在一起。
+3. 很难实现撤销、重做、日志记录。
+4. 很难把操作放入队列延迟执行。
+5. 新增操作时，需要修改调用方大量代码。
+6. 多种操作缺少统一表示方式。
+</code></pre>
+<p>例如 GUI 按钮直接调用具体函数：</p>
+<pre><code class="language-text">保存按钮 → save_file()
+删除按钮 → delete_file()
+复制按钮 → copy_file()
+</code></pre>
+<p>短期看很简单，但如果以后要增加：</p>
+<pre><code class="language-text">快捷键
+菜单栏
+撤销功能
+操作记录
+脚本化执行
+</code></pre>
+<p>就会发现每个入口都要重复绑定具体逻辑。</p>
+<p>命令模式可以让这些入口都只产生“命令”，再由统一执行器处理。</p>
+<hr>
+<h2 id="5-传统面向对象中的实现思路-14"><a class="header" href="#5-传统面向对象中的实现思路-14">5. 传统面向对象中的实现思路</a></h2>
+<p>在传统 OOP 中，命令模式通常包含几个角色：</p>
+<pre><code class="language-text">1. Command：命令接口，定义 execute() 方法。
+2. ConcreteCommand：具体命令，实现具体操作。
+3. Receiver：真正执行业务逻辑的对象。
+4. Invoker：命令调用者，负责触发命令。
+5. Client：创建命令并绑定接收者。
+</code></pre>
+<p>典型结构是：</p>
+<pre><code class="language-text">Command
+ └── execute()
+
+CreateFileCommand
+ ├── receiver: FileSystem
+ └── execute() { receiver.create_file() }
+
+Invoker
+ └── command.execute()
+</code></pre>
+<p>这里有一个关键点：</p>
+<pre><code class="language-text">命令对象本身不一定真正完成所有业务逻辑，
+它通常只是封装“调用哪个接收者的哪个方法”。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">按钮 Button 不知道怎么保存文件。
+按钮只知道执行一个 Command。
+真正保存文件的是 FileSystem。
+</code></pre>
+<hr>
+<h2 id="6-rust-中的实现思路-14"><a class="header" href="#6-rust-中的实现思路-14">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-14"><a class="header" href="#61-rust-中通常怎么实现-14">6.1 Rust 中通常怎么实现</a></h3>
+<p>Rust 中命令模式有两种常见实现方式。</p>
+<p>第一种是 <strong>enum + match</strong>。</p>
+<p>如果命令种类是固定的，Rust 更推荐用 <code>enum</code> 表达命令：</p>
+<pre class="playground"><code class="language-rust edition2024">enum Command {
+    CreateFile { name: String },
+    DeleteFile { name: String },
+    RenameFile { old: String, new: String },
+}
+
+struct FileSystem;
+
+impl FileSystem {
+    fn execute(&amp;self, command: Command) {
+        match command {
+            Command::CreateFile { name } =&gt; {
+                println!("创建文件：{}", name);
+            }
+            Command::DeleteFile { name } =&gt; {
+                println!("删除文件：{}", name);
+            }
+            Command::RenameFile { old, new } =&gt; {
+                println!("重命名文件：{} -&gt; {}", old, new);
+            }
+        }
+    }
+}
+
+fn main() {
+    let fs = FileSystem;
+
+    let cmd = Command::CreateFile {
+        name: "test.txt".to_string(),
+    };
+
+    fs.execute(cmd);
+}</code></pre>
+<p>这种写法的优点是：</p>
+<pre><code class="language-text">1. 命令类型明确。
+2. match 可以穷尽检查。
+3. 不需要动态分发。
+4. 适合 CLI、任务类型固定的系统。
+</code></pre>
+<hr>
+<p>第二种是 <strong>trait + <code>Box&lt;dyn Command&gt;</code></strong>。</p>
+<p>如果命令类型需要动态扩展，可以定义 <code>Command</code> trait：</p>
+<pre class="playground"><code class="language-rust edition2024">trait Command {
+    fn execute(&amp;self);
+}
+
+struct CreateFileCommand {
+    name: String,
+}
+
+impl Command for CreateFileCommand {
+    fn execute(&amp;self) {
+        println!("创建文件：{}", self.name);
+    }
+}
+
+struct DeleteFileCommand {
+    name: String,
+}
+
+impl Command for DeleteFileCommand {
+    fn execute(&amp;self) {
+        println!("删除文件：{}", self.name);
+    }
+}
+
+struct Invoker {
+    commands: Vec&lt;Box&lt;dyn Command&gt;&gt;,
+}
+
+impl Invoker {
+    fn new() -&gt; Self {
+        Self {
+            commands: Vec::new(),
+        }
+    }
+
+    fn add_command(&amp;mut self, command: Box&lt;dyn Command&gt;) {
+        self.commands.push(command);
+    }
+
+    fn run(&amp;self) {
+        for command in &amp;self.commands {
+            command.execute();
+        }
+    }
+}
+
+fn main() {
+    let mut invoker = Invoker::new();
+
+    invoker.add_command(Box::new(CreateFileCommand {
+        name: "a.txt".to_string(),
+    }));
+
+    invoker.add_command(Box::new(DeleteFileCommand {
+        name: "b.txt".to_string(),
+    }));
+
+    invoker.run();
+}</code></pre>
+<p>这种写法的优点是：</p>
+<pre><code class="language-text">1. 可以把不同命令放入同一个队列。
+2. 可以运行时决定执行哪些命令。
+3. 可以扩展新的命令类型。
+4. 适合任务队列、插件化系统、GUI 事件系统。
+</code></pre>
+<hr>
+<h3 id="62-和传统-oop-写法相比有什么不同-14"><a class="header" href="#62-和传统-oop-写法相比有什么不同-14">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<p>和传统面向对象语言相比，Rust 的命令模式有几个明显特点。</p>
+<p>第一，Rust 可以直接用 <code>enum</code> 表达命令集合。
+传统 OOP 中往往一个命令一个类；Rust 中如果命令种类有限，用 <code>enum</code> 会更简洁。</p>
+<p>第二，Rust 的 <code>match</code> 可以进行穷尽性检查。
+当新增命令类型时，编译器会提示哪些地方没有处理。</p>
+<p>第三，Rust 也可以用 trait object 实现传统命令对象。
+例如 <code>Box&lt;dyn Command&gt;</code> 可以把不同命令放到同一个 <code>Vec</code> 中统一执行。</p>
+<p>第四，Rust 中命令对象要考虑所有权。
+命令如果携带数据，比如文件名、参数、请求体，需要明确这些数据是移动进命令、借用，还是共享。</p>
+<p>第五，Rust 中闭包也可以作为轻量命令。
+如果命令逻辑很简单，不一定要定义结构体，可以直接保存闭包。</p>
+<hr>
+<h3 id="63-rust-中是否有更自然的替代写法-14"><a class="header" href="#63-rust-中是否有更自然的替代写法-14">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<p>在 Rust 中，命令模式可以根据场景选择不同写法。</p>
+<p>如果命令集合固定，推荐：</p>
+<pre><code class="language-text">enum + match
+</code></pre>
+<p>如果命令集合需要扩展，推荐：</p>
+<pre><code class="language-text">trait Command + Box&lt;dyn Command&gt;
+</code></pre>
+<p>如果命令只是简单回调，推荐：</p>
+<pre><code class="language-text">闭包
+</code></pre>
+<p>例如：</p>
+<pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let commands: Vec&lt;Box&lt;dyn Fn()&gt;&gt; = vec![
+    Box::new(|| println!("执行命令 A")),
+    Box::new(|| println!("执行命令 B")),
+];
+
+for command in commands {
+    command();
+}
+<span class="boring">}</span></code></pre>
+<p>如果需要撤销操作，可以让命令同时支持：</p>
+<pre><code class="language-text">execute()
+undo()
+</code></pre>
+<p>如果需要异步任务队列，可以考虑：</p>
+<pre><code class="language-text">channel
+async task
+tokio::spawn
+</code></pre>
+<p>所以 Rust 中的命令模式不一定非要写成复杂的“命令类体系”，而是要根据命令是否固定、是否需要扩展、是否需要撤销来选择实现方式。</p>
+<hr>
+<h2 id="7-rust-中涉及的语言特性-14"><a class="header" href="#7-rust-中涉及的语言特性-14">7. Rust 中涉及的语言特性</a></h2>
+<p>命令模式在 Rust 中主要涉及以下语言特性：</p>
+<pre><code class="language-text">1. enum
+2. match
+3. trait
+4. `Box&lt;dyn Trait&gt;`
+5. Vec
+6. 闭包
+7. 所有权移动
+8. Result
+9. channel
+10. async / await
+</code></pre>
+<p>这些特性分别解决的问题是：</p>
+<pre><code class="language-text">enum：表达固定命令集合
+match：根据命令类型分发执行逻辑
+trait：抽象命令接口
+Box&lt;dyn Trait&gt;：保存不同类型命令
+Vec：管理命令队列或历史记录
+闭包：表达轻量命令
+所有权：管理命令携带的数据
+Result：表达命令执行成功或失败
+channel：实现跨线程命令传递
+async：实现异步命令执行
+</code></pre>
+<p>其中最核心的是：</p>
+<pre><code class="language-text">enum + match
+trait Command + Box&lt;dyn Command&gt;
+</code></pre>
+<hr>
+<h2 id="8-性能与工程代价-14"><a class="header" href="#8-性能与工程代价-14">8. 性能与工程代价</a></h2>
+<p>命令模式的性能取决于具体实现方式。</p>
+<p>如果使用 <code>enum + match</code>：</p>
+<pre><code class="language-text">1. 没有动态分发。
+2. 没有额外堆分配。
+3. 编译器容易优化。
+4. 适合命令类型固定的高性能场景。
+</code></pre>
+<p>如果使用 <code>Box&lt;dyn Command&gt;</code>：</p>
+<pre><code class="language-text">1. 可以统一保存不同命令类型。
+2. 有动态分发开销。
+3. 通常会产生堆分配。
+4. 灵活性更强，但性能略低。
+</code></pre>
+<p>如果使用闭包：</p>
+<pre><code class="language-text">1. 简单灵活。
+2. 可以捕获环境变量。
+3. 使用 Box&lt;dyn Fn()&gt; 时同样可能有动态分发和堆分配。
+</code></pre>
+<p>工程代价方面，命令模式会引入额外结构：</p>
+<pre><code class="language-text">1. 需要定义命令类型。
+2. 需要设计执行器或调度器。
+3. 如果支持 undo，需要额外保存历史。
+4. 如果命令携带资源，需要处理所有权和生命周期。
+</code></pre>
+<p>一句话总结：</p>
+<pre><code class="language-text">命令模式提升了操作管理能力，但会增加一层命令封装。
+</code></pre>
+<hr>
+<h2 id="9-典型应用场景-14"><a class="header" href="#9-典型应用场景-14">9. 典型应用场景</a></h2>
+<p>命令模式适合用于“操作需要被管理”的场景。</p>
+<p>常见应用包括：</p>
+<pre><code class="language-text">1. GUI 按钮事件
+2. 菜单操作
+3. 命令行子命令
+4. 任务队列
+5. 撤销和重做系统
+6. 操作日志
+7. 宏命令
+8. 消息队列
+9. 异步任务调度
+10. 游戏输入控制
+</code></pre>
+<p>在 Rust 项目中，命令模式可能出现在：</p>
+<pre><code class="language-text">CLI 工具
+Web 请求任务处理
+批量编译任务调度
+文件操作工具
+编辑器撤销系统
+异步 worker 队列
+测试任务执行器
+</code></pre>
+<p>例如批量编译 crate 时，可以把每个任务封装成命令：</p>
+<pre><code class="language-text">CompileCommand
+TestCommand
+CleanCommand
+UpdateDependencyCommand
+</code></pre>
+<p>然后统一放入队列执行。</p>
+<hr>
+<h2 id="10-和相似模式的区别-14"><a class="header" href="#10-和相似模式的区别-14">10. 和相似模式的区别</a></h2>
+<p>命令模式容易和策略模式、责任链模式、备忘录模式、观察者模式混淆。</p>
+<h3 id="101-命令模式和策略模式"><a class="header" href="#101-命令模式和策略模式">10.1 命令模式和策略模式</a></h3>
+<p>二者都可能把行为封装起来，但关注点不同。</p>
+<pre><code class="language-text">策略模式：关注算法或行为的替换。
+命令模式：关注操作的封装、传递、排队、撤销和延迟执行。
+</code></pre>
+<p>策略模式更像是：</p>
+<pre><code class="language-text">我选择哪种算法来完成这个任务。
+</code></pre>
+<p>命令模式更像是：</p>
+<pre><code class="language-text">我把这个任务封装成一个命令，交给别人执行。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">选择 zip 或 gzip 压缩：策略模式
+把“压缩这个文件”放进任务队列：命令模式
+</code></pre>
+<hr>
+<h3 id="102-命令模式和责任链模式"><a class="header" href="#102-命令模式和责任链模式">10.2 命令模式和责任链模式</a></h3>
+<p>二者都可能处理请求，但结构不同。</p>
+<pre><code class="language-text">命令模式：把请求封装成对象，由执行器执行。
+责任链模式：请求沿着多个处理者传递。
+</code></pre>
+<p>命令模式关注：</p>
+<pre><code class="language-text">请求本身如何被表示和管理。
+</code></pre>
+<p>责任链模式关注：</p>
+<pre><code class="language-text">请求应该由链上的哪个处理者处理。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">保存文件命令加入操作队列：命令模式
+HTTP 请求经过认证、日志、路由处理：责任链模式
+</code></pre>
+<hr>
+<h3 id="103-命令模式和备忘录模式"><a class="header" href="#103-命令模式和备忘录模式">10.3 命令模式和备忘录模式</a></h3>
+<p>二者都可以实现撤销，但方式不同。</p>
+<pre><code class="language-text">命令模式：保存操作，通过反向操作 undo。
+备忘录模式：保存状态，通过恢复快照 undo。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">删除字符命令的 undo 是重新插入字符：命令模式
+保存整个文档历史状态再恢复：备忘录模式
+</code></pre>
+<p>如果操作很容易反向执行，命令模式更合适。
+如果操作难以反向计算，备忘录模式更合适。</p>
+<hr>
+<h3 id="104-命令模式和观察者模式"><a class="header" href="#104-命令模式和观察者模式">10.4 命令模式和观察者模式</a></h3>
+<p>二者都可能和事件系统有关，但关注点不同。</p>
+<pre><code class="language-text">命令模式：事件发生后要执行什么操作。
+观察者模式：状态变化后要通知哪些对象。
+</code></pre>
+<p>例如：</p>
+<pre><code class="language-text">按钮点击后执行 SaveCommand：命令模式
+文档变化后通知多个视图刷新：观察者模式
+</code></pre>
+<p>观察者模式更强调通知关系，命令模式更强调操作封装。</p>
+<hr>
+<h2 id="11-使用该模式的优点-14"><a class="header" href="#11-使用该模式的优点-14">11. 使用该模式的优点</a></h2>
+<p>命令模式的优点主要有：</p>
+<pre><code class="language-text">1. 将操作请求和执行逻辑解耦。
+2. 命令可以被保存、排队、延迟执行。
+3. 可以支持撤销和重做。
+4. 可以统一管理不同操作。
+5. 可以记录操作日志或实现重放。
+6. 在 Rust 中可以用 enum 或 trait 灵活实现。
+</code></pre>
+<p>从工程角度看，命令模式的价值在于：</p>
+<pre><code class="language-text">把“行为”变成可以管理的数据。
+</code></pre>
+<hr>
+<h2 id="12-使用该模式的代价-14"><a class="header" href="#12-使用该模式的代价-14">12. 使用该模式的代价</a></h2>
+<p>命令模式的代价主要包括：</p>
+<pre><code class="language-text">1. 简单操作使用命令模式可能过度设计。
+2. 需要额外定义命令类型或命令 trait。
+3. 动态命令可能带来堆分配和动态分发开销。
+4. 支持 undo 时需要额外保存上下文。
+5. 命令数量过多时，结构可能变复杂。
+</code></pre>
+<p>特别是在 Rust 中，如果命令携带大量数据，要注意：</p>
+<pre><code class="language-text">1. 数据是移动进命令，还是借用？
+2. 命令需要执行一次，还是可以多次执行？
+3. 命令执行失败怎么处理？
+4. 命令是否需要线程安全？
+</code></pre>
+<p>这些都会影响命令结构设计。</p>
+<hr>
+<h2 id="13-什么时候不应该使用-14"><a class="header" href="#13-什么时候不应该使用-14">13. 什么时候不应该使用</a></h2>
+<p>以下情况不适合使用命令模式：</p>
+<pre><code class="language-text">1. 操作非常简单，直接调用函数即可。
+2. 不需要撤销、队列、延迟执行或日志记录。
+3. 操作数量很少，也不会扩展。
+4. 调用方和执行方没有解耦需求。
+5. 命令对象反而让代码更难理解。
+</code></pre>
+<p>在 Rust 中可以遵循一个简单原则：</p>
+<pre><code class="language-text">只是立即执行一次的简单函数，不需要命令模式。
+需要把操作保存、传递、排队、撤销时，再考虑命令模式。
+</code></pre>
+<hr>
+<h2 id="14-一个简单例子思路-14"><a class="header" href="#14-一个简单例子思路-14">14. 一个简单例子思路</a></h2>
+<p><strong>场景：</strong> 文本编辑器撤销操作</p>
+<p>需求：</p>
+<pre><code class="language-text">支持插入文本
+支持删除文本
+支持撤销上一步操作
+</code></pre>
+<p>处理流程：</p>
+<pre><code class="language-text">1. 定义 Command trait。
+2. 每个命令实现 execute()。
+3. 如果支持撤销，再实现 undo()。
+4. Editor 作为 Receiver，真正修改文本。
+5. Invoker 保存命令历史栈。
+6. 执行命令后，把命令放入 history。
+7. undo 时，从 history 弹出命令并执行 undo()。
+</code></pre>
+<p>适合练习的 Rust 特性：</p>
+<pre><code class="language-text">trait
+Box&lt;dyn Trait&gt;
+Vec 历史栈
+所有权
+可变借用
+Result
+</code></pre>
+<p>也可以设计一个 CLI 场景：</p>
+<pre><code class="language-text">Command::Add
+Command::Remove
+Command::List
+Command::Run
+</code></pre>
+<p>这种情况下更适合用 <code>enum + match</code>。</p>
+<hr>
+<h2 id="15-总结一句话-14"><a class="header" href="#15-总结一句话-14">15. 总结一句话</a></h2>
+<p>命令模式的本质是：</p>
+<pre><code class="language-text">把一次操作封装成一个可保存、可传递、可排队、可撤销或可延迟执行的命令对象。
+</code></pre>
+<p>在 Rust 中，如果命令集合固定，通常优先使用 <code>enum + match</code>；如果命令需要动态扩展，可以使用 <code>trait Command + Box&lt;dyn Command&gt;</code>；如果只是简单回调，也可以直接使用闭包。命令模式适合任务队列、撤销重做、CLI 子命令、GUI 事件和异步任务调度等场景。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="17_观察者模式-observer-pattern"><a class="header" href="#17_观察者模式-observer-pattern">17_观察者模式 Observer Pattern</a></h1>
-<h2 id="1-基本信息-12"><a class="header" href="#1-基本信息-12">1. 基本信息</a></h2>
+<h2 id="1-基本信息-16"><a class="header" href="#1-基本信息-16">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 观察者模式</p>
 <p><strong>英文名称：</strong> Observer Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、<code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code>、<code>channel</code>、闭包</p>
 <p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
 <hr>
-<h2 id="2-模式核心思想-11"><a class="header" href="#2-模式核心思想-11">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-15"><a class="header" href="#2-模式核心思想-15">2. 模式核心思想</a></h2>
 <p>观察者模式的核心思想是：</p>
 <blockquote>
 <p><strong>定义对象间的一对多依赖关系，当一个对象状态发生改变时，所有依赖它的对象都会得到通知并自动更新。</strong></p>
@@ -11425,7 +13432,7 @@ fn main() {
 <li>调用方无需主动轮询状态</li>
 </ul>
 <hr>
-<h2 id="3-这个模式解决什么问题-11"><a class="header" href="#3-这个模式解决什么问题-11">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-15"><a class="header" href="#3-这个模式解决什么问题-15">3. 这个模式解决什么问题</a></h2>
 <p>在实际开发中，观察者模式主要解决以下问题：</p>
 <pre><code class="language-text">一个对象状态变化需要通知多个对象
 需要保持调用方与被观察者的松耦合
@@ -11441,7 +13448,7 @@ fn main() {
 <li>多线程事件通知</li>
 </ul>
 <hr>
-<h2 id="4-不使用这个模式会怎样-11"><a class="header" href="#4-不使用这个模式会怎样-11">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-15"><a class="header" href="#4-不使用这个模式会怎样-15">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用观察者模式，可能出现：</p>
 <pre><code class="language-text">调用方需要主动轮询状态，浪费性能
 调用方和被观察对象耦合，维护成本高
@@ -11449,7 +13456,7 @@ fn main() {
 事件通知逻辑分散，不统一
 </code></pre>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-11"><a class="header" href="#5-传统面向对象中的实现思路-11">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-15"><a class="header" href="#5-传统面向对象中的实现思路-15">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，观察者模式通常有两个角色：</p>
 <pre><code class="language-text">Observer（观察者）：实现 update() 方法接收通知
 </code></pre>
@@ -11464,8 +13471,8 @@ Observer
  └── update()
 </code></pre>
 <hr>
-<h2 id="6-rust-中的实现思路-11"><a class="header" href="#6-rust-中的实现思路-11">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-11"><a class="header" href="#61-rust-中通常怎么实现-11">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-15"><a class="header" href="#6-rust-中的实现思路-15">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-15"><a class="header" href="#61-rust-中通常怎么实现-15">6.1 Rust 中通常怎么实现</a></h3>
 <p>在 Rust 中，观察者模式常用 <strong>trait + <code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust edition2024">// 定义观察者 trait
 trait Observer {
@@ -11512,21 +13519,21 @@ fn main() {
 <li>支持多观察者同时通知</li>
 </ul>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-11"><a class="header" href="#62-和传统-oop-写法相比有什么不同-11">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-15"><a class="header" href="#62-和传统-oop-写法相比有什么不同-15">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
 <li>Rust 不使用类继承体系，而是 trait + <code>Box&lt;dyn Observer&gt;</code> 实现多态。</li>
 <li>所有权和借用机制保证安全，避免悬挂指针或内存泄漏。</li>
 <li>可以通过泛型或闭包实现静态分发，提高性能。</li>
 <li>多线程场景下可结合 <code>Arc&lt;Mutex&lt;&gt;&gt;</code> 或 <code>channel</code>，实现线程安全的事件通知。</li>
 </ol>
-<h3 id="63-rust-中是否有更自然的替代写法-11"><a class="header" href="#63-rust-中是否有更自然的替代写法-11">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-15"><a class="header" href="#63-rust-中是否有更自然的替代写法-15">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
 <li>对单线程简单通知，可以直接使用 <strong><code>Vec&lt;&amp; Observer&gt;</code></strong> 避免堆分配。</li>
 <li>对异步或跨线程通知，可用 <strong>channel</strong>，让 Subject 发送事件到观察者。</li>
 <li>对简单场景，也可用闭包数组代替 trait 对象，减少动态分发开销。</li>
 </ul>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-11"><a class="header" href="#7-rust-中涉及的语言特性-11">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-15"><a class="header" href="#7-rust-中涉及的语言特性-15">7. Rust 中涉及的语言特性</a></h2>
 <pre><code class="language-text">trait
 impl
 Box&lt;dyn Trait&gt;
@@ -11536,7 +13543,7 @@ Arc / Mutex（多线程安全）
 channel（可选，异步通知）
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-11"><a class="header" href="#8-性能与工程代价-11">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-15"><a class="header" href="#8-性能与工程代价-15">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型 Observer）性能高，编译期内联</li>
 <li><code>Box&lt;dyn Observer&gt;</code> 有虚函数调用开销，但方便动态注册观察者</li>
@@ -11545,7 +13552,7 @@ channel（可选，异步通知）
 <li>Rust 静态类型和借用检查保证访问安全，无运行时内存泄漏</li>
 </ul>
 <hr>
-<h2 id="9-典型应用场景-11"><a class="header" href="#9-典型应用场景-11">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-15"><a class="header" href="#9-典型应用场景-15">9. 典型应用场景</a></h2>
 <pre><code class="language-text">GUI 事件系统（按钮、控件、视图）
 数据模型变化通知视图
 日志或监控系统事件通知
@@ -11554,7 +13561,7 @@ channel（可选，异步通知）
 异步事件处理或订阅发布
 </code></pre>
 <hr>
-<h2 id="10-和相似模式的区别-11"><a class="header" href="#10-和相似模式的区别-11">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-15"><a class="header" href="#10-和相似模式的区别-15">10. 和相似模式的区别</a></h2>
 <ul>
 <li><strong>策略模式</strong>：策略模式替换算法或行为；观察者模式通知状态变化。</li>
 <li><strong>代理模式</strong>：代理控制访问或延迟执行；观察者模式关注多对象状态通知。</li>
@@ -11562,7 +13569,7 @@ channel（可选，异步通知）
 <li><strong>外观模式</strong>：外观简化调用接口，隐藏子系统复杂性；观察者模式关注状态变更通知机制。</li>
 </ul>
 <hr>
-<h2 id="11-使用该模式的优点-11"><a class="header" href="#11-使用该模式的优点-11">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-15"><a class="header" href="#11-使用该模式的优点-15">11. 使用该模式的优点</a></h2>
 <pre><code class="language-text">松耦合：调用方与观察者解耦
 支持动态添加/移除观察者
 自动通知依赖对象
@@ -11570,21 +13577,21 @@ channel（可选，异步通知）
 可结合 trait、Box、channel 实现线程安全
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-11"><a class="header" href="#12-使用该模式的代价-11">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-15"><a class="header" href="#12-使用该模式的代价-15">12. 使用该模式的代价</a></h2>
 <pre><code class="language-text">多观察者数量大时遍历通知开销增加
 Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 多线程场景需要同步或锁
 复杂事件链可能增加调试难度
 </code></pre>
 <hr>
-<h2 id="13-什么时候不应该使用-11"><a class="header" href="#13-什么时候不应该使用-11">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-15"><a class="header" href="#13-什么时候不应该使用-15">13. 什么时候不应该使用</a></h2>
 <pre><code class="language-text">只有单个依赖对象，无需通知多方
 状态变化不需要异步或自动通知
 系统简单，不需要解耦通知机制
 动态注册观察者不必要
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-11"><a class="header" href="#14-一个简单例子思路-11">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-15"><a class="header" href="#14-一个简单例子思路-15">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> 温度传感器状态变化通知多个观察者</p>
 <ul>
 <li>Subject：TemperatureSensor</li>
@@ -11594,13 +13601,13 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 </ul>
 <p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Vec</code>、<code>Arc/Mutex</code>（多线程）、<code>channel</code>（异步通知）。</p>
 <hr>
-<h2 id="15-总结一句话-11"><a class="header" href="#15-总结一句话-11">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-15"><a class="header" href="#15-总结一句话-15">15. 总结一句话</a></h2>
 <blockquote>
 <p>观察者模式的本质是：<strong>当对象状态发生变化时，自动通知依赖它的多个观察者，实现松耦合和事件驱动。在 Rust 中，trait + 包装结构体、<code>Box&lt;dyn Trait&gt;</code></strong> <strong>或 <code>channel</code> 是最常用实现方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="18_责任链模式-chain-of-responsibility-pattern"><a class="header" href="#18_责任链模式-chain-of-responsibility-pattern">18_责任链模式 Chain of Responsibility Pattern</a></h1>
-<h2 id="1-基本信息-13"><a class="header" href="#1-基本信息-13">1. 基本信息</a></h2>
+<h2 id="1-基本信息-17"><a class="header" href="#1-基本信息-17">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 责任链模式</p>
 <p><strong>英文名称：</strong> Chain of Responsibility Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -11608,7 +13615,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <p>责任链模式的核心是：<strong>将请求沿着处理链传递，多个对象都有机会处理请求，从而避免调用方和处理对象的强耦合。</strong></p>
 <p>在 Rust 中，责任链模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>枚举 + match</strong> 实现，也可利用闭包链处理请求。</p>
 <hr>
-<h2 id="2-模式核心思想-12"><a class="header" href="#2-模式核心思想-12">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-16"><a class="header" href="#2-模式核心思想-16">2. 模式核心思想</a></h2>
 <p>责任链模式的核心思想是：</p>
 <blockquote>
 <p><strong>将请求沿着处理对象链传递，每个对象判断是否处理该请求，如果不能处理则传递给下一个对象，直到处理完或链末尾。</strong></p>
@@ -11620,7 +13627,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <li>请求沿链传递，动态组合处理对象</li>
 </ul>
 <hr>
-<h2 id="3-这个模式解决什么问题-12"><a class="header" href="#3-这个模式解决什么问题-12">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-16"><a class="header" href="#3-这个模式解决什么问题-16">3. 这个模式解决什么问题</a></h2>
 <p>在实际开发中，责任链模式主要解决以下问题：</p>
 <pre><code class="language-text">1. 多个对象可以处理同类请求，调用方无需指定处理者
 2. 动态组合处理对象，增加灵活性
@@ -11635,7 +13642,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <li>中间件链：Web 请求经过多个处理器（验证 → 日志 → 缓存 → 路由）</li>
 </ul>
 <hr>
-<h2 id="4-不使用这个模式会怎样-12"><a class="header" href="#4-不使用这个模式会怎样-12">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-16"><a class="header" href="#4-不使用这个模式会怎样-16">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用责任链模式，可能出现：</p>
 <pre><code class="language-text">1. 调用方需要明确指定具体处理对象
 2. 多个处理对象调用耦合度高
@@ -11643,7 +13650,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 4. 请求处理逻辑分散，维护成本高
 </code></pre>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-12"><a class="header" href="#5-传统面向对象中的实现思路-12">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-16"><a class="header" href="#5-传统面向对象中的实现思路-16">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，责任链模式通常包含三个角色：</p>
 <pre><code class="language-text">1. Handler（处理者接口）：定义处理请求方法
 2. ConcreteHandler（具体处理者）：实现 Handler 接口，并持有下一个处理者
@@ -11664,8 +13671,8 @@ ConcreteHandler
  ├── handle(request) { if can_handle { ... } else { next.handle(request) } }
 </code></pre>
 <hr>
-<h2 id="6-rust-中的实现思路-12"><a class="header" href="#6-rust-中的实现思路-12">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-12"><a class="header" href="#61-rust-中通常怎么实现-12">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-16"><a class="header" href="#6-rust-中的实现思路-16">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-16"><a class="header" href="#61-rust-中通常怎么实现-16">6.1 Rust 中通常怎么实现</a></h3>
 <p>在 Rust 中，责任链模式通常用 <strong>trait + 包装结构体 + <code>Box&lt;dyn Trait&gt;</code></strong> 实现：</p>
 <pre class="playground"><code class="language-rust edition2024">// 请求处理接口
 trait Handler {
@@ -11716,21 +13723,21 @@ fn main() {
 <li>可通过 <code>Box&lt;dyn Handler&gt;</code> 支持动态分发，也可用泛型实现静态分发</li>
 </ul>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-12"><a class="header" href="#62-和传统-oop-写法相比有什么不同-12">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-16"><a class="header" href="#62-和传统-oop-写法相比有什么不同-16">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <ol>
 <li>Rust 没有类继承，使用 trait + Box/Arc 实现多态。</li>
 <li>静态分发可使用泛型，动态分发使用 <code>Box&lt;dyn Handler&gt;</code>。</li>
 <li>所有权机制保证链条引用安全，无悬挂指针。</li>
 <li>不依赖虚函数或继承体系，类型安全，零成本抽象。</li>
 </ol>
-<h3 id="63-rust-中是否有更自然的替代写法-12"><a class="header" href="#63-rust-中是否有更自然的替代写法-12">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-16"><a class="header" href="#63-rust-中是否有更自然的替代写法-16">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
 <li>简单处理链可使用 <strong>闭包链</strong>，每个闭包处理请求或传递下一个闭包。</li>
 <li>枚举 + match 可替代静态处理链，适合请求类型固定且数量有限。</li>
 <li>多线程场景可用 channel +线程，实现异步责任链。</li>
 </ul>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-12"><a class="header" href="#7-rust-中涉及的语言特性-12">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-16"><a class="header" href="#7-rust-中涉及的语言特性-16">7. Rust 中涉及的语言特性</a></h2>
 <pre><code class="language-text">1. trait
 2. impl
 3. Box&lt;dyn Trait&gt;（动态分发）
@@ -11740,7 +13747,7 @@ fn main() {
 7. 闭包（可选，用于函数链）
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-12"><a class="header" href="#8-性能与工程代价-12">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-16"><a class="header" href="#8-性能与工程代价-16">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发（泛型）性能高，调用可内联</li>
 <li>动态分发（<code>Box&lt;dyn Trait&gt;</code>）可能有一次虚函数调用开销</li>
@@ -11749,7 +13756,7 @@ fn main() {
 <li>Rust 所有权机制保证内存安全，无运行时 GC</li>
 </ul>
 <hr>
-<h2 id="9-典型应用场景-12"><a class="header" href="#9-典型应用场景-12">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-16"><a class="header" href="#9-典型应用场景-16">9. 典型应用场景</a></h2>
 <pre><code class="language-text">1. Web 中间件链：身份验证 → 日志 → 缓存 → 路由
 2. GUI 事件处理链：控件层级事件传递
 3. 审批流程：部门 → 分管领导 → 总经理
@@ -11757,7 +13764,7 @@ fn main() {
 5. 消息处理系统：多个处理者按顺序处理请求
 </code></pre>
 <hr>
-<h2 id="10-和相似模式的区别-12"><a class="header" href="#10-和相似模式的区别-12">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-16"><a class="header" href="#10-和相似模式的区别-16">10. 和相似模式的区别</a></h2>
 <ul>
 <li><strong>策略模式</strong>：策略模式替换整个算法；责任链模式沿链传递请求，多个处理者可依次处理。</li>
 <li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；责任链模式请求沿链传递，通常只处理一次或部分处理。</li>
@@ -11765,7 +13772,7 @@ fn main() {
 <li><strong>外观模式</strong>：外观提供统一接口简化调用；责任链模式是请求动态沿处理者链传递。</li>
 </ul>
 <hr>
-<h2 id="11-使用该模式的优点-12"><a class="header" href="#11-使用该模式的优点-12">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-16"><a class="header" href="#11-使用该模式的优点-16">11. 使用该模式的优点</a></h2>
 <pre><code class="language-text">1. 调用方无需关心具体处理对象
 2. 可以动态组合处理链
 3. 每个处理者独立封装逻辑
@@ -11773,21 +13780,21 @@ fn main() {
 5. 可支持异步和多线程处理链
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-12"><a class="header" href="#12-使用该模式的代价-12">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-16"><a class="header" href="#12-使用该模式的代价-16">12. 使用该模式的代价</a></h2>
 <pre><code class="language-text">1. 链条过长可能增加调用开销
 2. Box&lt;dyn Trait&gt; 动态分发有虚函数调用成本
 3. 多线程或异步实现增加同步或消息开销
 4. 调试链条逻辑可能较复杂
 </code></pre>
 <hr>
-<h2 id="13-什么时候不应该使用-12"><a class="header" href="#13-什么时候不应该使用-12">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-16"><a class="header" href="#13-什么时候不应该使用-16">13. 什么时候不应该使用</a></h2>
 <pre><code class="language-text">1. 请求处理对象数量固定且少
 2. 调用方只需处理单个对象
 3. 链条组合和动态传递不必要
 4. 系统简单，不需要松耦合
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-12"><a class="header" href="#14-一个简单例子思路-12">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-16"><a class="header" href="#14-一个简单例子思路-16">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> Web 请求中间件链</p>
 <ul>
 <li>Subject：请求对象</li>
@@ -11797,13 +13804,13 @@ fn main() {
 </ul>
 <p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、<code>Option</code>、<code>Arc/Mutex</code>（多线程）、闭包链。</p>
 <hr>
-<h2 id="15-总结一句话-12"><a class="header" href="#15-总结一句话-12">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-16"><a class="header" href="#15-总结一句话-16">15. 总结一句话</a></h2>
 <blockquote>
 <p>责任链模式的本质是：<strong>将请求沿处理者链传递，每个对象独立判断是否处理，从而实现松耦合和动态扩展。在 Rust 中，trait + 包装结构体 + Box/Option 或闭包链是常用实现方式。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="19_中介者模式-mediator-pattern"><a class="header" href="#19_中介者模式-mediator-pattern">19_中介者模式 Mediator Pattern</a></h1>
-<h2 id="1-基本信息-14"><a class="header" href="#1-基本信息-14">1. 基本信息</a></h2>
+<h2 id="1-基本信息-18"><a class="header" href="#1-基本信息-18">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 中介者模式</p>
 <p><strong>英文名称：</strong> Mediator Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -11811,7 +13818,7 @@ fn main() {
 <p>中介者模式的核心是：<strong>将对象之间的通信封装到中介者中，降低对象之间的直接耦合，让对象只依赖中介者而非彼此。</strong></p>
 <p>在 Rust 中，中介者模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>消息通道</strong> 实现，支持松耦合的对象通信和事件协调。</p>
 <hr>
-<h2 id="2-模式核心思想-13"><a class="header" href="#2-模式核心思想-13">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-17"><a class="header" href="#2-模式核心思想-17">2. 模式核心思想</a></h2>
 <p>中介者模式的核心思想是：</p>
 <blockquote>
 <p><strong>通过一个中介者对象封装多个对象之间的交互，所有对象不直接通信，而通过中介者进行协调。</strong></p>
@@ -11823,7 +13830,7 @@ fn main() {
 <li>对象耦合度降低，系统可维护性和扩展性增强</li>
 </ul>
 <hr>
-<h2 id="3-这个模式解决什么问题-13"><a class="header" href="#3-这个模式解决什么问题-13">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-17"><a class="header" href="#3-这个模式解决什么问题-17">3. 这个模式解决什么问题</a></h2>
 <p>在实际开发中，中介者模式主要解决以下问题：</p>
 <pre><code class="language-text">多个对象之间存在复杂依赖和交互
 直接通信导致耦合度高，系统难以维护
@@ -11839,7 +13846,7 @@ fn main() {
 <li>游戏事件：玩家、NPC、环境通过中介管理事件</li>
 </ul>
 <hr>
-<h2 id="4-不使用这个模式会怎样-13"><a class="header" href="#4-不使用这个模式会怎样-13">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-17"><a class="header" href="#4-不使用这个模式会怎样-17">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用中介者模式，可能出现：</p>
 <pre><code class="language-text">对象之间直接依赖，形成网状耦合
 系统复杂度高，维护困难
@@ -11847,7 +13854,7 @@ fn main() {
 难以扩展或增加新的交互对象
 </code></pre>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-13"><a class="header" href="#5-传统面向对象中的实现思路-13">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-17"><a class="header" href="#5-传统面向对象中的实现思路-17">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，中介者模式通常有两个角色：</p>
 <pre><code class="language-text">Mediator（中介者接口）：声明协调对象交互的方法
 ConcreteMediator（具体中介者）：实现中介者接口，管理各个 Colleague
@@ -11869,8 +13876,8 @@ Colleague
  └── receive(event)
 </code></pre>
 <hr>
-<h2 id="6-rust-中的实现思路-13"><a class="header" href="#6-rust-中的实现思路-13">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-13"><a class="header" href="#61-rust-中通常怎么实现-13">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-17"><a class="header" href="#6-rust-中的实现思路-17">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-17"><a class="header" href="#61-rust-中通常怎么实现-17">6.1 Rust 中通常怎么实现</a></h3>
 <p>在 Rust 中，中介者模式通常通过 <strong>trait + Rc/Arc + RefCell/Mutex</strong> 或 <strong>channel</strong> 实现：</p>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
@@ -11920,19 +13927,19 @@ impl ColleagueB {
 // 各 Colleague 发送事件到 tx，中介者监听 rx 并协调
 <span class="boring">}</span></code></pre>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-13"><a class="header" href="#62-和传统-oop-写法相比有什么不同-13">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-17"><a class="header" href="#62-和传统-oop-写法相比有什么不同-17">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <p>Rust 不依赖类继承体系，<code>trait + Rc/Arc/RefCell/Mutex</code> 替代中介者接口和对象引用。
 静态类型保证对象安全，避免空引用或悬挂指针。
 多线程场景可通过 channel 或 Arc/Mutex 安全通信。
 动态分发可通过 <code>Box&lt;dyn Mediator&gt; </code>或 <code>Arc&lt;dyn Mediator&gt;</code> 实现灵活中介。</p>
-<h3 id="63-rust-中是否有更自然的替代写法-13"><a class="header" href="#63-rust-中是否有更自然的替代写法-13">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-17"><a class="header" href="#63-rust-中是否有更自然的替代写法-17">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <ul>
 <li>单线程简单场景可直接用 <strong><code>Rc&lt;RefCell&lt;&gt;&gt;</code></strong> 管理对象，调用 trait 方法协调。</li>
 <li>异步或跨线程场景可用 <strong>ch`annel</strong> 做事件总线，实现解耦。</li>
 <li>对简单事件流，也可用闭包数组代替 trait 对象。</li>
 </ul>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-13"><a class="header" href="#7-rust-中涉及的语言特性-13">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-17"><a class="header" href="#7-rust-中涉及的语言特性-17">7. Rust 中涉及的语言特性</a></h2>
 <pre><code class="language-text">trait
 impl
 Rc/Arc + RefCell/Mutex
@@ -11942,7 +13949,7 @@ channel（异步事件）
 闭包（可选，用于事件回调）
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-13"><a class="header" href="#8-性能与工程代价-13">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-17"><a class="header" href="#8-性能与工程代价-17">8. 性能与工程代价</a></h2>
 <ul>
 <li>静态分发中介者性能接近直接方法调用</li>
 <li><code>Box&lt;dyn Trait&gt;</code> 或 <code>channel</code> 动态分发增加一次虚函数或消息开销</li>
@@ -11951,7 +13958,7 @@ channel（异步事件）
 <li>Rust 的所有权检查保证内存安全，无 GC 开销</li>
 </ul>
 <hr>
-<h2 id="9-典型应用场景-13"><a class="header" href="#9-典型应用场景-13">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-17"><a class="header" href="#9-典型应用场景-17">9. 典型应用场景</a></h2>
 <pre><code class="language-text">1. GUI 控件事件协调（按钮、文本框、列表等）
 2. 聊天系统消息中介（用户之间通过服务器通信）
 3. 任务调度系统（调度器协调多个任务执行）
@@ -11959,7 +13966,7 @@ channel（异步事件）
 5. 游戏事件系统（玩家、NPC、环境事件协调）
 </code></pre>
 <hr>
-<h2 id="10-和相似模式的区别-13"><a class="header" href="#10-和相似模式的区别-13">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-17"><a class="header" href="#10-和相似模式的区别-17">10. 和相似模式的区别</a></h2>
 <ul>
 <li><strong>观察者模式</strong>：观察者模式通知所有依赖对象；中介者模式通过中心对象协调对象交互，通常单条链路。</li>
 <li><strong>责任链模式</strong>：责任链模式请求沿链传递，每个对象可处理或传递；中介者模式通过中心统一处理多个对象的交互。</li>
@@ -11967,7 +13974,7 @@ channel（异步事件）
 <li><strong>外观模式</strong>：外观模式提供统一接口简化调用；中介者模式关注对象间通信和协调机制。</li>
 </ul>
 <hr>
-<h2 id="11-使用该模式的优点-13"><a class="header" href="#11-使用该模式的优点-13">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-17"><a class="header" href="#11-使用该模式的优点-17">11. 使用该模式的优点</a></h2>
 <pre><code class="language-text">降低对象之间的耦合度
 所有对象通过中介者交互，逻辑集中管理
 易于增加新的对象或改变交互逻辑
@@ -11975,21 +13982,21 @@ channel（异步事件）
 可结合 trait、Box、channel 实现线程安全
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-13"><a class="header" href="#12-使用该模式的代价-13">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-17"><a class="header" href="#12-使用该模式的代价-17">12. 使用该模式的代价</a></h2>
 <pre><code class="language-text">中介者对象可能变得复杂
 动态分发或 channel 有性能开销
 调试逻辑可能较复杂，事件链条难追踪
 过度集中可能增加单点逻辑负担
 </code></pre>
 <hr>
-<h2 id="13-什么时候不应该使用-13"><a class="header" href="#13-什么时候不应该使用-13">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-17"><a class="header" href="#13-什么时候不应该使用-17">13. 什么时候不应该使用</a></h2>
 <pre><code class="language-text">系统对象少，交互简单
 对象间关系稳定且不需要动态协调
 单线程简单调用可直接引用对象
 过度集中逻辑增加维护成本
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-13"><a class="header" href="#14-一个简单例子思路-13">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-17"><a class="header" href="#14-一个简单例子思路-17">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> GUI 控件事件协调</p>
 <ul>
 <li>中介者对象 <code>UiMediator</code></li>
@@ -12000,13 +14007,13 @@ channel（异步事件）
 </ul>
 <p>适合练习 Rust 特性：trait、<code>Box&lt;dyn Trait&gt;</code>、Rc/RefCell、Arc/Mutex、多线程 channel、闭包回调。</p>
 <hr>
-<h2 id="15-总结一句话-13"><a class="header" href="#15-总结一句话-13">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-17"><a class="header" href="#15-总结一句话-17">15. 总结一句话</a></h2>
 <blockquote>
 <p>中介者模式的本质是：<strong>通过中心对象管理多个对象之间的交互，实现松耦合、集中管理和灵活协调。在 Rust 中，trait + 包装结构体、Box/Arc/RefCell/Mutex 或 channel 是实现中介者模式的常用方法。</strong></p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="20_状态模式-state-pattern"><a class="header" href="#20_状态模式-state-pattern">20_状态模式 State Pattern</a></h1>
-<h2 id="1-基本信息-15"><a class="header" href="#1-基本信息-15">1. 基本信息</a></h2>
+<h2 id="1-基本信息-19"><a class="header" href="#1-基本信息-19">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 状态模式</p>
 <p><strong>英文名称：</strong> State Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -12019,7 +14026,7 @@ match 处理不同状态行为
 </code></pre>
 <p>如果需要在编译期禁止非法状态操作，还可以使用 Rust 很有特色的 <strong>类型状态模式 Typestate Pattern</strong>。</p>
 <hr>
-<h2 id="2-模式核心思想-14"><a class="header" href="#2-模式核心思想-14">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-18"><a class="header" href="#2-模式核心思想-18">2. 模式核心思想</a></h2>
 <p>状态模式的核心思想是：</p>
 <pre><code class="language-text">把对象的不同行为和它所处的状态关联起来。
 当状态变化时，对象的行为也随之变化。
@@ -12035,7 +14042,7 @@ match 处理不同状态行为
 </code></pre>
 <p>这些行为都和“当前状态”有关。</p>
 <hr>
-<h2 id="3-这个模式解决什么问题-14"><a class="header" href="#3-这个模式解决什么问题-14">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-18"><a class="header" href="#3-这个模式解决什么问题-18">3. 这个模式解决什么问题</a></h2>
 <p>状态模式主要解决的是：<strong>对象存在多个状态，并且不同状态下行为不同的问题。</strong></p>
 <p>在实际开发中，如果一个对象状态较多，经常会写出大量判断：</p>
 <pre><code class="language-text">if state == "created" { ... }
@@ -12053,7 +14060,7 @@ else if state == "finished" { ... }
 </code></pre>
 <p>状态模式的目标是：<strong>把状态本身和状态对应的行为组织清楚。</strong></p>
 <hr>
-<h2 id="4-不使用这个模式会怎样-14"><a class="header" href="#4-不使用这个模式会怎样-14">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-18"><a class="header" href="#4-不使用这个模式会怎样-18">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用状态模式，可能出现以下问题：</p>
 <pre><code class="language-text">1. 代码中充满状态判断。
 2. 状态转换逻辑分散，难以追踪。
@@ -12070,7 +14077,7 @@ else if state == "finished" { ... }
 <p>这些字符串编译器无法检查，写错了也可能运行时才发现。</p>
 <p>所以 Rust 更推荐用 <code>enum</code> 表达状态。</p>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-14"><a class="header" href="#5-传统面向对象中的实现思路-14">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-18"><a class="header" href="#5-传统面向对象中的实现思路-18">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，状态模式通常包含三个角色：</p>
 <pre><code class="language-text">1. Context：上下文对象，持有当前状态。
 2. State：状态接口，定义状态相关行为。
@@ -12099,8 +14106,8 @@ ConcreteStateB
 4. 简单状态机使用这种写法会显得过度设计。
 </code></pre>
 <hr>
-<h2 id="6-rust-中的实现思路-14"><a class="header" href="#6-rust-中的实现思路-14">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-14"><a class="header" href="#61-rust-中通常怎么实现-14">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-18"><a class="header" href="#6-rust-中的实现思路-18">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-18"><a class="header" href="#61-rust-中通常怎么实现-18">6.1 Rust 中通常怎么实现</a></h3>
 <p>Rust 中最常见、最自然的状态模式实现方式是：</p>
 <pre><code class="language-text">enum + match
 </code></pre>
@@ -12175,7 +14182,7 @@ fn main() {
 4. 不需要为每个状态创建独立结构体。
 </code></pre>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-14"><a class="header" href="#62-和传统-oop-写法相比有什么不同-14">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-18"><a class="header" href="#62-和传统-oop-写法相比有什么不同-18">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <p>和传统面向对象语言相比，Rust 的状态模式有几个明显特点。</p>
 <p>第一，Rust 更倾向于用 <code>enum</code> 表达有限状态。
 传统 OOP 中可能会为每个状态创建一个类，而 Rust 中很多状态本质上是一组有限取值，用 <code>enum</code> 更直接。</p>
@@ -12198,7 +14205,7 @@ fn main() {
 <p>第五，Rust 不依赖继承体系。
 状态行为可以通过 <code>enum + match</code>、trait、泛型或类型状态实现，而不是必须依赖“状态父类 + 具体状态子类”。</p>
 <hr>
-<h3 id="63-rust-中是否有更自然的替代写法-14"><a class="header" href="#63-rust-中是否有更自然的替代写法-14">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-18"><a class="header" href="#63-rust-中是否有更自然的替代写法-18">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <p>在 Rust 中，状态模式主要有三种实现层次。</p>
 <p>第一种是 <strong>enum 状态机</strong>。
 适合状态数量有限、状态转换规则清晰的场景。这是最推荐的入门写法。</p>
@@ -12213,7 +14220,7 @@ fn main() {
 </code></pre>
 <p>如果使用类型状态模式，可以让“未连接时调用 send”直接编译失败，而不是运行时报错。</p>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-14"><a class="header" href="#7-rust-中涉及的语言特性-14">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-18"><a class="header" href="#7-rust-中涉及的语言特性-18">7. Rust 中涉及的语言特性</a></h2>
 <p>状态模式在 Rust 中主要涉及以下语言特性：</p>
 <pre><code class="language-text">1. enum
 2. match
@@ -12242,7 +14249,7 @@ Option / Result：表达状态转换成功或失败
 <pre><code class="language-text">Typestate 类型状态模式
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-14"><a class="header" href="#8-性能与工程代价-14">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-18"><a class="header" href="#8-性能与工程代价-18">8. 性能与工程代价</a></h2>
 <p>状态模式的性能和具体实现方式有关。</p>
 <p>如果使用 <code>enum + match</code>：</p>
 <pre><code class="language-text">1. 性能通常很好。
@@ -12271,7 +14278,7 @@ Option / Result：表达状态转换成功或失败
 <pre><code class="language-text">Rust 中状态模式的首选通常是 enum + match，性能好、表达清晰、类型安全。
 </code></pre>
 <hr>
-<h2 id="9-典型应用场景-14"><a class="header" href="#9-典型应用场景-14">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-18"><a class="header" href="#9-典型应用场景-18">9. 典型应用场景</a></h2>
 <p>状态模式适合用于对象行为明显依赖状态的场景。</p>
 <p>常见应用包括：</p>
 <pre><code class="language-text">1. 订单流程：创建、支付、发货、完成、取消
@@ -12293,7 +14300,7 @@ Option / Result：表达状态转换成功或失败
 嵌入式设备状态管理
 </code></pre>
 <hr>
-<h2 id="10-和相似模式的区别-14"><a class="header" href="#10-和相似模式的区别-14">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-18"><a class="header" href="#10-和相似模式的区别-18">10. 和相似模式的区别</a></h2>
 <p>状态模式容易和策略模式、模板方法模式、责任链模式、备忘录模式混淆。</p>
 <h3 id="101-状态模式和策略模式"><a class="header" href="#101-状态模式和策略模式">10.1 状态模式和策略模式</a></h3>
 <p>二者都可能表现为“不同行为可以切换”，但关注点不同。</p>
@@ -12343,7 +14350,7 @@ Option / Result：表达状态转换成功或失败
 保存编辑器历史内容用于撤销：备忘录模式
 </code></pre>
 <hr>
-<h2 id="11-使用该模式的优点-14"><a class="header" href="#11-使用该模式的优点-14">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-18"><a class="header" href="#11-使用该模式的优点-18">11. 使用该模式的优点</a></h2>
 <p>状态模式的优点主要有：</p>
 <pre><code class="language-text">1. 将状态和行为关联起来，逻辑更清晰。
 2. 减少大量散落的 if/else 状态判断。
@@ -12356,7 +14363,7 @@ Option / Result：表达状态转换成功或失败
 <pre><code class="language-text">用类型系统表达状态边界，让错误尽量提前暴露。
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-14"><a class="header" href="#12-使用该模式的代价-14">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-18"><a class="header" href="#12-使用该模式的代价-18">12. 使用该模式的代价</a></h2>
 <p>状态模式的代价主要有：</p>
 <pre><code class="language-text">1. 状态数量多时，match 分支可能变长。
 2. 如果用 trait 状态对象，结构会更复杂。
@@ -12370,7 +14377,7 @@ Option / Result：表达状态转换成功或失败
 </code></pre>
 <p>已经足够清晰。</p>
 <hr>
-<h2 id="13-什么时候不应该使用-14"><a class="header" href="#13-什么时候不应该使用-14">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-18"><a class="header" href="#13-什么时候不应该使用-18">13. 什么时候不应该使用</a></h2>
 <p>以下情况不适合使用复杂的状态模式：</p>
 <pre><code class="language-text">1. 状态只有一两个，而且逻辑很简单。
 2. 状态不会影响对象行为。
@@ -12384,7 +14391,7 @@ Option / Result：表达状态转换成功或失败
 非法操作必须编译期禁止：Typestate。
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-14"><a class="header" href="#14-一个简单例子思路-14">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-18"><a class="header" href="#14-一个简单例子思路-18">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> 订单状态流转</p>
 <pre><code class="language-text">订单初始状态是 Created。
 Created 状态可以支付，也可以取消。
@@ -12409,14 +14416,14 @@ Result
 Typestate
 </code></pre>
 <hr>
-<h2 id="15-总结一句话-14"><a class="header" href="#15-总结一句话-14">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-18"><a class="header" href="#15-总结一句话-18">15. 总结一句话</a></h2>
 <p>状态模式的本质是：</p>
 <pre><code class="language-text">把对象行为和对象当前状态绑定起来，使对象在不同状态下对同一操作表现出不同的行为。
 </code></pre>
 <p>在 Rust 中，状态模式最自然的实现方式通常是 <code>enum + match</code>。当状态转换规则复杂时，可以结合 trait 状态对象；当希望编译期禁止非法操作时，可以进一步使用类型状态模式 Typestate。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="21_备忘录模式-memento-pattern"><a class="header" href="#21_备忘录模式-memento-pattern">21_备忘录模式 Memento Pattern</a></h1>
-<h2 id="1-基本信息-16"><a class="header" href="#1-基本信息-16">1. 基本信息</a></h2>
+<h2 id="1-基本信息-20"><a class="header" href="#1-基本信息-20">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 备忘录模式</p>
 <p><strong>英文名称：</strong> Memento Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -12424,7 +14431,7 @@ Typestate
 <p>备忘录模式的核心是：<strong>在不破坏对象封装性的前提下，保存对象某一时刻的内部状态，以便之后可以恢复到之前的状态。</strong></p>
 <p>在 Rust 中，备忘录模式通常可以通过保存状态快照来实现。最常见的做法是：对象在状态变化前，把当前状态 <code>clone</code> 一份保存到历史记录中；需要撤销时，再从历史记录中取出旧状态进行恢复。</p>
 <hr>
-<h2 id="2-模式核心思想-15"><a class="header" href="#2-模式核心思想-15">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-19"><a class="header" href="#2-模式核心思想-19">2. 模式核心思想</a></h2>
 <p>备忘录模式的核心思想是：</p>
 <pre><code class="language-text">保存对象的历史状态，使对象可以在未来恢复到某个旧状态。
 </code></pre>
@@ -12441,7 +14448,7 @@ Typestate
 </code></pre>
 <p>这就是备忘录模式的典型使用场景。</p>
 <hr>
-<h2 id="3-这个模式解决什么问题-15"><a class="header" href="#3-这个模式解决什么问题-15">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-19"><a class="header" href="#3-这个模式解决什么问题-19">3. 这个模式解决什么问题</a></h2>
 <p>备忘录模式主要解决的是：<strong>对象状态变化之后，如何支持撤销、回滚或恢复。</strong></p>
 <p>在实际开发中，很多对象的状态会不断变化，例如：</p>
 <pre><code class="language-text">1. 文本编辑器中的文档内容
@@ -12462,7 +14469,7 @@ Typestate
 </code></pre>
 <p>它的核心价值是：<strong>让对象状态变化变得可恢复。</strong></p>
 <hr>
-<h2 id="4-不使用这个模式会怎样-15"><a class="header" href="#4-不使用这个模式会怎样-15">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-19"><a class="header" href="#4-不使用这个模式会怎样-19">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用备忘录模式，可能会出现以下问题：</p>
 <pre><code class="language-text">1. 对象状态一旦修改，就无法恢复。
 2. 撤销功能需要手动记录每一步变化，逻辑复杂。
@@ -12480,7 +14487,7 @@ Typestate
 <p>如果撤销时只恢复文本内容，而没有恢复光标和选区，状态就会不完整。</p>
 <p>备忘录模式的作用就是：<strong>把某个时刻需要恢复的状态整体保存下来。</strong></p>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-15"><a class="header" href="#5-传统面向对象中的实现思路-15">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-19"><a class="header" href="#5-传统面向对象中的实现思路-19">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统面向对象语言中，备忘录模式通常包含三个角色：</p>
 <pre><code class="language-text">1. Originator：原发器，真正拥有状态的对象。
 2. Memento：备忘录，保存 Originator 的某个历史状态。
@@ -12503,8 +14510,8 @@ Caretaker 只能保存 Memento，不能随意修改其中的状态。
 </code></pre>
 <p>这样既能保存历史状态，又不会让外部对象直接操作 Originator 的内部细节。</p>
 <hr>
-<h2 id="6-rust-中的实现思路-15"><a class="header" href="#6-rust-中的实现思路-15">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-15"><a class="header" href="#61-rust-中通常怎么实现-15">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-19"><a class="header" href="#6-rust-中的实现思路-19">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-19"><a class="header" href="#61-rust-中通常怎么实现-19">6.1 Rust 中通常怎么实现</a></h3>
 <p>Rust 中实现备忘录模式，通常有两种方式。</p>
 <p>第一种是直接保存状态结构体的快照。</p>
 <pre class="playground"><code class="language-rust edition2024"><span class="boring">#![allow(unused)]
@@ -12561,7 +14568,7 @@ history 是 Caretaker 的作用
 </code></pre>
 <p>这种方式更接近传统备忘录模式，也更适合状态较复杂、需要隐藏内部细节的情况。</p>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-15"><a class="header" href="#62-和传统-oop-写法相比有什么不同-15">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-19"><a class="header" href="#62-和传统-oop-写法相比有什么不同-19">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <p>和传统面向对象语言相比，Rust 的备忘录模式有几个明显特点。</p>
 <p>第一，Rust 可以直接通过 <code>Clone</code> 保存状态快照。
 传统 OOP 中可能需要手动写 <code>save()</code>、<code>restore()</code> 和专门的 Memento 类；Rust 中如果状态结构体实现了 <code>Clone</code>，保存快照会很自然。</p>
@@ -12574,7 +14581,7 @@ history 是 Caretaker 的作用
 <p>第五，Rust 中也可以用序列化保存备忘录。
 如果状态需要持久化到文件，可以将 Memento 序列化，而不只是保存在内存中。</p>
 <hr>
-<h3 id="63-rust-中是否有更自然的替代写法-15"><a class="header" href="#63-rust-中是否有更自然的替代写法-15">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-19"><a class="header" href="#63-rust-中是否有更自然的替代写法-19">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <p>在 Rust 中，备忘录模式不一定总是保存完整快照，也可以根据场景选择不同实现。</p>
 <p>如果状态比较小，可以直接：</p>
 <pre><code class="language-text">Clone 整个状态
@@ -12598,7 +14605,7 @@ Cow
 还是需要持久化存档？
 </code></pre>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-15"><a class="header" href="#7-rust-中涉及的语言特性-15">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-19"><a class="header" href="#7-rust-中涉及的语言特性-19">7. Rust 中涉及的语言特性</a></h2>
 <p>备忘录模式在 Rust 中主要涉及以下语言特性：</p>
 <pre><code class="language-text">1. Clone
 2. struct
@@ -12629,7 +14636,7 @@ Rc / Arc / Cow：减少大对象复制成本
 需要恢复时弹出旧状态
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-15"><a class="header" href="#8-性能与工程代价-15">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-19"><a class="header" href="#8-性能与工程代价-19">8. 性能与工程代价</a></h2>
 <p>备忘录模式最大的性能问题是：<strong>保存状态快照可能很贵。</strong></p>
 <p>如果状态很小，例如只包含数字、枚举、小字符串，直接 <code>clone()</code> 通常没问题。</p>
 <p>但如果状态很大，例如：</p>
@@ -12661,7 +14668,7 @@ Rc / Arc / Cow：减少大对象复制成本
 <pre><code class="language-text">备忘录模式提升了状态恢复能力，但代价是额外的内存占用和状态管理复杂度。
 </code></pre>
 <hr>
-<h2 id="9-典型应用场景-15"><a class="header" href="#9-典型应用场景-15">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-19"><a class="header" href="#9-典型应用场景-19">9. 典型应用场景</a></h2>
 <p>备忘录模式适合用于需要保存历史状态的场景。</p>
 <p>常见应用包括：</p>
 <pre><code class="language-text">1. 文本编辑器撤销和重做
@@ -12682,7 +14689,7 @@ Rc / Arc / Cow：减少大对象复制成本
 数据处理流程中的检查点 checkpoint
 </code></pre>
 <hr>
-<h2 id="10-和相似模式的区别-15"><a class="header" href="#10-和相似模式的区别-15">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-19"><a class="header" href="#10-和相似模式的区别-19">10. 和相似模式的区别</a></h2>
 <p>备忘录模式容易和原型模式、状态模式、命令模式、快照机制混淆。</p>
 <h3 id="101-备忘录模式和原型模式"><a class="header" href="#101-备忘录模式和原型模式">10.1 备忘录模式和原型模式</a></h3>
 <p>二者都可能涉及对象复制，但目的不同。</p>
@@ -12742,7 +14749,7 @@ Rc / Arc / Cow：减少大对象复制成本
 </code></pre>
 <p>也就是说，备忘录模式不是简单地复制一份数据，而是一种有角色分工的状态保存与恢复设计。</p>
 <hr>
-<h2 id="11-使用该模式的优点-15"><a class="header" href="#11-使用该模式的优点-15">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-19"><a class="header" href="#11-使用该模式的优点-19">11. 使用该模式的优点</a></h2>
 <p>备忘录模式的优点主要有：</p>
 <pre><code class="language-text">1. 可以恢复对象历史状态。
 2. 适合实现撤销、重做、回滚、存档。
@@ -12753,7 +14760,7 @@ Rc / Arc / Cow：减少大对象复制成本
 </code></pre>
 <p>从工程角度看，备忘录模式让系统更可靠，尤其适合状态变化频繁、需要可恢复性的场景。</p>
 <hr>
-<h2 id="12-使用该模式的代价-15"><a class="header" href="#12-使用该模式的代价-15">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-19"><a class="header" href="#12-使用该模式的代价-19">12. 使用该模式的代价</a></h2>
 <p>备忘录模式的代价主要包括：</p>
 <pre><code class="language-text">1. 保存历史状态会增加内存占用。
 2. 大对象 clone 可能带来性能开销。
@@ -12769,7 +14776,7 @@ Rc / Arc / Cow：减少大对象复制成本
 是否需要限制历史步数？
 </code></pre>
 <hr>
-<h2 id="13-什么时候不应该使用-15"><a class="header" href="#13-什么时候不应该使用-15">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-19"><a class="header" href="#13-什么时候不应该使用-19">13. 什么时候不应该使用</a></h2>
 <p>以下情况不适合使用备忘录模式：</p>
 <pre><code class="language-text">1. 对象状态很简单，不需要恢复。
 2. 状态变化后不需要撤销或回滚。
@@ -12785,7 +14792,7 @@ Rc / Arc / Cow：减少大对象复制成本
 资源不可复制：不要直接做完整备忘录。
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-15"><a class="header" href="#14-一个简单例子思路-15">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-19"><a class="header" href="#14-一个简单例子思路-19">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> 文本编辑器撤销功能</p>
 <pre><code class="language-text">编辑器中有当前文本内容和光标位置。
 用户每次输入文字前，先保存当前状态。
@@ -12809,14 +14816,14 @@ impl
 Result
 </code></pre>
 <hr>
-<h2 id="15-总结一句话-15"><a class="header" href="#15-总结一句话-15">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-19"><a class="header" href="#15-总结一句话-19">15. 总结一句话</a></h2>
 <p>备忘录模式的本质是：</p>
 <pre><code class="language-text">保存对象某一时刻的内部状态，使对象在之后可以恢复到这个历史状态。
 </code></pre>
 <p>在 Rust 中，备忘录模式通常通过 <code>Clone</code> 保存状态快照，并用 <code>Vec</code> 或其他集合管理历史记录。使用时需要重点关注快照复制成本、历史记录大小、undo/redo 逻辑，以及状态中是否包含不可复制资源。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="22_解释器模式-interpreter-pattern"><a class="header" href="#22_解释器模式-interpreter-pattern">22_解释器模式 Interpreter Pattern</a></h1>
-<h2 id="1-基本信息-17"><a class="header" href="#1-基本信息-17">1. 基本信息</a></h2>
+<h2 id="1-基本信息-21"><a class="header" href="#1-基本信息-21">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 解释器模式</p>
 <p><strong>英文名称：</strong> Interpreter Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -12828,7 +14835,7 @@ match 分发不同解释逻辑
 递归函数执行表达式求值
 </code></pre>
 <hr>
-<h2 id="2-模式核心思想-16"><a class="header" href="#2-模式核心思想-16">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-20"><a class="header" href="#2-模式核心思想-20">2. 模式核心思想</a></h2>
 <p>解释器模式的核心思想是：</p>
 <pre><code class="language-text">把一种规则、表达式或简单语言表示成程序中的结构，
 然后通过解释器逐步解析和执行这些结构。
@@ -12847,7 +14854,7 @@ price &gt; 100
 <p>这些都可以看作某种表达式或规则。</p>
 <p>解释器模式要做的就是：<strong>把这些表达式抽象成结构，再写解释逻辑执行它们。</strong></p>
 <hr>
-<h2 id="3-这个模式解决什么问题-16"><a class="header" href="#3-这个模式解决什么问题-16">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-20"><a class="header" href="#3-这个模式解决什么问题-20">3. 这个模式解决什么问题</a></h2>
 <p>解释器模式主要解决的是：<strong>当系统中存在一套固定规则、表达式或小型语言时，如何把它们结构化并执行。</strong></p>
 <p>在实际开发中，可能会遇到：</p>
 <pre><code class="language-text">1. 数学表达式求值
@@ -12864,7 +14871,7 @@ price &gt; 100
 再用统一解释逻辑执行这些表达式。
 </code></pre>
 <hr>
-<h2 id="4-不使用这个模式会怎样-16"><a class="header" href="#4-不使用这个模式会怎样-16">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-20"><a class="header" href="#4-不使用这个模式会怎样-20">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用解释器模式，可能出现：</p>
 <p>1. 规则逻辑散落在大量 if/else 中。</p>
 <p>2. 表达式结构不清晰，难以扩展。</p>
@@ -12883,7 +14890,7 @@ price &gt; 100
 </code></pre>
 <p>这样规则本身就变成了可组合的数据结构。</p>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-16"><a class="header" href="#5-传统面向对象中的实现思路-16">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-20"><a class="header" href="#5-传统面向对象中的实现思路-20">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，解释器模式通常包含以下角色：</p>
 <pre><code class="language-text">1. AbstractExpression：抽象表达式接口
 2. TerminalExpression：终结符表达式
@@ -12915,8 +14922,8 @@ AddExpression
 </code></pre>
 <p>然后通过递归调用 <code>interpret()</code> 得到结果。</p>
 <hr>
-<h2 id="6-rust-中的实现思路-16"><a class="header" href="#6-rust-中的实现思路-16">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-16"><a class="header" href="#61-rust-中通常怎么实现-16">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-20"><a class="header" href="#6-rust-中的实现思路-20">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-20"><a class="header" href="#61-rust-中通常怎么实现-20">6.1 Rust 中通常怎么实现</a></h3>
 <p>Rust 中解释器模式最自然的实现方式通常是：</p>
 <pre><code class="language-text">enum + match + 递归求值
 </code></pre>
@@ -12965,7 +14972,7 @@ fn main() {
 </code></pre>
 <p>这里的 <code>Expr</code> 就是表达式树，也就是 AST。</p>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-16"><a class="header" href="#62-和传统-oop-写法相比有什么不同-16">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-20"><a class="header" href="#62-和传统-oop-写法相比有什么不同-20">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <p>和传统面向对象语言相比，Rust 的解释器模式有几个明显特点。</p>
 <p>第一，Rust 更适合用 <code>enum</code> 表达语法节点。
 传统 OOP 可能会为每一种表达式创建一个类，例如 <code>NumberExpression</code>、<code>AddExpression</code>、<code>SubExpression</code>。
@@ -12979,7 +14986,7 @@ Rust 中可以直接用一个 <code>enum</code> 表达所有表达式类型。</
 <p>第五，Rust 不一定需要 trait object。
 如果语法类型是固定的，用 <code>enum + match</code> 通常比 <code>Box&lt;dyn Expression&gt;</code> 更简单、更高效。</p>
 <hr>
-<h3 id="63-rust-中是否有更自然的替代写法-16"><a class="header" href="#63-rust-中是否有更自然的替代写法-16">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-20"><a class="header" href="#63-rust-中是否有更自然的替代写法-20">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <p>在 Rust 中，解释器模式可以根据复杂程度选择不同写法。</p>
 <p>如果表达式种类固定，推荐：</p>
 <pre><code class="language-text">enum + match
@@ -13002,7 +15009,7 @@ match
 <p>所以不是所有规则判断都需要解释器模式。
 只有当规则本身逐渐形成“语言”或“表达式结构”时，解释器模式才更有价值。</p>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-16"><a class="header" href="#7-rust-中涉及的语言特性-16">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-20"><a class="header" href="#7-rust-中涉及的语言特性-20">7. Rust 中涉及的语言特性</a></h2>
 <p>解释器模式在 Rust 中主要涉及以下语言特性：</p>
 <pre><code class="language-text">1. enum
 2. match
@@ -13029,7 +15036,7 @@ Option：表达可选值或查找结果
 <pre><code class="language-text">enum + match + Box
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-16"><a class="header" href="#8-性能与工程代价-16">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-20"><a class="header" href="#8-性能与工程代价-20">8. 性能与工程代价</a></h2>
 <p>解释器模式的性能主要取决于表达式树规模和解释方式。</p>
 <p>如果使用 <code>enum + match</code>：</p>
 <pre><code class="language-text">1. 分发成本较低。
@@ -13062,7 +15069,7 @@ Option：表达可选值或查找结果
 <pre><code class="language-text">解释器模式结构清晰、扩展方便，但复杂表达式和频繁解释可能带来运行时开销。
 </code></pre>
 <hr>
-<h2 id="9-典型应用场景-16"><a class="header" href="#9-典型应用场景-16">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-20"><a class="header" href="#9-典型应用场景-20">9. 典型应用场景</a></h2>
 <p>解释器模式适合用于有固定语法或规则表达式的场景。</p>
 <p>常见应用包括：</p>
 <pre><code class="language-text">1. 数学表达式求值
@@ -13089,7 +15096,7 @@ Option：表达可选值或查找结果
 </code></pre>
 <p>可以被解析成表达式树，再用解释器结合用户上下文判断结果。</p>
 <hr>
-<h2 id="10-和相似模式的区别-16"><a class="header" href="#10-和相似模式的区别-16">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-20"><a class="header" href="#10-和相似模式的区别-20">10. 和相似模式的区别</a></h2>
 <p>解释器模式容易和访问者模式、组合模式、策略模式、状态模式混淆。</p>
 <h3 id="101-解释器模式和组合模式"><a class="header" href="#101-解释器模式和组合模式">10.1 解释器模式和组合模式</a></h3>
 <p>二者都可能使用树形结构，但关注点不同。</p>
@@ -13139,7 +15146,7 @@ Option：表达可选值或查找结果
 解析并执行 “paid == true &amp;&amp; stock &gt; 0”：解释器模式
 </code></pre>
 <hr>
-<h2 id="11-使用该模式的优点-16"><a class="header" href="#11-使用该模式的优点-16">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-20"><a class="header" href="#11-使用该模式的优点-20">11. 使用该模式的优点</a></h2>
 <p>解释器模式的优点主要有：</p>
 <pre><code class="language-text">1. 可以把规则或表达式结构化。
 2. 适合实现小型语言或 DSL。
@@ -13152,7 +15159,7 @@ Option：表达可选值或查找结果
 <pre><code class="language-text">把“写死在代码里的判断逻辑”变成“可表达、可组合、可解释的规则结构”。
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-16"><a class="header" href="#12-使用该模式的代价-16">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-20"><a class="header" href="#12-使用该模式的代价-20">12. 使用该模式的代价</a></h2>
 <p>解释器模式的代价主要包括：</p>
 <pre><code class="language-text">1. 需要设计表达式结构，前期成本较高。
 2. 复杂语法需要词法分析和语法分析。
@@ -13169,7 +15176,7 @@ Option：表达可选值或查找结果
 </code></pre>
 <p>这些会比普通业务判断更复杂。</p>
 <hr>
-<h2 id="13-什么时候不应该使用-16"><a class="header" href="#13-什么时候不应该使用-16">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-20"><a class="header" href="#13-什么时候不应该使用-20">13. 什么时候不应该使用</a></h2>
 <p>以下情况不适合使用解释器模式：</p>
 <pre><code class="language-text">1. 规则非常简单，普通 if/else 足够清晰。
 2. 不需要表达式组合。
@@ -13183,7 +15190,7 @@ Option：表达可选值或查找结果
 如果规则开始像一种“小语言”，可以考虑解释器模式。
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-16"><a class="header" href="#14-一个简单例子思路-16">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-20"><a class="header" href="#14-一个简单例子思路-20">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> 简单数学表达式解释器</p>
 <p>需求：</p>
 <pre><code class="language-text">支持数字、加法、减法、乘法。
@@ -13216,14 +15223,14 @@ Result
 解析字符串输入
 </code></pre>
 <hr>
-<h2 id="15-总结一句话-16"><a class="header" href="#15-总结一句话-16">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-20"><a class="header" href="#15-总结一句话-20">15. 总结一句话</a></h2>
 <p>解释器模式的本质是：</p>
 <pre><code class="language-text">把规则、表达式或简单语言表示成程序中的语法结构，并提供解释执行这些结构的方法。
 </code></pre>
 <p>在 Rust 中，解释器模式通常使用 <code>enum + match + Box</code> 构造表达式树，再通过递归函数进行解释执行。它适合规则引擎、小型 DSL、表达式求值等场景，但不适合过于简单的条件判断或极端性能敏感的核心路径。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="23_访问者模式-visitor-pattern"><a class="header" href="#23_访问者模式-visitor-pattern">23_访问者模式 Visitor Pattern</a></h1>
-<h2 id="1-基本信息-18"><a class="header" href="#1-基本信息-18">1. 基本信息</a></h2>
+<h2 id="1-基本信息-22"><a class="header" href="#1-基本信息-22">1. 基本信息</a></h2>
 <p><strong>中文名称：</strong> 访问者模式</p>
 <p><strong>英文名称：</strong> Visitor Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
@@ -13232,7 +15239,7 @@ Result
 <p>在 Rust 中，访问者模式经常出现在编译器、解释器、语法树 AST、文档树、UI 组件树等场景中。</p>
 <p>不过需要注意：Rust 有强大的 <code>enum + match</code>，所以很多传统 OOP 中必须使用访问者模式的场景，在 Rust 中可以用更直接的方式表达。</p>
 <hr>
-<h2 id="2-模式核心思想-17"><a class="header" href="#2-模式核心思想-17">2. 模式核心思想</a></h2>
+<h2 id="2-模式核心思想-21"><a class="header" href="#2-模式核心思想-21">2. 模式核心思想</a></h2>
 <p>访问者模式的核心思想是：</p>
 <pre><code class="language-text">把“数据结构”和“作用在数据结构上的操作”分离。
 </code></pre>
@@ -13253,7 +15260,7 @@ Result
 </code></pre>
 <p>如果把这些操作全部写在节点结构内部，节点代码会越来越臃肿。访问者模式就是把这些操作抽离出来，让不同访问者负责不同任务。</p>
 <hr>
-<h2 id="3-这个模式解决什么问题-17"><a class="header" href="#3-这个模式解决什么问题-17">3. 这个模式解决什么问题</a></h2>
+<h2 id="3-这个模式解决什么问题-21"><a class="header" href="#3-这个模式解决什么问题-21">3. 这个模式解决什么问题</a></h2>
 <p>访问者模式主要解决的是：<strong>当一个稳定的数据结构需要不断增加新操作时，如何避免频繁修改数据结构本身。</strong></p>
 <p>在实际开发中，可能有这样的情况：</p>
 <pre><code class="language-text">1. 数据结构相对稳定。
@@ -13279,7 +15286,7 @@ IfExpr
 </code></pre>
 <p>访问者模式可以把这些操作独立成不同访问者。</p>
 <hr>
-<h2 id="4-不使用这个模式会怎样-17"><a class="header" href="#4-不使用这个模式会怎样-17">4. 不使用这个模式会怎样</a></h2>
+<h2 id="4-不使用这个模式会怎样-21"><a class="header" href="#4-不使用这个模式会怎样-21">4. 不使用这个模式会怎样</a></h2>
 <p>如果不使用访问者模式，可能出现以下问题：</p>
 <pre><code class="language-text">1. 数据结构内部塞满各种操作方法。
 2. 新增操作时，需要修改多个节点类型。
@@ -13298,7 +15305,7 @@ optimize()
 <p>短期看很方便，但随着操作越来越多，节点类型会变得越来越臃肿。</p>
 <p>访问者模式的作用就是：<strong>让节点结构保持相对干净，把操作移到访问者中。</strong></p>
 <hr>
-<h2 id="5-传统面向对象中的实现思路-17"><a class="header" href="#5-传统面向对象中的实现思路-17">5. 传统面向对象中的实现思路</a></h2>
+<h2 id="5-传统面向对象中的实现思路-21"><a class="header" href="#5-传统面向对象中的实现思路-21">5. 传统面向对象中的实现思路</a></h2>
 <p>在传统 OOP 中，访问者模式通常包含几个角色：</p>
 <pre><code class="language-text">1. Visitor：访问者接口，定义访问不同节点的方法。
 2. ConcreteVisitor：具体访问者，实现具体操作。
@@ -13331,8 +15338,8 @@ Add
 也取决于被访问节点类型。
 </code></pre>
 <hr>
-<h2 id="6-rust-中的实现思路-17"><a class="header" href="#6-rust-中的实现思路-17">6. Rust 中的实现思路</a></h2>
-<h3 id="61-rust-中通常怎么实现-17"><a class="header" href="#61-rust-中通常怎么实现-17">6.1 Rust 中通常怎么实现</a></h3>
+<h2 id="6-rust-中的实现思路-21"><a class="header" href="#6-rust-中的实现思路-21">6. Rust 中的实现思路</a></h2>
+<h3 id="61-rust-中通常怎么实现-21"><a class="header" href="#61-rust-中通常怎么实现-21">6.1 Rust 中通常怎么实现</a></h3>
 <p>Rust 中访问者模式有两种常见写法。</p>
 <p>第一种是传统访问者写法：<code>trait Visitor + accept()</code>。</p>
 <p>例如：</p>
@@ -13416,7 +15423,7 @@ fn count_nodes(expr: &amp;Expr) -&gt; usize {
 <p>这种写法没有显式的 <code>Visitor</code> trait，但同样实现了“访问树结构并执行操作”的目的。</p>
 <p>在 Rust 中，如果数据结构是 <code>enum</code>，并且操作数量不多，那么 <code>match</code> 往往比传统访问者更简单。</p>
 <hr>
-<h3 id="62-和传统-oop-写法相比有什么不同-17"><a class="header" href="#62-和传统-oop-写法相比有什么不同-17">6.2 和传统 OOP 写法相比有什么不同</a></h3>
+<h3 id="62-和传统-oop-写法相比有什么不同-21"><a class="header" href="#62-和传统-oop-写法相比有什么不同-21">6.2 和传统 OOP 写法相比有什么不同</a></h3>
 <p>和传统面向对象语言相比，Rust 的访问者模式有几个明显特点。</p>
 <p>第一，Rust 中很多访问者模式可以被 <code>enum + match</code> 替代。
 传统 OOP 中因为缺少代数数据类型，常常需要访问者模式来处理不同节点类型；Rust 可以直接用 <code>match</code> 对枚举变体进行分发。</p>
@@ -13434,7 +15441,7 @@ self
 <p>第五，Rust 中需要考虑所有权和递归结构。
 对于 AST、树形结构，通常需要使用 <code>Box</code>、<code>Rc</code>、<code>Arc</code> 等来表达递归和共享关系。</p>
 <hr>
-<h3 id="63-rust-中是否有更自然的替代写法-17"><a class="header" href="#63-rust-中是否有更自然的替代写法-17">6.3 Rust 中是否有更自然的替代写法</a></h3>
+<h3 id="63-rust-中是否有更自然的替代写法-21"><a class="header" href="#63-rust-中是否有更自然的替代写法-21">6.3 Rust 中是否有更自然的替代写法</a></h3>
 <p>在 Rust 中选择访问者模式时，可以这样判断。</p>
 <p>如果数据结构是 <code>enum</code>，并且操作数量较少：</p>
 <pre><code class="language-text">优先使用 enum + match
@@ -13457,7 +15464,7 @@ self
 </code></pre>
 <p>所以 Rust 中不需要机械照搬访问者模式，而要看数据结构和操作哪一边更稳定。</p>
 <hr>
-<h2 id="7-rust-中涉及的语言特性-17"><a class="header" href="#7-rust-中涉及的语言特性-17">7. Rust 中涉及的语言特性</a></h2>
+<h2 id="7-rust-中涉及的语言特性-21"><a class="header" href="#7-rust-中涉及的语言特性-21">7. Rust 中涉及的语言特性</a></h2>
 <p>访问者模式在 Rust 中主要涉及以下语言特性：</p>
 <pre><code class="language-text">1. trait
 2. enum
@@ -13485,7 +15492,7 @@ enum + match
 递归遍历
 </code></pre>
 <hr>
-<h2 id="8-性能与工程代价-17"><a class="header" href="#8-性能与工程代价-17">8. 性能与工程代价</a></h2>
+<h2 id="8-性能与工程代价-21"><a class="header" href="#8-性能与工程代价-21">8. 性能与工程代价</a></h2>
 <p>访问者模式的性能取决于具体实现方式。</p>
 <p>如果使用 <code>enum + match</code>：</p>
 <pre><code class="language-text">1. 分发成本较低。
@@ -13514,7 +15521,7 @@ enum + match
 <pre><code class="language-text">访问者模式适合复杂结构和多种操作，但对简单场景来说，Rust 的 enum + match 更轻量。
 </code></pre>
 <hr>
-<h2 id="9-典型应用场景-17"><a class="header" href="#9-典型应用场景-17">9. 典型应用场景</a></h2>
+<h2 id="9-典型应用场景-21"><a class="header" href="#9-典型应用场景-21">9. 典型应用场景</a></h2>
 <p>访问者模式适合用于复杂数据结构，尤其是树形结构。</p>
 <p>常见应用包括：</p>
 <pre><code class="language-text">1. 编译器 AST 遍历
@@ -13544,7 +15551,7 @@ DSL 解释器
 </code></pre>
 <p>这类场景就适合考虑访问者模式。</p>
 <hr>
-<h2 id="10-和相似模式的区别-17"><a class="header" href="#10-和相似模式的区别-17">10. 和相似模式的区别</a></h2>
+<h2 id="10-和相似模式的区别-21"><a class="header" href="#10-和相似模式的区别-21">10. 和相似模式的区别</a></h2>
 <p>访问者模式容易和解释器模式、组合模式、迭代器模式、策略模式混淆。</p>
 <h3 id="101-访问者模式和解释器模式"><a class="header" href="#101-访问者模式和解释器模式">10.1 访问者模式和解释器模式</a></h3>
 <p>二者都经常用于 AST，但关注点不同。</p>
@@ -13595,7 +15602,7 @@ DSL 解释器
 对 AST 的不同节点执行类型检查：访问者模式
 </code></pre>
 <hr>
-<h2 id="11-使用该模式的优点-17"><a class="header" href="#11-使用该模式的优点-17">11. 使用该模式的优点</a></h2>
+<h2 id="11-使用该模式的优点-21"><a class="header" href="#11-使用该模式的优点-21">11. 使用该模式的优点</a></h2>
 <p>访问者模式的优点主要有：</p>
 <pre><code class="language-text">1. 可以在不修改数据结构的情况下增加新操作。
 2. 适合复杂树形结构或 AST。
@@ -13609,7 +15616,7 @@ DSL 解释器
 把不断变化的操作逻辑移到访问者中。
 </code></pre>
 <hr>
-<h2 id="12-使用该模式的代价-17"><a class="header" href="#12-使用该模式的代价-17">12. 使用该模式的代价</a></h2>
+<h2 id="12-使用该模式的代价-21"><a class="header" href="#12-使用该模式的代价-21">12. 使用该模式的代价</a></h2>
 <p>访问者模式的代价主要包括：</p>
 <pre><code class="language-text">1. 结构复杂度较高。
 2. 新增节点类型时，需要修改 Visitor trait。
@@ -13631,7 +15638,7 @@ CodeGenVisitor
 </code></pre>
 <p>所以访问者模式适合“节点类型比较稳定，操作经常增加”的场景。</p>
 <hr>
-<h2 id="13-什么时候不应该使用-17"><a class="header" href="#13-什么时候不应该使用-17">13. 什么时候不应该使用</a></h2>
+<h2 id="13-什么时候不应该使用-21"><a class="header" href="#13-什么时候不应该使用-21">13. 什么时候不应该使用</a></h2>
 <p>以下情况不适合使用访问者模式：</p>
 <pre><code class="language-text">1. 数据结构很简单。
 2. 操作数量很少。
@@ -13647,7 +15654,7 @@ CodeGenVisitor
 操作经常变：访问者模式更合适。
 </code></pre>
 <hr>
-<h2 id="14-一个简单例子思路-17"><a class="header" href="#14-一个简单例子思路-17">14. 一个简单例子思路</a></h2>
+<h2 id="14-一个简单例子思路-21"><a class="header" href="#14-一个简单例子思路-21">14. 一个简单例子思路</a></h2>
 <p><strong>场景：</strong> 表达式树访问</p>
 <p>表达式类型包括：</p>
 <pre><code class="language-text">Number
@@ -13677,7 +15684,7 @@ Box
 泛型访问者
 </code></pre>
 <hr>
-<h2 id="15-总结一句话-17"><a class="header" href="#15-总结一句话-17">15. 总结一句话</a></h2>
+<h2 id="15-总结一句话-21"><a class="header" href="#15-总结一句话-21">15. 总结一句话</a></h2>
 <p>访问者模式的本质是：</p>
 <pre><code class="language-text">把作用在数据结构上的操作抽离出来，使数据结构保持稳定，同时可以独立增加新的操作。
 </code></pre>
@@ -15748,7 +17755,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>容量</strong>：分配的内存能容纳的元素数量（<code>capacity</code>）。
 当 <code>len</code> 接近或超过 <code>capacity</code> 时，<code>Vec</code> 会重新分配更大的内存（通常以 <code>2</code> 倍增长），并将现有元素复制到新内存。</li>
 </ul>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+<a href="LeetCode/数据结构/还未实现">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现]</p>
 <h3 id="3队列"><a class="header" href="#3队列">3、队列</a></h3>
 <p><code>Rust</code> 的标准库提供了 <code>std::collections::VecDeque</code>，这是一个高效的双端队列（<code>double-ended queue</code>），既支持队列的 <code>FIFO</code> 操作，也支持栈的 <code>LIFO</code> 操作，非常适合实现队列。</p>
 <ul>
@@ -15784,7 +17791,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 <p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
 <h3 id="6栈"><a class="header" href="#6栈">6、栈</a></h3>
-<p><code>Rust</code> 没有专门的栈类型或 <code>API</code>，但 Vec<t> 的 <code>push、pop、last</code>等方法提供了高效、封装好的栈操作，足以满足 <code>LIFO</code> 需求。</t></p>
+<p><code>Rust</code> 没有专门的栈类型或 <code>API</code>，但 <code>Vec&lt;T&gt;</code> 的 <code>push、pop、last</code>等方法提供了高效、封装好的栈操作，足以满足 <code>LIFO</code> 需求。</p>
 <ul>
 <li><strong>LIFO 顺序</strong>：最后压入（<code>push</code>）的元素最先弹出（<code>pop</code>），类似堆叠的盘子。</li>
 <li><strong>高效操作</strong>：压入（<code>push</code>）和弹出（<code>pop</code>）操作通常为 <code>O(1)</code> 时间复杂度。</li>
@@ -16267,11 +18274,11 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 
         <script src="elasticlunr-ef4e11c1.min.js"></script>
         <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="searcher-09f2665d.js"></script>
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-abc7f01d.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="book-c22b7243.js"></script>
 
         <!-- Custom JS scripts -->
 
