@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-f773f06c.js";
+            window.path_to_searchindex_js = "../../searchindex-e4fb229b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-bf95e44b.js"></script>
@@ -189,6 +189,7 @@
 <p><strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
 <p>原型模式的核心是：<strong>通过复制已有对象来创建新对象，而不是每次都从零开始构造对象。</strong></p>
 <p>在 Rust 中，原型模式通常和 <code>Clone</code> 机制直接对应。只要一个类型实现了 <code>Clone</code>，就可以基于已有实例创建出一个新的实例。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/prototype_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
 <p>原型模式的核心思想是：</p>

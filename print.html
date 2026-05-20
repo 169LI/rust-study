@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f773f06c.js";
+            window.path_to_searchindex_js = "searchindex-e4fb229b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bf95e44b.js"></script>
@@ -8884,6 +8884,7 @@ Rust 中常用到的语法：
 <p><strong>英文名称：</strong> Iterator Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> <code>Iterator</code> trait、<code>iter()</code>、<code>into_iter()</code>、<code>iter_mut()</code>、<code>map()</code>、<code>filter()</code>、<code>collect()</code>、<code>for</code> 循环</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/iterator_pattern/src/main.rs">示例代码</a></p>
 <p>迭代器模式的核心是：<strong>把“如何遍历集合”的过程从集合本身中抽离出来，让使用者不需要关心集合内部结构，也能按照统一方式访问其中的元素。</strong></p>
 <p>在 Rust 中，迭代器不是一个简单的“遍历工具”，而是一套非常重要的数据处理机制。它不仅可以遍历数组、向量、哈希表等集合，还可以通过链式调用完成过滤、映射、聚合、查找、转换等操作。</p>
 <hr>
@@ -9151,6 +9152,7 @@ fold()
 <p><strong>Rust 中常见实现方式：</strong> 迭代器链、<code>filter()</code>、闭包、<code>map()</code>、<code>fold()</code>、<code>collect()</code></p>
 <p>过滤器模式的核心是：<strong>对集合中的元素按照某些条件进行筛选或过滤，并可以组合多个条件形成处理管道。</strong>
 在 Rust 中，过滤器模式通常依赖迭代器链和闭包表达筛选逻辑，从而形成声明式的数据处理流程。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/filter_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
 <p>过滤器模式的核心思想是：</p>
@@ -9322,6 +9324,7 @@ OrFilter
 <p><strong>Rust 中常见实现方式：</strong> <code>Clone</code> trait、<code>clone()</code>、<code>clone_from()</code>、<code>#[derive(Clone)]</code>、手动实现 <code>Clone</code></p>
 <p>原型模式的核心是：<strong>通过复制已有对象来创建新对象，而不是每次都从零开始构造对象。</strong></p>
 <p>在 Rust 中，原型模式通常和 <code>Clone</code> 机制直接对应。只要一个类型实现了 <code>Clone</code>，就可以基于已有实例创建出一个新的实例。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/prototype_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想-1"><a class="header" href="#2-模式核心思想-1">2. 模式核心思想</a></h2>
 <p>原型模式的核心思想是：</p>
@@ -9652,6 +9655,7 @@ String 和 Vec 的 clone 成本
 <p><strong>Rust 中常见实现方式：</strong> <code>OnceLock</code>、<code>LazyLock</code>、<code>static</code> 结合 <code>Mutex</code> 或 <code>RwLock</code>、<code>Arc</code></p>
 <p>单例模式的核心是：<strong>保证某个类型在整个程序中只有一个实例，并提供全局访问点。</strong>
 在 Rust 中，单例模式通常结合静态初始化和线程安全机制实现，避免全局可变状态带来的安全问题。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/singleton_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想-2"><a class="header" href="#2-模式核心思想-2">2. 模式核心思想</a></h2>
 <p>单例模式的核心思想是：</p>
@@ -9902,6 +9906,7 @@ Arc / Mutex / RwLock
 <p><strong>Rust 中常见实现方式：</strong> Builder 链式调用、<code>struct</code> + <code>impl</code>、<code>Option</code> 字段、默认值、方法链、<code>build()</code> 最终生成结构体</p>
 <p>构建者模式的核心是：<strong>将复杂对象的构造过程抽象出来，使对象可以按步骤构造，同时允许灵活组合属性和可选字段。</strong></p>
 <p>在 Rust 中，构建者模式通常结合结构体和方法链实现，使得创建复杂对象既清晰又安全。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/builder_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想-3"><a class="header" href="#2-模式核心思想-3">2. 模式核心思想</a></h2>
 <p>构建者模式的核心思想是：</p>
@@ -10093,6 +10098,7 @@ impl ServerConfigBuilder {
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> trait、泛型、dyn Trait、闭包</p>
 <p>策略模式的核心是：<strong>将可变化的算法或行为封装起来，使调用方依赖抽象而不是具体实现，从而可以在运行时或编译期灵活替换算法或策略。</strong></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/strategy_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想-4"><a class="header" href="#2-模式核心思想-4">2. 模式核心思想</a></h2>
 <p>策略模式的核心思想是：</p>

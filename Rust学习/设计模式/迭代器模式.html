@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-f773f06c.js";
+            window.path_to_searchindex_js = "../../searchindex-e4fb229b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-bf95e44b.js"></script>
@@ -187,6 +187,7 @@
 <p><strong>英文名称：</strong> Iterator Pattern</p>
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> <code>Iterator</code> trait、<code>iter()</code>、<code>into_iter()</code>、<code>iter_mut()</code>、<code>map()</code>、<code>filter()</code>、<code>collect()</code>、<code>for</code> 循环</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/iterator_pattern/src/main.rs">示例代码</a></p>
 <p>迭代器模式的核心是：<strong>把“如何遍历集合”的过程从集合本身中抽离出来，让使用者不需要关心集合内部结构，也能按照统一方式访问其中的元素。</strong></p>
 <p>在 Rust 中，迭代器不是一个简单的“遍历工具”，而是一套非常重要的数据处理机制。它不仅可以遍历数组、向量、哈希表等集合，还可以通过链式调用完成过滤、映射、聚合、查找、转换等操作。</p>
 <hr>
