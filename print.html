@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-e4fb229b.js";
+            window.path_to_searchindex_js = "searchindex-431522e9.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bf95e44b.js"></script>
@@ -10281,6 +10281,7 @@ impl
 <p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + <code>Box&lt;dyn Trait&gt;</code>、泛型、枚举</p>
 <p>工厂模式的核心是：<strong>将对象创建逻辑封装在独立的“工厂”里，调用方无需知道具体构造过程即可获取对象。</strong></p>
 <p>在 Rust 中，工厂模式不依赖类继承，而是通过 trait、关联函数和泛型实现创建解耦和动态选择。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/factory_pattern/src/main.rs">示例代码</a></p>
 <hr>
 <h2 id="2-模式核心思想-5"><a class="header" href="#2-模式核心思想-5">2. 模式核心思想</a></h2>
 <p>工厂模式的核心思想是：</p>
@@ -10478,6 +10479,7 @@ GUI 控件工厂（不同平台实现）
 <p><strong>Rust 中常见实现方式：</strong> trait 实现适配、包装结构体（wrapper）、From/Into trait、Deref trait</p>
 <p>适配器模式的核心是：<strong>将一个接口转换成调用方期望的接口，使原本不兼容的接口能够协同工作。</strong></p>
 <p>在 Rust 中，适配器模式通常通过 <strong>包装结构体 + trait</strong> 实现，或者直接利用标准库的 <code>From/Into</code> trait 做类型转换。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/adapter_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-6"><a class="header" href="#2-模式核心思想-6">2. 模式核心思想</a></h2>
 <p>适配器模式的核心思想是：</p>
@@ -10675,6 +10677,7 @@ From / Into trait
 <p><strong>Rust 中常见实现方式：</strong> trait 默认方法 + trait 方法调用、结构体 + impl</p>
 <p>模板方法模式的核心是：<strong>在父类或 trait 中定义算法骨架，将部分步骤留给子类或实现者完成，从而保证整体流程不变，同时允许部分步骤可定制。</strong></p>
 <p>在 Rust 中，模板方法模式通常通过 trait 默认方法实现算法骨架，具体步骤由具体实现类型重写。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/template_method_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-7"><a class="header" href="#2-模式核心思想-7">2. 模式核心思想</a></h2>
 <p>模板方法模式的核心思想是：</p>
@@ -10854,6 +10857,7 @@ fn main() {
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
 <p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/proxy_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-8"><a class="header" href="#2-模式核心思想-8">2. 模式核心思想</a></h2>
 <p>代理模式的核心思想是：</p>
@@ -11047,6 +11051,7 @@ Box&lt;dyn Trait&gt; 可选动态分发
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
 <p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/decorator_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-9"><a class="header" href="#2-模式核心思想-9">2. 模式核心思想</a></h2>
 <p>装饰器模式的核心思想是：</p>
