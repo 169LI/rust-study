@@ -1,3 +1,15 @@
 [workspace]
-members = ["iterator_pattern", "filter_pattern", "prototype_pattern", "singleton_pattern", "builder_pattern", "strategy_pattern"]
+members = [
+    "iterator_pattern",
+    "filter_pattern",
+    "prototype_pattern",
+    "singleton_pattern",
+    "builder_pattern",
+    "strategy_pattern",
+    "factory_pattern",
+    "adapter_pattern",
+    "template_method_pattern",
+    "proxy_pattern",
+    "decorator_pattern",
+]
 resolver = "2"
