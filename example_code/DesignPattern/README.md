@@ -27,6 +27,10 @@ cargo run -p <package_name> -- <args>
 | 模板方法模式（Template Method Pattern） | `template_method_pattern` | `cargo run -p template_method_pattern` | 固定流程（读取→解析→处理→写入），CSV/JSON 仅定制步骤 |
 | 代理模式（Proxy Pattern） | `proxy_pattern` | `cargo run -p proxy_pattern -- --user alice --role admin` | 打印服务代理：权限控制（保护代理）+ 延迟初始化（虚拟代理） |
 | 装饰器模式（Decorator Pattern） | `decorator_pattern` | `cargo run -p decorator_pattern` | 消息发送器装饰链：日志/大写/计时等功能可叠加 |
+| 外观模式（Facade Pattern） | `facade_pattern` | `cargo run -p facade_pattern` | 文件处理外观：读取→压缩→加密→写入 的统一入口 |
+| 组合模式（Composite Pattern） | `composite_pattern` | `cargo run -p composite_pattern` | 目录树结构：统一处理文件（叶子）与目录（组合） |
+| 桥接模式（Bridge Pattern） | `bridge_pattern` | `cargo run -p bridge_pattern` | 消息类型 × 发送方式：拆分两个维度，避免组合爆炸 |
+| 享元模式（Flyweight Pattern） | `flyweight_pattern` | `cargo run -p flyweight_pattern` | 树类型共享：Arc + HashMap 缓存池复用内部状态 |
 
 ### 参数示例
 

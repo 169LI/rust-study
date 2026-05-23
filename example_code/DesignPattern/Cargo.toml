@@ -10,6 +10,6 @@ members = [
     "adapter_pattern",
     "template_method_pattern",
     "proxy_pattern",
-    "decorator_pattern",
+    "decorator_pattern", "facade_pattern", "composite_pattern", "bridge_pattern", "flyweight_pattern",
 ]
 resolver = "2"

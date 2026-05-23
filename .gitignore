@@ -9,3 +9,6 @@ target/
 example_code/DesignPattern/target/
 example_code/data_struct/target/
 Cargo.lock
+
+example_code/DesignPattern/facade_input.txt
+example_code/DesignPattern/facade_output.bin
