@@ -36,10 +36,10 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-431522e9.js";
+            window.path_to_searchindex_js = "../../searchindex-15600bc5.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-bf95e44b.js"></script>
+        <script src="../../toc-2c6b24e0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -204,8 +204,8 @@
 </ul>
 </li>
 </ul>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/adj_list_graph_achieve.rs">基于邻接表图的实现</a></p>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/adj_matrix_graph_achieve.rs">基于邻接矩阵图的实现</a></p>
+<p><a href="../../../example_code/data_struct/graph/src/adj_list_graph_achieve.rs">基于邻接表图的实现</a></p>
+<p><a href="../../../example_code/data_struct/graph/src/adj_matrix_graph_achieve.rs">基于邻接矩阵图的实现</a></p>
 <h2 id="广度优先搜索"><a class="header" href="#广度优先搜索">广度优先搜索</a></h2>
 <ul>
 <li><strong>原理</strong>：从起点开始，逐层访问所有邻居节点，基于队列实现，优先扩展距离最近的节点。</li>
@@ -215,7 +215,7 @@
 <li><strong>缺点</strong>：不适合深度优先探索（如递归路径）。</li>
 <li><strong>适用场景</strong>：最短路径、连通性检测、层次遍历。</li>
 </ul>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/bfs.rs">广度优先搜索BFS的实现</a></p>
+<p><a href="../../../example_code/data_struct/graph/src/bfs.rs">广度优先搜索BFS的实现</a></p>
 <h2 id="深度优先搜索"><a class="header" href="#深度优先搜索">深度优先搜索</a></h2>
 <ul>
 <li><strong>原理</strong>：从起点开始，沿着一条路径深入探索，直到无法继续，然后回溯，基于栈（递归或显式栈）实现。</li>
@@ -225,7 +225,7 @@
 <li><strong>缺点</strong>：不保证最短路径，可能陷入无限循环（需标记访问）。</li>
 <li><strong>适用场景</strong>：迷宫问题、拓扑排序、检测环。</li>
 </ul>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/dfs.rs">深度优先搜索DFS的实现</a></p>
+<p><a href="../../../example_code/data_struct/graph/src/dfs.rs">深度优先搜索DFS的实现</a></p>
 <h2 id="dijkstra算法"><a class="header" href="#dijkstra算法">Dijkstra算法</a></h2>
 <ul>
 <li><strong>原理</strong>：贪心算法，从起点开始，逐步选择当前未访问节点中距离最小的节点，更新其邻居的距离，直到所有节点被访问目标节点距离确定。</li>
@@ -235,7 +235,7 @@
 <li><strong>缺点</strong>：不能处理负权边。</li>
 <li><strong>适用场景</strong>：网络路由、路径规划。</li>
 </ul>
-<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/dijkstra.rs">Dijkstra 算法</a></p>
+<p><a href="../../../example_code/data_struct/graph/src/dijkstra.rs">Dijkstra 算法</a></p>
 
                     </main>
 
