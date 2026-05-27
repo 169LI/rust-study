@@ -1,0 +1,4 @@
+[package]
+name = "chain_of_responsibility_pattern"
+version = "0.1.0"
+edition = "2021"

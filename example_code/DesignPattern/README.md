@@ -2,6 +2,10 @@
 
 本目录是 Rust 设计模式示例代码的 Cargo Workspace。
 
+### 与设计模式章节的关系
+
+`src/Rust学习/设计模式/` 中的每个设计模式章节，对应本目录下一个可独立运行的 Cargo package。章节负责解释概念、适用场景和 Rust 实现思路；`example_code/DesignPattern/` 负责提供能运行的小项目演示，用代码验证章节中的模式角色和使用场景。
+
 ### 运行方式
 
 在本目录下执行：
@@ -31,6 +35,14 @@ cargo run -p <package_name> -- <args>
 | 组合模式（Composite Pattern） | `composite_pattern` | `cargo run -p composite_pattern` | 目录树结构：统一处理文件（叶子）与目录（组合） |
 | 桥接模式（Bridge Pattern） | `bridge_pattern` | `cargo run -p bridge_pattern` | 消息类型 × 发送方式：拆分两个维度，避免组合爆炸 |
 | 享元模式（Flyweight Pattern） | `flyweight_pattern` | `cargo run -p flyweight_pattern` | 树类型共享：Arc + HashMap 缓存池复用内部状态 |
+| 命令模式（Command Pattern） | `command_pattern` | `cargo run -p command_pattern` | 文本编辑器操作封装成命令：可排队执行并支持 undo/redo |
+| 观察者模式（Observer Pattern） | `observer_pattern` | `cargo run -p observer_pattern` | 温度传感器状态变化后自动通知显示器、日志器、告警器 |
+| 责任链模式（Chain of Responsibility Pattern） | `chain_of_responsibility_pattern` | `cargo run -p chain_of_responsibility_pattern` | Web 请求中间件链：认证、缓存、路由依次判断处理 |
+| 中介者模式（Mediator Pattern） | `mediator_pattern` | `cargo run -p mediator_pattern` | GUI 控件通过 `UiMediator` 协调交互，避免控件互相直接依赖 |
+| 状态模式（State Pattern） | `state_pattern` | `cargo run -p state_pattern` | 订单状态机：`Created`、`Paid`、`Shipped`、`Finished`、`Cancelled` 的合法流转 |
+| 备忘录模式（Memento Pattern） | `memento_pattern` | `cargo run -p memento_pattern` | 文本编辑器保存状态快照，并通过历史栈支持 undo/redo |
+| 解释器模式（Interpreter Pattern） | `interpreter_pattern` | `cargo run -p interpreter_pattern` | `enum + match + Box` 构造表达式树并递归求值 |
+| 访问者模式（Visitor Pattern） | `visitor_pattern` | `cargo run -p visitor_pattern` | 表达式树保持稳定，统计、打印、求值由不同 Visitor 执行 |
 
 ### 参数示例
 
