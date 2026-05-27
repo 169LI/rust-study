@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-15600bc5.js";
+            window.path_to_searchindex_js = "searchindex-1d82a82d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-2c6b24e0.js"></script>
@@ -12944,6 +12944,7 @@ Clone
 <pre><code class="language-text">1. enum + match：适合命令种类固定的场景
 2. trait + Box&lt;dyn Command&gt;：适合命令种类需要动态扩展的场景
 </code></pre>
+<p><a href="../example_code/DesignPattern/command_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-14"><a class="header" href="#2-模式核心思想-14">2. 模式核心思想</a></h2>
 <p>命令模式的核心思想是：</p>
@@ -13435,6 +13436,7 @@ Command::Run
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、<code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code>、<code>channel</code>、闭包</p>
 <p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
+<p><a href="../example_code/DesignPattern/observer_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-15"><a class="header" href="#2-模式核心思想-15">2. 模式核心思想</a></h2>
 <p>观察者模式的核心思想是：</p>
@@ -13631,6 +13633,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体 + Box/Arc、枚举 + match、闭包链</p>
 <p>责任链模式的核心是：<strong>将请求沿着处理链传递，多个对象都有机会处理请求，从而避免调用方和处理对象的强耦合。</strong></p>
 <p>在 Rust 中，责任链模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>枚举 + match</strong> 实现，也可利用闭包链处理请求。</p>
+<p><a href="../example_code/DesignPattern/chain_of_responsibility_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-16"><a class="header" href="#2-模式核心思想-16">2. 模式核心思想</a></h2>
 <p>责任链模式的核心思想是：</p>
@@ -13834,6 +13837,7 @@ fn main() {
 <p><strong>Rust 中常见实现方式：</strong> trait + 结构体 + Rc/Arc + RefCell/Mutex、channel、闭包</p>
 <p>中介者模式的核心是：<strong>将对象之间的通信封装到中介者中，降低对象之间的直接耦合，让对象只依赖中介者而非彼此。</strong></p>
 <p>在 Rust 中，中介者模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>消息通道</strong> 实现，支持松耦合的对象通信和事件协调。</p>
+<p><a href="../example_code/DesignPattern/mediator_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-17"><a class="header" href="#2-模式核心思想-17">2. 模式核心思想</a></h2>
 <p>中介者模式的核心思想是：</p>
@@ -14851,6 +14855,7 @@ Result
 match 分发不同解释逻辑
 递归函数执行表达式求值
 </code></pre>
+<p><a href="../example_code/DesignPattern/interpreter_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-20"><a class="header" href="#2-模式核心思想-20">2. 模式核心思想</a></h2>
 <p>解释器模式的核心思想是：</p>
