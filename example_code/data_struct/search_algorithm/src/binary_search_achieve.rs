@@ -40,13 +40,4 @@ fn main() {
         Some(index) => println!("找到 {}，索引为 {}", target2, index),
         None => println!("未找到 {}", target2),
     }
-
-    // 测试用例 3：查找字符串数组（展示泛型支持）
-    let words = ["苹果", "香蕉", "橙子", "葡萄"];
-    let target_word = "橙子";
-    println!("\n测试查找字符串 '{}'", target_word);
-    match manual_binary_search(&words, &target_word) {
-        Some(index) => println!("找到 '{}'，索引为 {}", target_word, index),
-        None => println!("未找到 '{}'", target_word),
-    }
 }
