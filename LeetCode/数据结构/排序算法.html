@@ -206,7 +206,7 @@
 <li><strong>优点</strong>：实现简单，易于理解，适合小规模数据。</li>
 <li><strong>缺点</strong>：效率低，交换操作频繁，不适合大数据量。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/bubble_sort.rs">冒泡排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/bubble_sort.rs">冒泡排序</a></p>
 <h2 id="选择排序"><a class="header" href="#选择排序">选择排序</a></h2>
 <ul>
 <li><strong>原理</strong>：每次从未排序部分选择最小（或最大）元素，将其交换到已排序部分的末尾，逐步扩展已排序区域。</li>
@@ -216,7 +216,7 @@
 <li><strong>优点</strong>：实现简单，交换次数少（最多<code>n-1 </code>次）。</li>
 <li><strong>缺点</strong>：效率低，不适合大数据量，缺乏稳定性。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/selection_sort.rs">选择排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/selection_sort.rs">选择排序</a></p>
 <h2 id="插入排序"><a class="header" href="#插入排序">插入排序</a></h2>
 <ul>
 <li><strong>原理</strong>：将数组分为已排序和未排序两部分，逐一将未排序部分的元素插入到已排序部分的正确位置，类似整理扑克牌。</li>
@@ -226,7 +226,7 @@
 <li><strong>优点</strong>：实现简单，适合部分有序或小规模数据，适应增量排序。</li>
 <li><strong>缺点</strong>：效率低，大规模数据性能差。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/insertion_sort.rs">插入排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/insertion_sort.rs">插入排序</a></p>
 <h2 id="归并排序"><a class="header" href="#归并排序">归并排序</a></h2>
 <ul>
 <li><strong>原理</strong>：采用分治法，将数组递归拆分为小块，直到不可再分，然后合并有序子数组，最终完成排序。</li>
@@ -236,7 +236,7 @@
 <li><strong>优点</strong>：性能稳定，适合大数据和链表排序，复杂度不随数据分布变化。</li>
 <li><strong>缺点</strong>：非原地排序，空间开销较大，合并过程需额外内存。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/merge_sort.rs">归并排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/merge_sort.rs">归并排序</a></p>
 <h2 id="快速排序"><a class="header" href="#快速排序">快速排序</a></h2>
 <ul>
 <li><strong>原理</strong>：采用<strong>分治法</strong>，选择一个基准（<code>pivot</code>），将数组分区为小于和大于基准的两部分，递归对子数组排序。</li>
@@ -252,7 +252,7 @@
 <li><strong>优点</strong>：平均性能极佳，原地排序，适合内存排序，缓存友好。</li>
 <li><strong>缺点</strong>：最差情况性能差（需优化基准选择），不稳定。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/quick_sort.rs">快速排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/quick_sort.rs">快速排序</a></p>
 <h2 id="堆排序"><a class="header" href="#堆排序">堆排序</a></h2>
 <ul>
 <li><strong>原理</strong>：基于堆数据结构（通常是最大堆），先构建最大堆，然后反复提取堆顶（最大元素）并调整堆，直到所有元素有序。</li>
@@ -262,7 +262,7 @@
 <li><strong>优点</strong>：原地排序，时间复杂度稳定，适合固定内存场景。</li>
 <li><strong>缺点</strong>：不稳定，缓存不友好（堆操作跳跃式访问），实际性能可能不如快速排序。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/heap_sort.rs">堆排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/heap_sort.rs">堆排序</a></p>
 <h2 id="希尔排序"><a class="header" href="#希尔排序">希尔排序</a></h2>
 <ul>
 <li><strong>原理</strong>：一种改进的插入排序，通过设定增量（<code>gap</code>）将数组分组，逐步缩小增量进行插入排序，最终实现整体排序。</li>
@@ -278,7 +278,7 @@
 <li><strong>优点</strong>：比插入排序快，适合中等规模数据，逐步减少逆序对。</li>
 <li><strong>缺点</strong>：时间复杂度依赖增量序列选择，实际性能不如快速排序或归并排序。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/shell_sort.rs">希尔排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/shell_sort.rs">希尔排序</a></p>
 <h2 id="基数排序"><a class="header" href="#基数排序">基数排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，按位（从低位到高位）分配元素到桶中，结合计数排序或桶排序，逐步完成排序。</li>
@@ -292,7 +292,7 @@
 <li><strong>优点</strong>：线性时间复杂度，适合多位数或字符串排序。</li>
 <li><strong>缺点</strong>：空间开销较大，依赖位数和基数，不适合浮点数或范围过大的数据。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/radix_sort.rs">基数排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/radix_sort.rs">基数排序</a></p>
 <h2 id="桶排序"><a class="header" href="#桶排序">桶排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，将元素按值范围分配到多个桶中，每个桶内单独排序（通常用插入排序），最后合并所有桶。</li>
@@ -308,7 +308,7 @@
 <li><strong>优点</strong>：线性时间复杂度，适合均匀分布数据。</li>
 <li><strong>缺点</strong>：对数据分布敏感，空间开销较大，不适合范围过大的数据。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/bucket_sort.rs">桶排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/bucket_sort.rs">桶排序</a></p>
 <h2 id="计数排序"><a class="header" href="#计数排序">计数排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，通过统计元素出现次数，计算每个元素的最终位置，直接赋值完成排序。</li>
@@ -322,7 +322,7 @@
 <li><strong>优点</strong>：线性时间复杂度，适合固定范围整数。</li>
 <li><strong>缺点</strong>：仅适用于有限范围数据，不适合浮点数或范围过大的数据。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/sort_algorithm/src/count_sort.rs">计数排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/count_sort.rs">计数排序</a></p>
 
                     </main>
 

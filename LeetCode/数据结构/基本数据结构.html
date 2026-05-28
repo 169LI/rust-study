@@ -206,7 +206,7 @@
 <li><strong>使用场景</strong>：适合需要固定大小且数量已知的数据集合，例如坐标点、固定长度的缓冲区等。</li>
 <li><strong>性能</strong>：由于栈分配，访问和操作效率高，没有额外的内存管理开销。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/array_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/array_example.rs">用法示例</a></p>
 <h3 id="2向量"><a class="header" href="#2向量">2、向量</a></h3>
 <ul>
 <li><strong>定义</strong>：<code>Vec</code> 是 <code>Rust</code> 标准库（<code>std::vec</code>）提供的一种动态数组，类型为 <code>Vec&lt;T&gt;</code>，可以存储任意数量的同构元素。</li>
@@ -223,7 +223,7 @@
 <li><strong>容量</strong>：分配的内存能容纳的元素数量（<code>capacity</code>）。
 当 <code>len</code> 接近或超过 <code>capacity</code> 时，<code>Vec</code> 会重新分配更大的内存（通常以 <code>2</code> 倍增长），并将现有元素复制到新内存。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现]</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现]</p>
 <h3 id="3队列"><a class="header" href="#3队列">3、队列</a></h3>
 <p><code>Rust</code> 的标准库提供了 <code>std::collections::VecDeque</code>，这是一个高效的双端队列（<code>double-ended queue</code>），既支持队列的 <code>FIFO</code> 操作，也支持栈的 <code>LIFO</code> 操作，非常适合实现队列。</p>
 <ul>
@@ -236,7 +236,7 @@
 <li><strong>线程安全性</strong>（视实现）：<code>VecDeque</code> 非线程安全，需 <code>Mutex</code> 或用 <code>std::sync::mpsc。</code></li>
 <li><strong>变体</strong>：支持双端队列（<code>VecDeque</code>）、优先级队列（<code>BinaryHeap</code>）等。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/queue_example.rs">用法示例</a>+<a href="../../../example_code/data_struct/basic_data_structure/src/queue_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/queue_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/queue_achieve.rs">实现</a></p>
 <h3 id="4双端队列"><a class="header" href="#4双端队列">4、双端队列</a></h3>
 <ul>
 <li><strong>双端操作</strong>：支持在队列头部和尾部进行添加（<code>push</code>）和移除（<code>pop</code>）。</li>
@@ -248,7 +248,7 @@
 <li><strong>非线程安全</strong>：标准实现（如 <code>VecDeque</code>）需配合锁用于多线程。</li>
 <li><strong>灵活变体</strong>：可作为队列、栈或双端队列使用。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/deque_example.rs">用法示例</a>+<a href="../../../example_code/data_struct/basic_data_structure/src/deque_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/deque_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/deque_achieve.rs">实现</a></p>
 <h3 id="5链表"><a class="header" href="#5链表">5、链表</a></h3>
 <ul>
 <li><strong>动态结构</strong>：链表通过指针连接节点，允许动态分配和释放内存，适合大小不固定的数据。</li>
@@ -257,7 +257,7 @@
 <li><strong>空间开销</strong>：每个节点需额外存储指针，占用更多内存。</li>
 <li><strong>顺序访问</strong>：遍历需从头或尾开始，无法直接跳跃到任意节点。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="../../../example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
 <h3 id="6栈"><a class="header" href="#6栈">6、栈</a></h3>
 <p><code>Rust</code> 没有专门的栈类型或 <code>API</code>，但 <code>Vec&lt;T&gt;</code> 的 <code>push、pop、last</code>等方法提供了高效、封装好的栈操作，足以满足 <code>LIFO</code> 需求。</p>
 <ul>
@@ -274,10 +274,10 @@
 </ul>
 </li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/stack_vec_achieve.rs">vec实现</a>+<a href="../../../example_code/data_struct/basic_data_structure/src/stack_deque_achieve.rs">队列实现</a></p>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/stack_base_conversion.rs">进制转换实现</a></p>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/stack_bracket_matching.rs">括号匹配实现</a></p>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/stack_infix_to_postfix.rs">栈的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_vec_achieve.rs">vec实现</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_deque_achieve.rs">队列实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_base_conversion.rs">进制转换实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_bracket_matching.rs">括号匹配实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_infix_to_postfix.rs">栈的实现</a></p>
 <h2 id="特殊类型结构"><a class="header" href="#特殊类型结构">特殊类型结构</a></h2>
 <ul>
 <li><a href="#切片">切片</a>：<code>&amp;[T]</code></li>
@@ -295,14 +295,14 @@
 <li><strong>使用场景</strong>：函数参数、字符串处理、数组操作、避免数据拷贝。</li>
 <li><strong>优势</strong>：结合 <code>Rust</code> 的借用规则，切片提供高效、灵活的数据访问方式。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/slice_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/slice_example.rs">用法示例</a></p>
 <h3 id="字符串"><a class="header" href="#字符串">字符串</a></h3>
 <ul>
 <li><strong>定义</strong>：<code>String</code> 是 <code>Rust</code> 标准库中用于动态、可变字符串的拥有类型，基于堆分配，支持 <code>UTF-8</code> 编码。</li>
 <li><strong>特点</strong>：拥有所有权、可变、动态增长，与 <code>&amp;str</code> 配合灵活。</li>
 <li><strong>使用场景</strong>：动态字符串构建、 字符串修改、 与切片配合、 多语言支持、 临时缓冲。</li>
 </ul>
-<p><a href="../../../example_code/data_struct/basic_data_structure/src/string_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/string_example.rs">用法示例</a></p>
 
                     </main>
 

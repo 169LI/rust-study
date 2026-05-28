@@ -10102,7 +10102,7 @@ impl ServerConfigBuilder {
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> trait、泛型、dyn Trait、闭包</p>
 <p>策略模式的核心是：<strong>将可变化的算法或行为封装起来，使调用方依赖抽象而不是具体实现，从而可以在运行时或编译期灵活替换算法或策略。</strong></p>
-<p><a href="../example_code/DesignPattern/strategy_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/strategy_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-4"><a class="header" href="#2-模式核心思想-4">2. 模式核心思想</a></h2>
 <p>策略模式的核心思想是：</p>
@@ -10285,7 +10285,7 @@ impl
 <p><strong>Rust 中常见实现方式：</strong> 关联函数 (<code>new</code> / <code>with_*</code>)、trait + <code>Box&lt;dyn Trait&gt;</code>、泛型、枚举</p>
 <p>工厂模式的核心是：<strong>将对象创建逻辑封装在独立的“工厂”里，调用方无需知道具体构造过程即可获取对象。</strong></p>
 <p>在 Rust 中，工厂模式不依赖类继承，而是通过 trait、关联函数和泛型实现创建解耦和动态选择。</p>
-<p><a href="../example_code/DesignPattern/factory_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/factory_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-5"><a class="header" href="#2-模式核心思想-5">2. 模式核心思想</a></h2>
 <p>工厂模式的核心思想是：</p>
@@ -10483,7 +10483,7 @@ GUI 控件工厂（不同平台实现）
 <p><strong>Rust 中常见实现方式：</strong> trait 实现适配、包装结构体（wrapper）、From/Into trait、Deref trait</p>
 <p>适配器模式的核心是：<strong>将一个接口转换成调用方期望的接口，使原本不兼容的接口能够协同工作。</strong></p>
 <p>在 Rust 中，适配器模式通常通过 <strong>包装结构体 + trait</strong> 实现，或者直接利用标准库的 <code>From/Into</code> trait 做类型转换。</p>
-<p><a href="../example_code/DesignPattern/adapter_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/adapter_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-6"><a class="header" href="#2-模式核心思想-6">2. 模式核心思想</a></h2>
 <p>适配器模式的核心思想是：</p>
@@ -10681,7 +10681,7 @@ From / Into trait
 <p><strong>Rust 中常见实现方式：</strong> trait 默认方法 + trait 方法调用、结构体 + impl</p>
 <p>模板方法模式的核心是：<strong>在父类或 trait 中定义算法骨架，将部分步骤留给子类或实现者完成，从而保证整体流程不变，同时允许部分步骤可定制。</strong></p>
 <p>在 Rust 中，模板方法模式通常通过 trait 默认方法实现算法骨架，具体步骤由具体实现类型重写。</p>
-<p><a href="../example_code/DesignPattern/template_method_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/template_method_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-7"><a class="header" href="#2-模式核心思想-7">2. 模式核心思想</a></h2>
 <p>模板方法模式的核心思想是：</p>
@@ -10861,7 +10861,7 @@ fn main() {
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、Deref/DerefMut trait、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>代理模式的核心是：<strong>为某个对象提供一个代理对象，通过代理控制对原对象的访问、增强行为或延迟初始化。</strong></p>
 <p>在 Rust 中，代理模式通常通过 <strong>包装结构体 + trait</strong> 实现，允许在访问原对象前后插入逻辑，同时保持类型安全。</p>
-<p><a href="../example_code/DesignPattern/proxy_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/proxy_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-8"><a class="header" href="#2-模式核心思想-8">2. 模式核心思想</a></h2>
 <p>代理模式的核心思想是：</p>
@@ -11055,7 +11055,7 @@ Box&lt;dyn Trait&gt; 可选动态分发
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（wrapper）、泛型、<code>Box&lt;dyn Trait&gt;</code></p>
 <p>装饰器模式的核心是：<strong>在不修改原对象的情况下，为对象动态增加额外功能或行为。</strong></p>
 <p>在 Rust 中，装饰器模式通常通过 <strong>包装结构体 + trait</strong> 实现，调用方通过装饰器对象访问原对象，同时在访问前后插入附加逻辑。</p>
-<p><a href="../example_code/DesignPattern/decorator_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/decorator_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-9"><a class="header" href="#2-模式核心思想-9">2. 模式核心思想</a></h2>
 <p>装饰器模式的核心思想是：</p>
@@ -11243,7 +11243,7 @@ fn main() {
 <p><strong>Rust 中常见实现方式：</strong> 封装模块 + 结构体 + trait、impl、函数接口</p>
 <p>外观模式的核心是：<strong>为复杂子系统提供统一、高层次接口，使调用方无需了解子系统内部细节即可使用系统功能。</strong></p>
 <p>在 Rust 中，外观模式通常通过 <strong>结构体封装多个子模块接口</strong> 或 <strong>提供高层函数接口</strong> 实现。</p>
-<p><a href="../example_code/DesignPattern/facade_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/facade_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-10"><a class="header" href="#2-模式核心思想-10">2. 模式核心思想</a></h2>
 <p>外观模式的核心思想是：</p>
@@ -11424,7 +11424,7 @@ fn main() {
 2. trait + Box&lt;dyn Trait&gt; 表达统一接口
 3. Rc / RefCell 处理共享和可变树结构
 </code></pre>
-<p><a href="../example_code/DesignPattern/composite_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/composite_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-11"><a class="header" href="#2-模式核心思想-11">2. 模式核心思想</a></h2>
 <p>组合模式的核心思想是：</p>
@@ -11942,7 +11942,7 @@ Vec&lt;Box&lt;dyn Component&gt;&gt;
 struct 持有实现对象
 泛型或 dyn Trait 连接抽象和实现
 </code></pre>
-<p><a href="../example_code/DesignPattern/bridge_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/bridge_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-12"><a class="header" href="#2-模式核心思想-12">2. 模式核心思想</a></h2>
 <p>桥接模式的核心思想是：</p>
@@ -12451,7 +12451,7 @@ HashMap 缓存
 字符串驻留
 共享不可变数据
 </code></pre>
-<p><a href="../example_code/DesignPattern/flyweight_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/flyweight_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-13"><a class="header" href="#2-模式核心思想-13">2. 模式核心思想</a></h2>
 <p>享元模式的核心思想是：</p>
@@ -12944,7 +12944,7 @@ Clone
 <pre><code class="language-text">1. enum + match：适合命令种类固定的场景
 2. trait + Box&lt;dyn Command&gt;：适合命令种类需要动态扩展的场景
 </code></pre>
-<p><a href="../example_code/DesignPattern/command_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/command_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-14"><a class="header" href="#2-模式核心思想-14">2. 模式核心思想</a></h2>
 <p>命令模式的核心思想是：</p>
@@ -13436,7 +13436,7 @@ Command::Run
 <p><strong>模式类型：</strong> 行为型设计模式</p>
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体（subject + observer）、<code>Vec&lt;Box&lt;dyn Observer&gt;&gt;</code>、<code>channel</code>、闭包</p>
 <p>观察者模式的核心是：<strong>当一个对象状态发生变化时，自动通知依赖它的多个对象，从而实现松耦合的事件驱动或状态通知机制。</strong></p>
-<p><a href="../example_code/DesignPattern/observer_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/observer_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-15"><a class="header" href="#2-模式核心思想-15">2. 模式核心思想</a></h2>
 <p>观察者模式的核心思想是：</p>
@@ -13633,7 +13633,7 @@ Box&lt;dyn Trait&gt; 或 channel 有动态分发成本
 <p><strong>Rust 中常见实现方式：</strong> trait + 包装结构体 + Box/Arc、枚举 + match、闭包链</p>
 <p>责任链模式的核心是：<strong>将请求沿着处理链传递，多个对象都有机会处理请求，从而避免调用方和处理对象的强耦合。</strong></p>
 <p>在 Rust 中，责任链模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>枚举 + match</strong> 实现，也可利用闭包链处理请求。</p>
-<p><a href="../example_code/DesignPattern/chain_of_responsibility_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/chain_of_responsibility_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-16"><a class="header" href="#2-模式核心思想-16">2. 模式核心思想</a></h2>
 <p>责任链模式的核心思想是：</p>
@@ -13837,7 +13837,7 @@ fn main() {
 <p><strong>Rust 中常见实现方式：</strong> trait + 结构体 + Rc/Arc + RefCell/Mutex、channel、闭包</p>
 <p>中介者模式的核心是：<strong>将对象之间的通信封装到中介者中，降低对象之间的直接耦合，让对象只依赖中介者而非彼此。</strong></p>
 <p>在 Rust 中，中介者模式通常通过 <strong>trait + 包装结构体</strong> 或 <strong>消息通道</strong> 实现，支持松耦合的对象通信和事件协调。</p>
-<p><a href="../example_code/DesignPattern/mediator_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/mediator_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-17"><a class="header" href="#2-模式核心思想-17">2. 模式核心思想</a></h2>
 <p>中介者模式的核心思想是：</p>
@@ -14046,7 +14046,7 @@ match 处理不同状态行为
 方法控制状态转换
 </code></pre>
 <p>如果需要在编译期禁止非法状态操作，还可以使用 Rust 很有特色的 <strong>类型状态模式 Typestate Pattern</strong>。</p>
-<p><a href="../example_code/DesignPattern/state_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/state_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-18"><a class="header" href="#2-模式核心思想-18">2. 模式核心思想</a></h2>
 <p>状态模式的核心思想是：</p>
@@ -14452,7 +14452,7 @@ Typestate
 <p><strong>Rust 中常见实现方式：</strong> <code>Clone</code>、快照结构体、<code>Vec</code> 历史栈、<code>Option</code>、<code>Result</code>、序列化与反序列化</p>
 <p>备忘录模式的核心是：<strong>在不破坏对象封装性的前提下，保存对象某一时刻的内部状态，以便之后可以恢复到之前的状态。</strong></p>
 <p>在 Rust 中，备忘录模式通常可以通过保存状态快照来实现。最常见的做法是：对象在状态变化前，把当前状态 <code>clone</code> 一份保存到历史记录中；需要撤销时，再从历史记录中取出旧状态进行恢复。</p>
-<p><a href="../example_code/DesignPattern/memento_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/memento_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-19"><a class="header" href="#2-模式核心思想-19">2. 模式核心思想</a></h2>
 <p>备忘录模式的核心思想是：</p>
@@ -14857,7 +14857,7 @@ Result
 match 分发不同解释逻辑
 递归函数执行表达式求值
 </code></pre>
-<p><a href="../example_code/DesignPattern/interpreter_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/interpreter_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-20"><a class="header" href="#2-模式核心思想-20">2. 模式核心思想</a></h2>
 <p>解释器模式的核心思想是：</p>
@@ -15262,7 +15262,7 @@ Result
 <p>访问者模式的核心是：<strong>在不修改已有数据结构的前提下，为数据结构增加新的操作。</strong></p>
 <p>在 Rust 中，访问者模式经常出现在编译器、解释器、语法树 AST、文档树、UI 组件树等场景中。</p>
 <p>不过需要注意：Rust 有强大的 <code>enum + match</code>，所以很多传统 OOP 中必须使用访问者模式的场景，在 Rust 中可以用更直接的方式表达。</p>
-<p><a href="../example_code/DesignPattern/visitor_pattern/src/main.rs">代码示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/DesignPattern/visitor_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想-21"><a class="header" href="#2-模式核心思想-21">2. 模式核心思想</a></h2>
 <p>访问者模式的核心思想是：</p>
@@ -17763,7 +17763,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>使用场景</strong>：适合需要固定大小且数量已知的数据集合，例如坐标点、固定长度的缓冲区等。</li>
 <li><strong>性能</strong>：由于栈分配，访问和操作效率高，没有额外的内存管理开销。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/array_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/array_example.rs">用法示例</a></p>
 <h3 id="2向量"><a class="header" href="#2向量">2、向量</a></h3>
 <ul>
 <li><strong>定义</strong>：<code>Vec</code> 是 <code>Rust</code> 标准库（<code>std::vec</code>）提供的一种动态数组，类型为 <code>Vec&lt;T&gt;</code>，可以存储任意数量的同构元素。</li>
@@ -17780,7 +17780,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>容量</strong>：分配的内存能容纳的元素数量（<code>capacity</code>）。
 当 <code>len</code> 接近或超过 <code>capacity</code> 时，<code>Vec</code> 会重新分配更大的内存（通常以 <code>2</code> 倍增长），并将现有元素复制到新内存。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现]</p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/vec_example.rs">用法示例</a>+[实现]</p>
 <h3 id="3队列"><a class="header" href="#3队列">3、队列</a></h3>
 <p><code>Rust</code> 的标准库提供了 <code>std::collections::VecDeque</code>，这是一个高效的双端队列（<code>double-ended queue</code>），既支持队列的 <code>FIFO</code> 操作，也支持栈的 <code>LIFO</code> 操作，非常适合实现队列。</p>
 <ul>
@@ -17793,7 +17793,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>线程安全性</strong>（视实现）：<code>VecDeque</code> 非线程安全，需 <code>Mutex</code> 或用 <code>std::sync::mpsc。</code></li>
 <li><strong>变体</strong>：支持双端队列（<code>VecDeque</code>）、优先级队列（<code>BinaryHeap</code>）等。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/queue_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/queue_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/queue_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/queue_achieve.rs">实现</a></p>
 <h3 id="4双端队列"><a class="header" href="#4双端队列">4、双端队列</a></h3>
 <ul>
 <li><strong>双端操作</strong>：支持在队列头部和尾部进行添加（<code>push</code>）和移除（<code>pop</code>）。</li>
@@ -17805,7 +17805,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>非线程安全</strong>：标准实现（如 <code>VecDeque</code>）需配合锁用于多线程。</li>
 <li><strong>灵活变体</strong>：可作为队列、栈或双端队列使用。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/deque_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/deque_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/deque_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/deque_achieve.rs">实现</a></p>
 <h3 id="5链表"><a class="header" href="#5链表">5、链表</a></h3>
 <ul>
 <li><strong>动态结构</strong>：链表通过指针连接节点，允许动态分配和释放内存，适合大小不固定的数据。</li>
@@ -17814,7 +17814,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>空间开销</strong>：每个节点需额外存储指针，占用更多内存。</li>
 <li><strong>顺序访问</strong>：遍历需从头或尾开始，无法直接跳跃到任意节点。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="../example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_example.rs">用法示例</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/link_achieve.rs">实现</a></p>
 <h3 id="6栈"><a class="header" href="#6栈">6、栈</a></h3>
 <p><code>Rust</code> 没有专门的栈类型或 <code>API</code>，但 <code>Vec&lt;T&gt;</code> 的 <code>push、pop、last</code>等方法提供了高效、封装好的栈操作，足以满足 <code>LIFO</code> 需求。</p>
 <ul>
@@ -17831,10 +17831,10 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 </li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/stack_vec_achieve.rs">vec实现</a>+<a href="../example_code/data_struct/basic_data_structure/src/stack_deque_achieve.rs">队列实现</a></p>
-<p><a href="../example_code/data_struct/basic_data_structure/src/stack_base_conversion.rs">进制转换实现</a></p>
-<p><a href="../example_code/data_struct/basic_data_structure/src/stack_bracket_matching.rs">括号匹配实现</a></p>
-<p><a href="../example_code/data_struct/basic_data_structure/src/stack_infix_to_postfix.rs">栈的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_vec_achieve.rs">vec实现</a>+<a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_deque_achieve.rs">队列实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_base_conversion.rs">进制转换实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_bracket_matching.rs">括号匹配实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/stack_infix_to_postfix.rs">栈的实现</a></p>
 <h2 id="特殊类型结构"><a class="header" href="#特殊类型结构">特殊类型结构</a></h2>
 <ul>
 <li><a href="#切片-1">切片</a>：<code>&amp;[T]</code></li>
@@ -17852,14 +17852,14 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>使用场景</strong>：函数参数、字符串处理、数组操作、避免数据拷贝。</li>
 <li><strong>优势</strong>：结合 <code>Rust</code> 的借用规则，切片提供高效、灵活的数据访问方式。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/slice_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/slice_example.rs">用法示例</a></p>
 <h3 id="字符串"><a class="header" href="#字符串">字符串</a></h3>
 <ul>
 <li><strong>定义</strong>：<code>String</code> 是 <code>Rust</code> 标准库中用于动态、可变字符串的拥有类型，基于堆分配，支持 <code>UTF-8</code> 编码。</li>
 <li><strong>特点</strong>：拥有所有权、可变、动态增长，与 <code>&amp;str</code> 配合灵活。</li>
 <li><strong>使用场景</strong>：动态字符串构建、 字符串修改、 与切片配合、 多语言支持、 临时缓冲。</li>
 </ul>
-<p><a href="../example_code/data_struct/basic_data_structure/src/string_example.rs">用法示例</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/basic_data_structure/src/string_example.rs">用法示例</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="查找算法"><a class="header" href="#查找算法">查找算法</a></h1>
 <h2 id="目录-3"><a class="header" href="#目录-3">目录</a></h2>
@@ -17883,8 +17883,8 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：效率低，不适合大数据或频繁查找。</li>
 <li><strong>Rust 实现</strong>：使用 <code>iter().position()</code> 或 <code>find()</code>，支持泛型，安全高效。</li>
 </ul>
-<p><a href="../example_code/data_struct/search_algorithm/src/sequential_search_example.rs">顺序查找演示</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/sequential_search_achieve.rs">顺序查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/sequential_search_example.rs">顺序查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/sequential_search_achieve.rs">顺序查找实现</a></p>
 <p><img src="LeetCode/数据结构/image/查找算法/img.png" alt="顺序查找复杂度.png"></p>
 <h2 id="二分查找"><a class="header" href="#二分查找">二分查找</a></h2>
 <p>二分查找是一种高效的查找算法，适用于<strong>有序数据集合</strong>。
@@ -17898,9 +17898,9 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：要求数据预先排序，不适用动态数据或无序集合。</li>
 <li><strong>Rust 特性</strong>：标准库提供 <code>binary_search</code> 等 <code>API</code>，泛型支持，安全高效。</li>
 </ul>
-<p><a href="../example_code/data_struct/search_algorithm/src/binary_search_example.rs">二分查找演示</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/binary_search_achieve.rs">二分查找实现</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/interpolation_search.rs">插值查找</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/binary_search_example.rs">二分查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/binary_search_achieve.rs">二分查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/interpolation_search.rs">插值查找</a></p>
 <h2 id="哈希查找"><a class="header" href="#哈希查找">哈希查找</a></h2>
 <p>哈希查找是一种基于哈希表的数据结构（如 <code>HashMap</code> 或 <code>HashSet</code>）的查找算法，通过将键映射到哈希值实现快速定位</p>
 <p>（这里以<strong>线性探测法</strong>为例）</p>
@@ -17918,9 +17918,9 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：依赖哈希函数质量，冲突可能降低性能，空间开销较大。</li>
 <li><strong>Rust 特性</strong>：标准库提供 <code>HashMap</code> 和 <code>HashSet</code>，高效、安全，支持泛型</li>
 </ul>
-<p><a href="../example_code/data_struct/search_algorithm/src/hash_search_example.rs">哈希查找演示</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/hash_search_achieve.rs">哈希查找实现</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/chaining_hash_search.rs">基于拉链法的哈希查找</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/hash_search_example.rs">哈希查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/hash_search_achieve.rs">哈希查找实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/chaining_hash_search.rs">基于拉链法的哈希查找</a></p>
 <h2 id="字符串查找"><a class="header" href="#字符串查找">字符串查找</a></h2>
 <p>字符串查找是计算机科学中的一个重要领域，涉及在文本中查找特定模式或子字符串的方法。
 其中，<code>KMP（Knuth-Morris-Pratt）</code>算法是一种高效的字符串查找算法，适用于模式匹配。</p>
@@ -17945,8 +17945,8 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 </li>
 </ul>
-<p><a href="../example_code/data_struct/search_algorithm/src/string_search_example.rs">字符串查找演示</a></p>
-<p><a href="../example_code/data_struct/search_algorithm/src/kmp_search.rs">KMP 实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/string_search_example.rs">字符串查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/kmp_search.rs">KMP 实现</a></p>
 <p><img src="LeetCode/数据结构/image/查找算法/string_search.png" alt="常见字符串查找算法复杂度.png"></p>
 <h2 id="并行查找"><a class="header" href="#并行查找">并行查找</a></h2>
 <ul>
@@ -17963,7 +17963,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：线程开销大，小数据集性能可能不如单线程。</li>
 <li><strong>适用场景</strong>：大规模排序数组，多核处理器环境。</li>
 </ul>
-<p><a href="../example_code/data_struct/search_algorithm/src/parallel_search_example.rs">并行查找演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/search_algorithm/src/parallel_search_example.rs">并行查找演示</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="排序"><a class="header" href="#排序">排序</a></h1>
 <p>排序算法是将一组数据按某种顺序排列的算法。
@@ -17990,7 +17990,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：实现简单，易于理解，适合小规模数据。</li>
 <li><strong>缺点</strong>：效率低，交换操作频繁，不适合大数据量。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/bubble_sort.rs">冒泡排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/bubble_sort.rs">冒泡排序</a></p>
 <h2 id="选择排序"><a class="header" href="#选择排序">选择排序</a></h2>
 <ul>
 <li><strong>原理</strong>：每次从未排序部分选择最小（或最大）元素，将其交换到已排序部分的末尾，逐步扩展已排序区域。</li>
@@ -18000,7 +18000,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：实现简单，交换次数少（最多<code>n-1 </code>次）。</li>
 <li><strong>缺点</strong>：效率低，不适合大数据量，缺乏稳定性。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/selection_sort.rs">选择排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/selection_sort.rs">选择排序</a></p>
 <h2 id="插入排序"><a class="header" href="#插入排序">插入排序</a></h2>
 <ul>
 <li><strong>原理</strong>：将数组分为已排序和未排序两部分，逐一将未排序部分的元素插入到已排序部分的正确位置，类似整理扑克牌。</li>
@@ -18010,7 +18010,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：实现简单，适合部分有序或小规模数据，适应增量排序。</li>
 <li><strong>缺点</strong>：效率低，大规模数据性能差。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/insertion_sort.rs">插入排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/insertion_sort.rs">插入排序</a></p>
 <h2 id="归并排序"><a class="header" href="#归并排序">归并排序</a></h2>
 <ul>
 <li><strong>原理</strong>：采用分治法，将数组递归拆分为小块，直到不可再分，然后合并有序子数组，最终完成排序。</li>
@@ -18020,7 +18020,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：性能稳定，适合大数据和链表排序，复杂度不随数据分布变化。</li>
 <li><strong>缺点</strong>：非原地排序，空间开销较大，合并过程需额外内存。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/merge_sort.rs">归并排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/merge_sort.rs">归并排序</a></p>
 <h2 id="快速排序"><a class="header" href="#快速排序">快速排序</a></h2>
 <ul>
 <li><strong>原理</strong>：采用<strong>分治法</strong>，选择一个基准（<code>pivot</code>），将数组分区为小于和大于基准的两部分，递归对子数组排序。</li>
@@ -18036,7 +18036,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：平均性能极佳，原地排序，适合内存排序，缓存友好。</li>
 <li><strong>缺点</strong>：最差情况性能差（需优化基准选择），不稳定。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/quick_sort.rs">快速排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/quick_sort.rs">快速排序</a></p>
 <h2 id="堆排序"><a class="header" href="#堆排序">堆排序</a></h2>
 <ul>
 <li><strong>原理</strong>：基于堆数据结构（通常是最大堆），先构建最大堆，然后反复提取堆顶（最大元素）并调整堆，直到所有元素有序。</li>
@@ -18046,7 +18046,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：原地排序，时间复杂度稳定，适合固定内存场景。</li>
 <li><strong>缺点</strong>：不稳定，缓存不友好（堆操作跳跃式访问），实际性能可能不如快速排序。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/heap_sort.rs">堆排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/heap_sort.rs">堆排序</a></p>
 <h2 id="希尔排序"><a class="header" href="#希尔排序">希尔排序</a></h2>
 <ul>
 <li><strong>原理</strong>：一种改进的插入排序，通过设定增量（<code>gap</code>）将数组分组，逐步缩小增量进行插入排序，最终实现整体排序。</li>
@@ -18062,7 +18062,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：比插入排序快，适合中等规模数据，逐步减少逆序对。</li>
 <li><strong>缺点</strong>：时间复杂度依赖增量序列选择，实际性能不如快速排序或归并排序。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/shell_sort.rs">希尔排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/shell_sort.rs">希尔排序</a></p>
 <h2 id="基数排序"><a class="header" href="#基数排序">基数排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，按位（从低位到高位）分配元素到桶中，结合计数排序或桶排序，逐步完成排序。</li>
@@ -18076,7 +18076,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：线性时间复杂度，适合多位数或字符串排序。</li>
 <li><strong>缺点</strong>：空间开销较大，依赖位数和基数，不适合浮点数或范围过大的数据。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/radix_sort.rs">基数排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/radix_sort.rs">基数排序</a></p>
 <h2 id="桶排序"><a class="header" href="#桶排序">桶排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，将元素按值范围分配到多个桶中，每个桶内单独排序（通常用插入排序），最后合并所有桶。</li>
@@ -18092,7 +18092,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：线性时间复杂度，适合均匀分布数据。</li>
 <li><strong>缺点</strong>：对数据分布敏感，空间开销较大，不适合范围过大的数据。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/bucket_sort.rs">桶排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/bucket_sort.rs">桶排序</a></p>
 <h2 id="计数排序"><a class="header" href="#计数排序">计数排序</a></h2>
 <ul>
 <li><strong>原理</strong>：非比较排序算法，通过统计元素出现次数，计算每个元素的最终位置，直接赋值完成排序。</li>
@@ -18106,7 +18106,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>优点</strong>：线性时间复杂度，适合固定范围整数。</li>
 <li><strong>缺点</strong>：仅适用于有限范围数据，不适合浮点数或范围过大的数据。</li>
 </ul>
-<p><a href="../example_code/data_struct/sort_algorithm/src/count_sort.rs">计数排序</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/sort_algorithm/src/count_sort.rs">计数排序</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="树"><a class="header" href="#树">树</a></h1>
 <h2 id="目录-5"><a class="header" href="#目录-5">目录</a></h2>
@@ -18128,7 +18128,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>遍历方式</strong>：前序（根-左-右）、中序（左-根-右）、后序（左-右-根）、层序（逐层遍历）。</li>
 <li><strong>应用</strong>：搜索、排序、表达式树、堆、哈夫曼编码等。</li>
 </ul>
-<p><a href="../example_code/data_struct/binary_tree/src/binary_tree.rs">简单的二叉树实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/binary_tree/src/binary_tree.rs">简单的二叉树实现</a></p>
 <h2 id="二叉堆"><a class="header" href="#二叉堆">二叉堆</a></h2>
 <ul>
 <li><strong>定义</strong>：二叉堆是一种特殊的二叉树，满足堆序性质（父节点值小于或大于子节点值）和完全二叉树性质（除最后一层外全满，最后一层靠左）。</li>
@@ -18155,8 +18155,8 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </li>
 <li><strong>应用</strong>：优先队列、堆排序、<code>Dijkstra</code>算法等。</li>
 </ul>
-<p><a href="../example_code/data_struct/binary_tree/src/binary_heap_example.rs">二叉堆使用演示</a></p>
-<p><a href="../example_code/data_struct/binary_tree/src/binary_heap.rs">简单的二叉堆实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/binary_tree/src/binary_heap_example.rs">二叉堆使用演示</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/binary_tree/src/binary_heap.rs">简单的二叉堆实现</a></p>
 <h2 id="二叉查找树"><a class="header" href="#二叉查找树">二叉查找树</a></h2>
 <ul>
 <li><strong>定义</strong>：二叉查找树（<code>BST</code>）是二叉树，每个节点最多有两个子节点，满足：左子树所有节点值 &lt; 当前节点值 &lt; 右子树所有节点值。</li>
@@ -18176,7 +18176,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 </li>
 </ul>
-<p><a href="../example_code/data_struct/binary_tree/src/binary_search_tree.rs">简单的二叉查找树实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/binary_tree/src/binary_search_tree.rs">简单的二叉查找树实现</a></p>
 <h2 id="平衡二叉树"><a class="header" href="#平衡二叉树">平衡二叉树</a></h2>
 <ul>
 <li><strong>定义</strong>：平衡二叉树是二叉查找树（<code>BST</code>），其左右子树高度差绝对值不超过1，且左右子树也是平衡的。</li>
@@ -18200,7 +18200,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 </li>
 </ul>
-<p><a href="../example_code/data_struct/binary_tree/src/balanced_binary_tree.rs">简单的平衡二叉树实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/binary_tree/src/balanced_binary_tree.rs">简单的平衡二叉树实现</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="图"><a class="header" href="#图">图</a></h1>
 <h2 id="目录-6"><a class="header" href="#目录-6">目录</a></h2>
@@ -18225,8 +18225,8 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 </ul>
 </li>
 </ul>
-<p><a href="../example_code/data_struct/graph/src/adj_list_graph_achieve.rs">基于邻接表图的实现</a></p>
-<p><a href="../example_code/data_struct/graph/src/adj_matrix_graph_achieve.rs">基于邻接矩阵图的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/adj_list_graph_achieve.rs">基于邻接表图的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/adj_matrix_graph_achieve.rs">基于邻接矩阵图的实现</a></p>
 <h2 id="广度优先搜索"><a class="header" href="#广度优先搜索">广度优先搜索</a></h2>
 <ul>
 <li><strong>原理</strong>：从起点开始，逐层访问所有邻居节点，基于队列实现，优先扩展距离最近的节点。</li>
@@ -18236,7 +18236,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：不适合深度优先探索（如递归路径）。</li>
 <li><strong>适用场景</strong>：最短路径、连通性检测、层次遍历。</li>
 </ul>
-<p><a href="../example_code/data_struct/graph/src/bfs.rs">广度优先搜索BFS的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/bfs.rs">广度优先搜索BFS的实现</a></p>
 <h2 id="深度优先搜索"><a class="header" href="#深度优先搜索">深度优先搜索</a></h2>
 <ul>
 <li><strong>原理</strong>：从起点开始，沿着一条路径深入探索，直到无法继续，然后回溯，基于栈（递归或显式栈）实现。</li>
@@ -18246,7 +18246,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：不保证最短路径，可能陷入无限循环（需标记访问）。</li>
 <li><strong>适用场景</strong>：迷宫问题、拓扑排序、检测环。</li>
 </ul>
-<p><a href="../example_code/data_struct/graph/src/dfs.rs">深度优先搜索DFS的实现</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/dfs.rs">深度优先搜索DFS的实现</a></p>
 <h2 id="dijkstra算法"><a class="header" href="#dijkstra算法">Dijkstra算法</a></h2>
 <ul>
 <li><strong>原理</strong>：贪心算法，从起点开始，逐步选择当前未访问节点中距离最小的节点，更新其邻居的距离，直到所有节点被访问目标节点距离确定。</li>
@@ -18256,7 +18256,7 @@ fn set_age(age: u8) -&gt; Result&lt;()&gt; {
 <li><strong>缺点</strong>：不能处理负权边。</li>
 <li><strong>适用场景</strong>：网络路由、路径规划。</li>
 </ul>
-<p><a href="../example_code/data_struct/graph/src/dijkstra.rs">Dijkstra 算法</a></p>
+<p><a href="https://github.com/169LI/rust-study/tree/master/example_code/data_struct/graph/src/dijkstra.rs">Dijkstra 算法</a></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="算法刷题"><a class="header" href="#算法刷题">算法刷题</a></h1>
 <div style="break-before: page; page-break-before: always;"></div>
