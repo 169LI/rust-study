@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-1d82a82d.js";
+            window.path_to_searchindex_js = "../../searchindex-fbc5c86d.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-2c6b24e0.js"></script>
@@ -189,6 +189,7 @@
 <p><strong>Rust 中常见实现方式：</strong> <code>Clone</code>、快照结构体、<code>Vec</code> 历史栈、<code>Option</code>、<code>Result</code>、序列化与反序列化</p>
 <p>备忘录模式的核心是：<strong>在不破坏对象封装性的前提下，保存对象某一时刻的内部状态，以便之后可以恢复到之前的状态。</strong></p>
 <p>在 Rust 中，备忘录模式通常可以通过保存状态快照来实现。最常见的做法是：对象在状态变化前，把当前状态 <code>clone</code> 一份保存到历史记录中；需要撤销时，再从历史记录中取出旧状态进行恢复。</p>
+<p><a href="../../../example_code/DesignPattern/memento_pattern/src/main.rs">代码示例</a></p>
 <hr>
 <h2 id="2-模式核心思想"><a class="header" href="#2-模式核心思想">2. 模式核心思想</a></h2>
 <p>备忘录模式的核心思想是：</p>
