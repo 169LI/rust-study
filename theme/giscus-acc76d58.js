@@ -85,7 +85,7 @@
         main.appendChild(comments);
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function init() {
         createGiscus();
 
         new MutationObserver(updateGiscusTheme).observe(document.documentElement, {
@@ -95,5 +95,11 @@
 
         const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
         colorScheme.addEventListener?.("change", updateGiscusTheme);
-    });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init, { once: true });
+    } else {
+        init();
+    }
 })();
