@@ -43,6 +43,14 @@
         );
     }
 
+    function getDiscussionTerm() {
+        try {
+            return decodeURIComponent(window.location.pathname);
+        } catch {
+            return window.location.pathname;
+        }
+    }
+
     function createGiscus() {
         const main = document.querySelector("#mdbook-content main");
 
@@ -65,7 +73,8 @@
             "data-repo-id": "R_kgDOQwBz4g",
             "data-category": "Comments",
             "data-category-id": "DIC_kwDOQwBz4s4DBUtV",
-            "data-mapping": "pathname",
+            "data-mapping": "specific",
+            "data-term": getDiscussionTerm(),
             "data-strict": "0",
             "data-reactions-enabled": "1",
             "data-emit-metadata": "0",
