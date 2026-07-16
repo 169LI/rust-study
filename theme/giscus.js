@@ -72,7 +72,7 @@
             "data-input-position": "top",
             "data-theme": getGiscusTheme(),
             "data-lang": "zh-CN",
-            "data-loading": "lazy",
+            //"data-loading": "lazy",
             crossorigin: "anonymous",
         };
 
