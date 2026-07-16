@@ -36,3 +36,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN}}
           publish_dir: ./book
           publish_branch: gh-pages
+          cname: rust.quanli-2026.site
